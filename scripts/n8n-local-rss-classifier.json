@@ -1,0 +1,52 @@
+{
+  "name": "Tinker AI — Local LLM RSS Classifier with Retry & Dedup",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://hnrss.org/newest?points=100"
+      },
+      "name": "RSS Feed Read",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.link }}"
+      },
+      "name": "Deduplicate by Link",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5:7b', format: 'json', stream: false, options: { temperature: 0.1, num_ctx: 4096 }, prompt: 'Classify this article into one category (local-ai, workflows, maker, ops) and provide a 1-sentence summary in JSON {category, summary}: ' + $json.title + ' - ' + ($json.contentSnippet || '') }) }}",
+        "options": {
+          "timeout": 45000
+        }
+      },
+      "name": "Local Ollama Classifier",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "continueOnFail": true,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "RSS Feed Read": {
+      "main": [[{ "node": "Deduplicate by Link", "type": "main", "index": 0 }]]
+    },
+    "Deduplicate by Link": {
+      "main": [[{ "node": "Local Ollama Classifier", "type": "main", "index": 0 }]]
+    }
+  }
+}

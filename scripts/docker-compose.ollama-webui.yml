@@ -1,0 +1,39 @@
+# Tinker AI Verified Stack — Ollama + Open WebUI (Guide #3)
+# Pre-upgrade backup: tar -czf backup-$(date +%F).tar.gz ./tinker-local-ai-data
+
+services:
+  ollama:
+    image: ollama/ollama:0.5.7
+    container_name: tinker-ollama
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KV_CACHE_TYPE=q8_0
+      - OLLAMA_NUM_PARALLEL=2
+      - OLLAMA_KEEP_ALIVE=15m
+    volumes:
+      - ./tinker-local-ai-data/ollama:/root/.ollama
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:v0.5.10
+    container_name: tinker-open-webui
+    restart: unless-stopped
+    depends_on:
+      - ollama
+    ports:
+      - "127.0.0.1:3000:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_EMBEDDING_MODEL=bge-m3:latest
+      - ENABLE_RAG_HYBRID_SEARCH=true
+      - RAG_TOP_K=5
+      - SCARF_NO_ANALYTICS=true
+      - DO_NOT_TRACK=true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ./tinker-local-ai-data/open-webui:/app/backend/data

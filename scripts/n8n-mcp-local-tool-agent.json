@@ -1,0 +1,68 @@
+{
+  "name": "Tinker AI — Local Qwen3 + MCP Client Tool Agent (Guide #23)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "mcp-local-agent",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "name": "Agent Request Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [220, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=/no_think User task: {{ $json.body.query || 'Check system status table and summarize anomalies' }}",
+        "options": {
+          "systemMessage": "You are a deterministic local operations agent connected to an MCP Server. RULES: 1) Always prefix internal routing with /no_think so tool-call JSON arguments are emitted immediately without <think> blocks. 2) Only invoke tools from the approved allowlist (list_tables,describe_table,read_query). 3) Never retry the same failing tool arguments more than once.",
+          "maxIterations": 5,
+          "returnIntermediateSteps": true
+        }
+      },
+      "name": "Local MCP Tool Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [520, 300]
+    },
+    {
+      "parameters": {
+        "model": "qwen3:8b",
+        "options": {
+          "baseURL": "http://host.docker.internal:11434",
+          "temperature": 0.1,
+          "numCtx": 16384
+        }
+      },
+      "name": "Ollama Qwen3 Router",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [440, 520]
+    },
+    {
+      "parameters": {
+        "sseEndpoint": "http://mcp-sqlite-readonly:3001/sse",
+        "include": "selected",
+        "includeTools": "list_tables,describe_table,read_query"
+      },
+      "name": "Sandboxed MCP Client (SSE)",
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1,
+      "position": [640, 520]
+    }
+  ],
+  "connections": {
+    "Agent Request Webhook": {
+      "main": [[{ "node": "Local MCP Tool Agent", "type": "main", "index": 0 }]]
+    },
+    "Ollama Qwen3 Router": {
+      "ai_languageModel": [[{ "node": "Local MCP Tool Agent", "type": "ai_languageModel", "index": 0 }]]
+    },
+    "Sandboxed MCP Client (SSE)": {
+      "ai_tool": [[{ "node": "Local MCP Tool Agent", "type": "ai_tool", "index": 0 }]]
+    }
+  }
+}

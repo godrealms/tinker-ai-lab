@@ -1,0 +1,20 @@
+# Tinker AI — Intel Arc Pro B60 (24GB/48GB) & AMD RX 9070 XT (RDNA 4) Stack (Guide #27)
+services:
+  ollama-vulkan:
+    image: ollama/ollama:0.6.2
+    container_name: tinker-b60-rdna4-llm
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:11434:11434"
+    devices:
+      - /dev/dri:/dev/dri
+    group_add:
+      - "109"
+    environment:
+      - GGML_VK_VISIBLE_DEVICES=0
+      - OLLAMA_FLASH_ATTENTION=1
+      - OLLAMA_KV_CACHE_TYPE=q8_0
+      - OLLAMA_NUM_PARALLEL=2
+      - OLLAMA_KEEP_ALIVE=30m
+    volumes:
+      - ./ollama-data:/root/.ollama

@@ -1,0 +1,46 @@
+{
+  "name": "Tinker AI — Local Invoice Extractor with Deterministic Math Guard",
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "Manual Test Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5:14b', format: 'json', stream: false, options: { temperature: 0, num_ctx: 8192 }, prompt: 'Extract invoice fields in strict JSON {invoiceNo, vendor, currency, subtotal, taxAmount, totalAmount}: ' + String($json.rawText || '').slice(0, 6000) }) }}",
+        "options": { "timeout": 45000 }
+      },
+      "name": "Local LLM JSON Extractor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "continueOnFail": true,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const parsed = JSON.parse($input.first().json.response || '{}');\nconst sub = Number(parsed.subtotal || 0);\nconst tax = Number(parsed.taxAmount || 0);\nconst total = Number(parsed.totalAmount || 0);\nconst mathValid = Math.abs((sub + tax) - total) < 0.02 && total > 0;\nreturn [{ json: { ...parsed, mathValid, auditStatus: mathValid ? 'VERIFIED' : 'NEEDS_HUMAN_REVIEW' } }];"
+      },
+      "name": "Deterministic Math Reconciliation",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Manual Test Trigger": {
+      "main": [[{ "node": "Local LLM JSON Extractor", "type": "main", "index": 0 }]]
+    },
+    "Local LLM JSON Extractor": {
+      "main": [[{ "node": "Deterministic Math Reconciliation", "type": "main", "index": 0 }]]
+    }
+  }
+}

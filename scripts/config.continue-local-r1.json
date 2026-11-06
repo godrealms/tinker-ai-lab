@@ -1,0 +1,42 @@
+{
+  "models": [
+    {
+      "title": "Local DeepSeek-R1 (Architect & Debugger)",
+      "provider": "ollama",
+      "model": "deepseek-r1:14b",
+      "apiBase": "http://127.0.0.1:11434",
+      "contextLength": 16384,
+      "completionOptions": {
+        "temperature": 0.6,
+        "topP": 0.95,
+        "maxTokens": 4096
+      }
+    },
+    {
+      "title": "Local Qwen2.5-Coder (Fast Edit)",
+      "provider": "ollama",
+      "model": "qwen2.5-coder:7b",
+      "apiBase": "http://127.0.0.1:11434",
+      "contextLength": 16384,
+      "completionOptions": {
+        "temperature": 0.1,
+        "maxTokens": 2048
+      }
+    }
+  ],
+  "tabAutocompleteModel": {
+    "title": "Qwen2.5-Coder FIM Autocomplete",
+    "provider": "ollama",
+    "model": "qwen2.5-coder:7b",
+    "apiBase": "http://127.0.0.1:11434",
+    "completionOptions": {
+      "maxTokens": 256,
+      "temperature": 0.05
+    }
+  },
+  "embeddingsProvider": {
+    "provider": "ollama",
+    "model": "bge-m3",
+    "apiBase": "http://127.0.0.1:11434"
+  }
+}

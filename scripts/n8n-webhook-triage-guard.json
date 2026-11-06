@@ -1,0 +1,38 @@
+{
+  "name": "Tinker AI — Webhook Ticket Triage with Schema Guard",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "tinker-ticket-triage",
+        "responseMode": "lastNode"
+      },
+      "name": "Inbound Ticket Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 280]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5:7b', temperature: 0, max_tokens: 256, response_format: { type: 'json_object' }, messages: [{ role: 'system', content: 'Return JSON with keys: urgency (low|medium|high), department (billing|tech|general), reason (string).' }, { role: 'user', content: String($json.body?.message || '').slice(0, 2000) }] }) }}",
+        "options": { "timeout": 30000 }
+      },
+      "name": "Structured Triage LLM",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "continueOnFail": true,
+      "position": [460, 280]
+    }
+  ],
+  "connections": {
+    "Inbound Ticket Webhook": {
+      "main": [[{ "node": "Structured Triage LLM", "type": "main", "index": 0 }]]
+    }
+  }
+}

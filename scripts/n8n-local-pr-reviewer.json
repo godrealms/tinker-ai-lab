@@ -1,0 +1,50 @@
+{
+  "name": "Tinker AI — Local Git Diff Security & Bug Reviewer",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "git-pr-review",
+        "responseMode": "lastNode"
+      },
+      "name": "PR Diff Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawDiff = String($input.first().json.body?.diff || '').slice(0, 12000);\nconst sanitizedDiff = rawDiff.replace(/(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{20,}|AKIA[0-9A-Z]{16})/g, '[REDACTED_SECRET]');\nreturn [{ json: { sanitizedDiff } }];"
+      },
+      "name": "Sanitize Secrets & Cap Diff Length",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5-coder:14b', format: 'json', stream: false, options: { temperature: 0.1, num_ctx: 16384 }, prompt: 'Review this git diff for security bugs, race conditions, or unhandled errors. Return JSON {summary, issues: [{severity, lineHint, suggestion}]}: \n' + $json.sanitizedDiff }) }}",
+        "options": { "timeout": 60000 }
+      },
+      "name": "Qwen2.5-Coder Diff Review",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "continueOnFail": true,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "PR Diff Webhook": {
+      "main": [[{ "node": "Sanitize Secrets & Cap Diff Length", "type": "main", "index": 0 }]]
+    },
+    "Sanitize Secrets & Cap Diff Length": {
+      "main": [[{ "node": "Qwen2.5-Coder Diff Review", "type": "main", "index": 0 }]]
+    }
+  }
+}

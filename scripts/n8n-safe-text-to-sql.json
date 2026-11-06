@@ -1,0 +1,50 @@
+{
+  "name": "Tinker AI - Safe Local Text-to-SQL Analyst",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "safe-sql-query",
+        "responseMode": "lastNode"
+      },
+      "name": "Question Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://host.docker.internal:11434/api/generate",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'qwen2.5-coder:14b', format: 'json', stream: false, options: { temperature: 0, num_ctx: 8192 }, prompt: 'You are a PostgreSQL read-only analyst. Given schema: orders(id, customer_id, status, amount_cents, created_at). Return JSON {"sql": "SELECT ..."} for question: ' + String($json.body?.question || '').slice(0, 500) }) }}",
+        "options": { "timeout": 45000 }
+      },
+      "name": "Generate SQL via Local Coder",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "continueOnFail": true,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = JSON.parse($input.first().json.response || '{}');\nlet sql = String(raw.sql || '').trim().replace(/;+$/, '');\nconst forbidden = /\\b(INSERT|UPDATE|DELETE|DROP|ALTER|TRUNCATE|GRANT|REVOKE|COPY|CREATE|EXEC|INTO|pg_sleep)\\b/i;\nif (!/^SELECT\\b/i.test(sql) || forbidden.test(sql) || sql.includes(';')) {\n  throw new Error('SECURITY_BLOCK: Only single-statement read-only SELECT queries are permitted.');\n}\nif (!/\\bLIMIT\\s+\\d+/i.test(sql)) {\n  sql += ' LIMIT 100';\n}\nreturn [{ json: { verifiedSql: sql } }];"
+      },
+      "name": "Deterministic SQL AST & Limit Guard",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Question Webhook": {
+      "main": [[{ "node": "Generate SQL via Local Coder", "type": "main", "index": 0 }]]
+    },
+    "Generate SQL via Local Coder": {
+      "main": [[{ "node": "Deterministic SQL AST & Limit Guard", "type": "main", "index": 0 }]]
+    }
+  }
+}
