@@ -3,7 +3,7 @@
 > **Official Website**: [https://tinker-ai.com/](https://tinker-ai.com/) | **中文官网**: [https://tinker-ai.com/zh/](https://tinker-ai.com/zh/)
 > **GitHub Pages Directory**: [https://godrealms.github.io/tinker-ai-lab/](https://godrealms.github.io/tinker-ai-lab/)
 
-This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **56 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
+This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **58 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
 
 ---
 
@@ -11,9 +11,9 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 | Tool | English URL | 中文版入口 | Description |
 | :--- | :--- | :--- | :--- |
-| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **48 model presets** and **77 hardware profiles** |
+| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **50 model presets** and **81 hardware profiles** |
 | **Interactive AI Troubleshooter** | [Open Troubleshooter](https://tinker-ai.com/tools/troubleshooter/) | [打开排障决策树](https://tinker-ai.com/zh/tools/troubleshooter/) | **13** step-by-step diagnostic decision trees for local LLM networking, VRAM OOM, SSE stream drops, RoCEv2 rings, and NPU/GPU traps |
-| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **56 verified configs** directly in your browser before downloading |
+| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **58 verified configs** directly in your browser before downloading |
 
 ---
 
@@ -25,7 +25,7 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 ---
 
-## 3. All 56 Public Guides & Companion Scripts
+## 3. All 58 Public Guides & Companion Scripts
 
 | # | English Guide | 中文实测指南 | Companion Script (`scripts/`) | Online Customizer |
 | :-: | :--- | :--- | :--- | :--- |
@@ -85,6 +85,8 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 | **54** | [ASUS Ascent QN10 (Snapdragon X2 Elite · 80 TOPS NPU) & KORA OS (NixOS + FastRPC CPU/GPU/NPU) vs Qualcomm Dragonwing IQ10 (700 TOPS · 64GB)](https://tinker-ai.com/guides/asus-ascent-qn10-snapdragon-x2-elite-kora-os-fastrpc-vs-qualcomm-dragonwing-iq10/) | [ASUS Ascent QN10（骁龙 X2 Elite · 80 TOPS NPU）与 KORA OS（NixOS + FastRPC 异构调度）对决高通跃龙 Dragonwing IQ10（700 TOPS · 64GB）](https://tinker-ai.com/zh/guides/asus-ascent-qn10-snapdragon-x2-elite-kora-os-fastrpc-vs-qualcomm-dragonwing-iq10/) | [`run-kora-snapdragon-x2-iq10.sh`](scripts/run-kora-snapdragon-x2-iq10.sh) | [Customize](https://tinker-ai.com/artifacts/kora-fastrpc-snapdragon-x2-dragonwing-iq10-runner/) |
 | **55** | [SC26 Desktop Cluster & NVMe KV Offload: NVIDIA DGX Spark 4-Node Switchless 200GbE Ring (512GB) + LMCache GPUDirect Storage Running Mistral Large 4 (1.05T) & 700B NVFP4](https://tinker-ai.com/guides/dgx-spark-hpc-4-node-ring-512gb-lmcache-gds-nvme-kv-offload-mistral-large-4/) | [SC26 桌面超算集群与 NVMe KV 卸载实战：NVIDIA DGX Spark 四节点无交换机 200GbE 环网（512GB）+ LMCache GPUDirect Storage 部署 Mistral Large 4 (1.05T) 与 700B NVFP4](https://tinker-ai.com/zh/guides/dgx-spark-hpc-4-node-ring-512gb-lmcache-gds-nvme-kv-offload-mistral-large-4/) | [`launch-dgx-spark-4node-ring-lmcache.sh`](scripts/launch-dgx-spark-4node-ring-lmcache.sh) | [Customize](https://tinker-ai.com/artifacts/dgx-spark-4node-ring-lmcache-gds-launcher/) |
 | **56** | [2026 Late-Fall 27B–30B Hybrid Models & High-RAM Edge Boards: Qwen3.8-27B, Qwen3.8-Flash-Next (51B N-Gram) & Muse Glimmer 30B on 24GB GPUs vs Orange Pi AI Station (96GB Ascend) & Radxa DragonStation](https://tinker-ai.com/guides/qwen38-27b-flash-next-muse-glimmer-30b-vs-orangepi-ai-station-96gb-radxa-dragonstation/) | [2026 深秋混合注意力新模型与大内存边缘板实测选型：Qwen3.8-27B、Qwen3.8-Flash-Next（51B N-Gram）与 Muse Glimmer 30B 在 24GB 独显 vs 香橙派 AI Station（96GB 昇腾）与瑞莎 DragonStation 上的表现](https://tinker-ai.com/zh/guides/qwen38-27b-flash-next-muse-glimmer-30b-vs-orangepi-ai-station-96gb-radxa-dragonstation/) | [`run-qwen38-glimmer-or-ascend-station.sh`](scripts/run-qwen38-glimmer-or-ascend-station.sh) | [Customize](https://tinker-ai.com/artifacts/qwen38-glimmer-orangepi-ascend-hybrid-runner/) |
+| **57** | [256GB Non-GPU PCIe Accelerators, SC26 CXL Memory Pools & Linux 7.4 IOMMU PerfOpt: Axelera Europa (Edge 232p / Server 250p), Micron CZ120 Weighted Interleave & +23% Ryzen UMA Speedup](https://tinker-ai.com/guides/axelera-europa-232p-250p-256gb-pcie-vs-cxl-cz120-weighted-interleave-and-amd-iommu-perfopt-llm/) | [256GB 大内存 PCIe 推理卡、SC26 CXL 内存池与 Linux 7.4 内核提速实战：Axelera Europa（232p / 250p）、美光 CZ120 加权交织与 AMD IOMMU PerfOpt（+23%）拆解](https://tinker-ai.com/zh/guides/axelera-europa-232p-250p-256gb-pcie-vs-cxl-cz120-weighted-interleave-and-amd-iommu-perfopt-llm/) | [`tune-cxl-interleave-iommu-perfopt-and-europa.sh`](scripts/tune-cxl-interleave-iommu-perfopt-and-europa.sh) | [Customize](https://tinker-ai.com/artifacts/europa-cxl-weighted-interleave-iommu-perfopt-tuner/) |
+| **58** | [LattePanda Sigma 2 (Core Ultra X7 358H · 64GB · Dual 10GbE · OCuLink) & Cloudflare Clairic / Clef (Apache 2.0): Local "System One" PDF Extraction & 59GB Xe3 Edge Server Guide](https://tinker-ai.com/guides/lattepanda-sigma-2-core-ultra-358h-64gb-10gbe-oculink-and-cloudflare-clairic-clef-local-ai/) | [LattePanda Sigma 2（酷睿 Ultra X7 358H · 64GB · 双万兆 · OCuLink）与 Cloudflare Clairic / Clef（Apache 2.0）：59GB Xe3 单板服务器与「System One」零幻觉文档提取实战](https://tinker-ai.com/zh/guides/lattepanda-sigma-2-core-ultra-358h-64gb-10gbe-oculink-and-cloudflare-clairic-clef-local-ai/) | [`run-sigma2-xe3-clairic-extractor.sh`](scripts/run-sigma2-xe3-clairic-extractor.sh) | [Customize](https://tinker-ai.com/artifacts/lattepanda-sigma2-xe3-and-clairic-extractor-runner/) |
 
 ---
 

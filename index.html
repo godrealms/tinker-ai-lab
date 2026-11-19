@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Tinker AI Lab — Open Reproducible Local LLM Benchmarks, VRAM Calculator &amp; Diagnostic Trees</title>
-  <meta name="description" content="Complete index of 56 reproducible Local LLM guides (Apple Silicon M5/M6, NVIDIA Blackwell &amp; SC26 DGX Spark 4-Node Ring, AMD EPYC SP7 &amp; Strix Halo, Edge NPUs &amp; SBCs), interactive VRAM &amp; KV Cache Calculator (48 models, 77 hardware profiles), 56 parameterized configs, and 13 diagnostic decision trees." />
+  <meta name="description" content="Complete index of 58 reproducible Local LLM guides (Apple Silicon M5/M6, NVIDIA Blackwell &amp; SC26 DGX Spark 4-Node Ring, Axelera Europa 256GB PCIe, Micron CZ120 CXL 2.0, LattePanda Sigma 2 &amp; Cloudflare Clairic/Clef), interactive VRAM &amp; KV Cache Calculator (50 models, 81 hardware profiles), 58 parameterized configs, and 13 diagnostic decision trees." />
   <link rel="canonical" href="https://tinker-ai.com/" />
   <style>
     body { font-family: system-ui, -apple-system, sans-serif; background: #090d16; color: #f8fafc; max-width: 1120px; margin: 0 auto; padding: 40px 20px; line-height: 1.6; }
@@ -21,7 +21,7 @@
   <div class="hero">
     <span class="badge">TINKER AI LAB // REPRODUCIBLE AI ENGINEERING</span>
     <h1><a href="https://tinker-ai.com/">Tinker AI Lab (tinker-ai.com)</a> — Reproducible Local AI Benchmarks &amp; Workbenches</h1>
-    <p>Bilingual (English &amp; Simplified Chinese) reproducible local LLM benchmarks, quantization &amp; KV cache calculators (48 models &amp; 77 hardware profiles), parameterized Docker/n8n/shell configs, and interactive troubleshooting decision trees.</p>
+    <p>Bilingual (English &amp; Simplified Chinese) reproducible local LLM benchmarks, quantization &amp; KV cache calculators (50 models &amp; 81 hardware profiles), parameterized Docker/n8n/shell configs, and interactive troubleshooting decision trees.</p>
     <p>
       <strong>Core Hubs:</strong>
       <a href="https://tinker-ai.com/">English Home</a> ·
@@ -37,7 +37,7 @@
     </p>
   </div>
 
-  <h2>1. 56 Reproducible Hardware &amp; Model Guides (EN &amp; ZH)</h2>
+  <h2>1. 58 Reproducible Hardware &amp; Model Guides (EN &amp; ZH)</h2>
   <ul>
     <li><a href="https://tinker-ai.com/guides/mac-local-llm-benchmark/">Apple Silicon Mac Local Model Benchmark: Fixed Tasks, Quantization, Context &amp; Speed</a> | <a href="https://tinker-ai.com/zh/guides/mac-local-llm-benchmark/">一台现有 Mac 的本地模型实测：固定任务、模型版本、量化、上下文和速度</a> (Tested on: MacBook Pro 14&quot; (M3 Pro · 18GB &amp; 36GB Unified Memory tested) · macOS 15.3)</li>
     <li><a href="https://tinker-ai.com/guides/nvidia-pc-vram-diagnostics/">NVIDIA PC Model Loading &amp; VRAM Diagnostics: Spotting PCIe Shared-Memory Spillover</a> | <a href="https://tinker-ai.com/zh/guides/nvidia-pc-vram-diagnostics/">一台现有 NVIDIA PC 的模型加载与显存排查：定位 PCIe 共享内存回退与 Docker GPU 透传</a> (Tested on: NVIDIA RTX 4070 12GB VRAM · 32GB DDR5 System RAM · Ubuntu 24.04 &amp; Windows 11 WSL2)</li>
@@ -95,6 +95,8 @@
     <li><a href="https://tinker-ai.com/guides/asus-ascent-qn10-snapdragon-x2-elite-kora-os-fastrpc-vs-qualcomm-dragonwing-iq10/">ASUS Ascent QN10 (Snapdragon X2 Elite · 80 TOPS NPU) &amp; KORA OS (NixOS + FastRPC CPU/GPU/NPU) vs Qualcomm Dragonwing IQ10 (700 TOPS · 64GB)</a> | <a href="https://tinker-ai.com/zh/guides/asus-ascent-qn10-snapdragon-x2-elite-kora-os-fastrpc-vs-qualcomm-dragonwing-iq10/">ASUS Ascent QN10（骁龙 X2 Elite · 80 TOPS NPU）与 KORA OS（NixOS + FastRPC 异构调度）对决高通跃龙 Dragonwing IQ10（700 TOPS · 64GB）</a> (Tested on: ASUS Ascent QN10 (Snapdragon X2E-88-100, 32GB LPDDR5x, 80 TOPS NPU) + KORA OS (NixOS) vs Qualcomm Dragonwing IQ10 (IQ-10800, 64GB LPDDR5x, 700 TOPS))</li>
     <li><a href="https://tinker-ai.com/guides/dgx-spark-hpc-4-node-ring-512gb-lmcache-gds-nvme-kv-offload-mistral-large-4/">SC26 Desktop Cluster &amp; NVMe KV Offload: NVIDIA DGX Spark 4-Node Switchless 200GbE Ring (512GB) + LMCache GPUDirect Storage Running Mistral Large 4 (1.05T) &amp; 700B NVFP4</a> | <a href="https://tinker-ai.com/zh/guides/dgx-spark-hpc-4-node-ring-512gb-lmcache-gds-nvme-kv-offload-mistral-large-4/">SC26 桌面超算集群与 NVMe KV 卸载实战：NVIDIA DGX Spark 四节点无交换机 200GbE 环网（512GB）+ LMCache GPUDirect Storage 部署 Mistral Large 4 (1.05T) 与 700B NVFP4</a> (Tested on: 4x NVIDIA DGX Spark HPC Developer Kit (4x GB10 Grace Blackwell · 512GB Coherent LPDDR5X · 20TB NVMe · Dual-Port ConnectX-7 200GbE Switchless Ring))</li>
     <li><a href="https://tinker-ai.com/guides/qwen38-27b-flash-next-muse-glimmer-30b-vs-orangepi-ai-station-96gb-radxa-dragonstation/">2026 Late-Fall 27B–30B Hybrid Models &amp; High-RAM Edge Boards: Qwen3.8-27B, Qwen3.8-Flash-Next (51B N-Gram) &amp; Muse Glimmer 30B on 24GB GPUs vs Orange Pi AI Station (96GB Ascend) &amp; Radxa DragonStation</a> | <a href="https://tinker-ai.com/zh/guides/qwen38-27b-flash-next-muse-glimmer-30b-vs-orangepi-ai-station-96gb-radxa-dragonstation/">2026 深秋混合注意力新模型与大内存边缘板实测选型：Qwen3.8-27B、Qwen3.8-Flash-Next（51B N-Gram）与 Muse Glimmer 30B 在 24GB 独显 vs 香橙派 AI Station（96GB 昇腾）与瑞莎 DragonStation 上的表现</a> (Tested on: RTX 4090 / 5080 SUPER (24GB) &amp; RTX 5090 (32GB) + 128GB DDR5 vs Orange Pi AI Station (Ascend 310 · 96GB LPDDR4X · 176 TOPS) &amp; Radxa DragonStation / DragonBay AI NAS (Qualcomm Hexagon NPU · 6x M.2 NVMe))</li>
+    <li><a href="https://tinker-ai.com/guides/axelera-europa-232p-250p-256gb-pcie-vs-cxl-cz120-weighted-interleave-and-amd-iommu-perfopt-llm/">256GB Non-GPU PCIe Accelerators, SC26 CXL Memory Pools &amp; Linux 7.4 IOMMU PerfOpt: Axelera Europa (Edge 232p / Server 250p), Micron CZ120 Weighted Interleave &amp; +23% Ryzen UMA Speedup</a> | <a href="https://tinker-ai.com/zh/guides/axelera-europa-232p-250p-256gb-pcie-vs-cxl-cz120-weighted-interleave-and-amd-iommu-perfopt-llm/">256GB 大内存 PCIe 推理卡、SC26 CXL 内存池与 Linux 7.4 内核提速实战：Axelera Europa（232p / 250p）、美光 CZ120 加权交织与 AMD IOMMU PerfOpt（+23%）拆解</a> (Tested on: Axelera Edge 232p (64GB · 45W) &amp; Server 250p (256GB · 800 GB/s · 4x Europa) vs EPYC / Xeon 6 + 4x Micron CZ120 E3.S CXL 2.0 (1TB) &amp; Ryzen AI Max+ 395 UMA (128GB))</li>
+    <li><a href="https://tinker-ai.com/guides/lattepanda-sigma-2-core-ultra-358h-64gb-10gbe-oculink-and-cloudflare-clairic-clef-local-ai/">LattePanda Sigma 2 (Core Ultra X7 358H · 64GB · Dual 10GbE · OCuLink) &amp; Cloudflare Clairic / Clef (Apache 2.0): Local &quot;System One&quot; PDF Extraction &amp; 59GB Xe3 Edge Server Guide</a> | <a href="https://tinker-ai.com/zh/guides/lattepanda-sigma-2-core-ultra-358h-64gb-10gbe-oculink-and-cloudflare-clairic-clef-local-ai/">LattePanda Sigma 2（酷睿 Ultra X7 358H · 64GB · 双万兆 · OCuLink）与 Cloudflare Clairic / Clef（Apache 2.0）：59GB Xe3 单板服务器与「System One」零幻觉文档提取实战</a> (Tested on: LattePanda Sigma 2 (Intel Core Ultra X7 358H · Arc B390 12-Xe3 · 64GB LPDDR5X-8533 · Dual 10GbE · OCuLink · RP2350) ± OCuLink 24GB eGPU)</li>
   </ul>
 
   <h2>2. 13 Interactive Troubleshooting Decision Trees (EN &amp; ZH)</h2>
@@ -114,7 +116,7 @@
     <li><a href="https://tinker-ai.com/tools/troubleshooter/hybrid-moe-numa-and-edge-npu-trap/">Hybrid CPU+GPU MoE (`NUMA` / `-ot` OOM) &amp; Edge NPU (`Hailo-10H` / `RK3588 CMA`) Traps</a> | <a href="https://tinker-ai.com/zh/tools/troubleshooter/hybrid-moe-numa-and-edge-npu-trap/">异构 CPU+GPU 大模型 (`NUMA` 掉速 / `-ot` 爆显存) 与边缘 NPU (`Hailo-10H` / `RK3588 CMA`) 排障</a></li>
   </ul>
 
-  <h2>3. 56 Parameterized Deployment Configs &amp; Benchmark Scripts (EN &amp; ZH)</h2>
+  <h2>3. 58 Parameterized Deployment Configs &amp; Benchmark Scripts (EN &amp; ZH)</h2>
   <ul>
     <li><a href="https://tinker-ai.com/artifacts/mac-benchmark-runner/">Apple Silicon Mac Fixed-Task Speed &amp; Context Benchmark Script</a> | <a href="https://tinker-ai.com/zh/artifacts/mac-benchmark-runner/">Mac 本地模型固定任务、上下文与生成速度复现脚本</a> (<code>run-mac-benchmark.sh</code>)</li>
     <li><a href="https://tinker-ai.com/artifacts/nvidia-vram-probe/">NVIDIA PC Model Loading &amp; PCIe Shared-Memory Spillover Probe</a> | <a href="https://tinker-ai.com/zh/artifacts/nvidia-vram-probe/">NVIDIA PC 模型加载与显存溢出 / PCIe 共享内存回退排查脚本</a> (<code>check-nvidia-vram-spill.sh</code>)</li>
@@ -172,6 +174,8 @@
     <li><a href="https://tinker-ai.com/artifacts/kora-fastrpc-snapdragon-x2-dragonwing-iq10-runner/">Snapdragon X2 Elite (Ascent QN10) &amp; KORA OS FastRPC / Dragonwing IQ10 Heterogeneous Runner</a> | <a href="https://tinker-ai.com/zh/artifacts/kora-fastrpc-snapdragon-x2-dragonwing-iq10-runner/">骁龙 X2 Elite (Ascent QN10) 与 KORA OS FastRPC / 跃龙 IQ10 异构推理脚本</a> (<code>run-kora-snapdragon-x2-iq10.sh</code>)</li>
     <li><a href="https://tinker-ai.com/artifacts/dgx-spark-4node-ring-lmcache-gds-launcher/">DGX Spark 4-Node Switchless 200GbE Ring (512GB) + LMCache NVMe GDS Launcher</a> | <a href="https://tinker-ai.com/zh/artifacts/dgx-spark-4node-ring-lmcache-gds-launcher/">DGX Spark 四节点无交换机 200GbE 环网（512GB）与 LMCache NVMe GDS 启动脚本</a> (<code>launch-dgx-spark-4node-ring-lmcache.sh</code>)</li>
     <li><a href="https://tinker-ai.com/artifacts/qwen38-glimmer-orangepi-ascend-hybrid-runner/">Qwen3.8-27B / Flash-Next (51B N-Gram Host Cache) / Muse Glimmer 30B &amp; Ascend 96GB Runner</a> | <a href="https://tinker-ai.com/zh/artifacts/qwen38-glimmer-orangepi-ascend-hybrid-runner/">Qwen3.8-27B / Flash-Next（51B N-Gram 主机缓存）/ Muse Glimmer 30B 与昇腾 96GB 启动脚本</a> (<code>run-qwen38-glimmer-or-ascend-station.sh</code>)</li>
+    <li><a href="https://tinker-ai.com/artifacts/europa-cxl-weighted-interleave-iommu-perfopt-tuner/">Axelera Europa (256GB PCIe) Audit, CXL Weighted Interleave &amp; AMD IOMMU PerfOpt Tuner</a> | <a href="https://tinker-ai.com/zh/artifacts/europa-cxl-weighted-interleave-iommu-perfopt-tuner/">Axelera Europa（256GB PCIe）核验、CXL 加权交织与 AMD IOMMU PerfOpt 调优脚本</a> (<code>tune-cxl-interleave-iommu-perfopt-and-europa.sh</code>)</li>
+    <li><a href="https://tinker-ai.com/artifacts/lattepanda-sigma2-xe3-and-clairic-extractor-runner/">LattePanda Sigma 2 (59GB Xe3 UMA + OCuLink) &amp; Cloudflare Clairic / Clef Extraction Runner</a> | <a href="https://tinker-ai.com/zh/artifacts/lattepanda-sigma2-xe3-and-clairic-extractor-runner/">LattePanda Sigma 2（59GB Xe3 核显 + OCuLink）与 Cloudflare Clairic / Clef 结构化提取脚本</a> (<code>run-sigma2-xe3-clairic-extractor.sh</code>)</li>
   </ul>
 </body>
 </html>
