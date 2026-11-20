@@ -3,7 +3,7 @@
 > **Official Website**: [https://tinker-ai.com/](https://tinker-ai.com/) | **中文官网**: [https://tinker-ai.com/zh/](https://tinker-ai.com/zh/)
 > **GitHub Pages Directory**: [https://godrealms.github.io/tinker-ai-lab/](https://godrealms.github.io/tinker-ai-lab/)
 
-This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **58 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
+This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **60 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
 
 ---
 
@@ -11,9 +11,9 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 | Tool | English URL | 中文版入口 | Description |
 | :--- | :--- | :--- | :--- |
-| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **50 model presets** and **81 hardware profiles** |
+| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **52 model presets** and **85 hardware profiles** |
 | **Interactive AI Troubleshooter** | [Open Troubleshooter](https://tinker-ai.com/tools/troubleshooter/) | [打开排障决策树](https://tinker-ai.com/zh/tools/troubleshooter/) | **13** step-by-step diagnostic decision trees for local LLM networking, VRAM OOM, SSE stream drops, RoCEv2 rings, and NPU/GPU traps |
-| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **58 verified configs** directly in your browser before downloading |
+| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **60 verified configs** directly in your browser before downloading |
 
 ---
 
@@ -25,7 +25,7 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 ---
 
-## 3. All 58 Public Guides & Companion Scripts
+## 3. All 60 Public Guides & Companion Scripts
 
 | # | English Guide | 中文实测指南 | Companion Script (`scripts/`) | Online Customizer |
 | :-: | :--- | :--- | :--- | :--- |
@@ -87,6 +87,8 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 | **56** | [2026 Late-Fall 27B–30B Hybrid Models & High-RAM Edge Boards: Qwen3.8-27B, Qwen3.8-Flash-Next (51B N-Gram) & Muse Glimmer 30B on 24GB GPUs vs Orange Pi AI Station (96GB Ascend) & Radxa DragonStation](https://tinker-ai.com/guides/qwen38-27b-flash-next-muse-glimmer-30b-vs-orangepi-ai-station-96gb-radxa-dragonstation/) | [2026 深秋混合注意力新模型与大内存边缘板实测选型：Qwen3.8-27B、Qwen3.8-Flash-Next（51B N-Gram）与 Muse Glimmer 30B 在 24GB 独显 vs 香橙派 AI Station（96GB 昇腾）与瑞莎 DragonStation 上的表现](https://tinker-ai.com/zh/guides/qwen38-27b-flash-next-muse-glimmer-30b-vs-orangepi-ai-station-96gb-radxa-dragonstation/) | [`run-qwen38-glimmer-or-ascend-station.sh`](scripts/run-qwen38-glimmer-or-ascend-station.sh) | [Customize](https://tinker-ai.com/artifacts/qwen38-glimmer-orangepi-ascend-hybrid-runner/) |
 | **57** | [256GB Non-GPU PCIe Accelerators, SC26 CXL Memory Pools & Linux 7.4 IOMMU PerfOpt: Axelera Europa (Edge 232p / Server 250p), Micron CZ120 Weighted Interleave & +23% Ryzen UMA Speedup](https://tinker-ai.com/guides/axelera-europa-232p-250p-256gb-pcie-vs-cxl-cz120-weighted-interleave-and-amd-iommu-perfopt-llm/) | [256GB 大内存 PCIe 推理卡、SC26 CXL 内存池与 Linux 7.4 内核提速实战：Axelera Europa（232p / 250p）、美光 CZ120 加权交织与 AMD IOMMU PerfOpt（+23%）拆解](https://tinker-ai.com/zh/guides/axelera-europa-232p-250p-256gb-pcie-vs-cxl-cz120-weighted-interleave-and-amd-iommu-perfopt-llm/) | [`tune-cxl-interleave-iommu-perfopt-and-europa.sh`](scripts/tune-cxl-interleave-iommu-perfopt-and-europa.sh) | [Customize](https://tinker-ai.com/artifacts/europa-cxl-weighted-interleave-iommu-perfopt-tuner/) |
 | **58** | [LattePanda Sigma 2 (Core Ultra X7 358H · 64GB · Dual 10GbE · OCuLink) & Cloudflare Clairic / Clef (Apache 2.0): Local "System One" PDF Extraction & 59GB Xe3 Edge Server Guide](https://tinker-ai.com/guides/lattepanda-sigma-2-core-ultra-358h-64gb-10gbe-oculink-and-cloudflare-clairic-clef-local-ai/) | [LattePanda Sigma 2（酷睿 Ultra X7 358H · 64GB · 双万兆 · OCuLink）与 Cloudflare Clairic / Clef（Apache 2.0）：59GB Xe3 单板服务器与「System One」零幻觉文档提取实战](https://tinker-ai.com/zh/guides/lattepanda-sigma-2-core-ultra-358h-64gb-10gbe-oculink-and-cloudflare-clairic-clef-local-ai/) | [`run-sigma2-xe3-clairic-extractor.sh`](scripts/run-sigma2-xe3-clairic-extractor.sh) | [Customize](https://tinker-ai.com/artifacts/lattepanda-sigma2-xe3-and-clairic-extractor-runner/) |
+| **59** | [SC26 Disaggregated On-Premise Inference & PCIe Gen5 KV Offload: MiTAC G4520G6 + 8× Skymizer HTX301-4S (2TB Decode-First LPU for Kimi K3.1 2.8T) vs TRUSTA T7P5 AI Scaler 3-Tier vLLM](https://tinker-ai.com/guides/sc26-disaggregated-inference-skymizer-htx301-2tb-vs-trusta-ai-scaler-pcie5-kv-offload/) | [SC26 异构预填充/解码分离与 PCIe Gen5 KV 卸载实战：MiTAC 4U + 8× Skymizer HTX301-4S（2TB 内存跑通 2.8T Kimi K3.1）对决 TRUSTA T7P5 AI Scaler 三层 vLLM 内存池](https://tinker-ai.com/zh/guides/sc26-disaggregated-inference-skymizer-htx301-2tb-vs-trusta-ai-scaler-pcie5-kv-offload/) | [`launch-disagg-or-trusta-kv-vllm.sh`](scripts/launch-disagg-or-trusta-kv-vllm.sh) | [Customize](https://tinker-ai.com/artifacts/skymizer-disagg-trusta-vllm-kv-launcher/) |
+| **60** | [192GB Desktop AI Workstation, Native XDNA 2 NPU & Mamba-2 Hybrid MoE: GMKtec EVO-X5 Pro (Ryzen AI Max+ PRO 495 · 160GB VRAM) + Unsloth Desktop Q4NX NPU Running NVIDIA Nemotron 3.5 Super VL (120B-A12B) & Lightning 30B](https://tinker-ai.com/guides/gmktec-evo-x5-pro-192gb-unsloth-desktop-xdna2-npu-and-nemotron-35-super-vl-120b/) | [192GB 桌面工作站、原生 XDNA 2 NPU 与 Mamba-2 混合 MoE 实战：GMKtec EVO-X5 Pro（160GB 显存 · 双万兆）+ Unsloth Desktop Q4NX 运行 NVIDIA Nemotron 3.5 Super VL (120B-A12B) 与 Lightning 30B](https://tinker-ai.com/zh/guides/gmktec-evo-x5-pro-192gb-unsloth-desktop-xdna2-npu-and-nemotron-35-super-vl-120b/) | [`run-evox5-unsloth-npu-nemotron35.sh`](scripts/run-evox5-unsloth-npu-nemotron35.sh) | [Customize](https://tinker-ai.com/artifacts/evo-x5-192gb-unsloth-npu-nemotron35-launcher/) |
 
 ---
 

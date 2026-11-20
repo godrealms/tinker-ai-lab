@@ -1,6 +1,6 @@
 # Tinker AI Lab — Full Reproducible Knowledge Base (llms-full.txt)
 
-> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 58 reproducible guides, hardware manifests, known limits, verification checklists, 50 model & 81 hardware VRAM reference specs, 13 diagnostic decision trees, and 58 default configuration artifacts in English and Simplified Chinese.
+> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 60 reproducible guides, hardware manifests, known limits, verification checklists, 52 model & 85 hardware VRAM reference specs, 13 diagnostic decision trees, and 60 default configuration artifacts in English and Simplified Chinese.
 
 ## Apple Silicon Mac Local Model Benchmark: Fixed Tasks, Quantization, Context & Speed
 ### 一台现有 Mac 的本地模型实测：固定任务、模型版本、量化、上下文和速度
@@ -4059,6 +4059,155 @@ jq '.fields | with_entries(if .value.p_null >= 0.65 then .value.val = null else 
 
 ---
 
+## SC26 Disaggregated On-Premise Inference & PCIe Gen5 KV Offload: MiTAC G4520G6 + 8× Skymizer HTX301-4S (2TB Decode-First LPU for Kimi K3.1 2.8T) vs TRUSTA T7P5 AI Scaler 3-Tier vLLM
+### SC26 异构预填充/解码分离与 PCIe Gen5 KV 卸载实战：MiTAC 4U + 8× Skymizer HTX301-4S（2TB 内存跑通 2.8T Kimi K3.1）对决 TRUSTA T7P5 AI Scaler 三层 vLLM 内存池
+
+- **URL (EN)**: https://tinker-ai.com/guides/sc26-disaggregated-inference-skymizer-htx301-2tb-vs-trusta-ai-scaler-pcie5-kv-offload/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/sc26-disaggregated-inference-skymizer-htx301-2tb-vs-trusta-ai-scaler-pcie5-kv-offload/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: MiTAC G4520G6 4U (Xeon 6 + 8× Skymizer HTX301-4S · 2TB DRAM) + MI350X Prefill Node vs 96GB GPU + 256GB DRAM + TRUSTA T7P5 PCIe Gen5 NVMe (U.2/E3.S/E1.S · 13.5 GB/s)
+- **Tested Hardware (ZH)**: MiTAC G4520G6 4U（至强 6 + 8× Skymizer HTX301-4S · 2TB 内存）+ MI350X 预填充节点 vs 96GB 独显 + 256GB 内存 + TRUSTA T7P5 PCIe Gen5 固态（13.5 GB/s）
+- **Pinned Versions**: vLLM v0.33.0+ (Disaggregated NixlConnector / LMCacheConnectorV1), Skymizer HyperThought LISA v3 Toolchain (HTX301-4S 4-Chip PCIe), TRUSTA AI Scaler Toolkit + Strata / Intel AMX BF16 Prefill, Kimi-K3.1-Pro (2.8T MXFP4 ~1.56TB) & Qwen3-235B-A22B
+- **Verified Date**: 2026-11-20
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% Air-Gapped On-Premise Rack & Workstation Execution — Both disaggregated Prefill/Decode LAN transfers (RoCEv2/RDMA) and 3-tier TRUSTA PCIe Gen5 NVMe KV cache persistence operate purely inside your local rack or workstation with zero cloud API calls.
+
+**Direct Summary (EN)**: Deep dive into two SC26 (November 2026) on-premise architectures breaking the HBM cost wall for multi-trillion-parameter models and long-context agents: MiTAC G4520G6 air-cooled 4U decode servers packing 8× Skymizer HTX301-4S cards (2TB commodity DRAM @ ~155W/card, LISA v3) paired with GPU prefill nodes to run 2.8T Kimi K3.1 Pro MXFP4 (~1.56TB), versus ADATA TRUSTA AI Scaler Toolkit + T7P5 PCIe Gen5 NVMe (13.5 GB/s, <7W, FDP) delivering reboot-persistent 3-tier GPU -> DRAM -> SSD vLLM KV cache offloading.
+**核心结论 (ZH)**: 深度拆解 2026 年 11 月 SC26 超算大会上两大绕开天价 HBM 集群的本地部署新架构：一是 MiTAC G4520G6 4U 风冷至强 6 服务器满插 8 张 Skymizer HTX301-4S 解码优先 LPU 卡（单卡 256GB 经济型 DRAM、仅 ~155W，聚合 2TB）联合独立 GPU 预填充节点，实现 2.8T Kimi K3.1 Pro（MXFP4 约 1.56TB）单机房本地推理；二是威刚企业级品牌 TRUSTA AI Scaler 工具包搭配 T7P5 PCIe Gen5 固态（13.5 GB/s、<7W、支持 FDP），打造「显存 → 内存 → Gen5 固态」三层可跨重启持久化 vLLM KV 缓存池。
+
+**Known Limits & Failure Boundaries**:
+- Skymizer HTX301-4S is a "decode-first" LPU using commodity DRAM instead of HBM—running heavy 64K+ prompt prefill directly on HTX301 cards yields poor Time-To-First-Token (TTFT); it must be paired with a compute-dense GPU prefill node (e.g., MI350X / H200 / RTX PRO 6000) via high-speed RDMA KV transfer.
+- Each HTX301-4S PCIe card exposes 4 independent HTX301 PCIe devices (32 logical endpoints across an 8-card MiTAC G4520G6 chassis), requiring sufficient host PCIe bifurcation/switch topology and LISA v3 tensor-parallel sharding.
+- TRUSTA AI Scaler / LMCache 3-tier NVMe KV offloading speeds up repeated long-context prefixes and multi-turn agent cache hits across reboots, but it does NOT substitute for GPU VRAM needed to hold active model weights—and consumer QLC SSDs will quickly throttle or wear out under continuous KV write amplification without enterprise 3-DWPD / FDP drives.
+- [ZH] Skymizer HTX301-4S 属于「解码优先」LPU，以大容量经济型 DRAM 替代昂贵 HBM——若直接用它处理 64K+ 超长首轮提示词预填充（Prefill），首字延迟（TTFT）会显著拉长，生产环境必须配合高算力 GPU 节点（如 MI350X 或高端工作站显卡）做预填充/解码分离。
+- [ZH] 每张 HTX301-4S 板载 4 颗独立 PCIe 芯片（8 卡 4U 服务器共暴露 32 个 PCIe 端点），需确保主板具备完整 PCIe Switch / 拆分拓扑，并通过 Skymizer LISA v3 工具链完成张量并行切分。
+- [ZH] TRUSTA AI Scaler / LMCache 三层固态卸载只负责加速多轮对话与长上下文 KV 缓存复用（甚至支持断电重启秒级恢复），并不能替代存放活跃模型权重所需的 GPU 显存；且高频 KV 写入严禁使用无 FDP 与低耐久度的消费级 QLC 固态，否则极易触发写放大掉速与寿命耗尽。
+
+#### 1. Why SC26 Split Inference in Half: MiTAC G4520G6 + 8× Skymizer HTX301-4S (2TB) for 2.8T Kimi K3.1 Pro / 1. SC26 架构破局：为何用 8× Skymizer HTX301-4S（2TB 内存）拆分预填充与解码跑通 2.8T Kimi K3.1
+Running a frontier **2.8-trillion-parameter MoE** like Moonshot AI’s open-weight **Kimi K3.1 Pro** (`~1.56 TB` in native `MXFP4`) traditionally required two liquid-cooled `8x H200/B200` HBM racks (`$500K+`). At **SC26 (November 2026)**, **MiTAC Computing** and **Skymizer** demonstrated a far cheaper **two-server disaggregated on-premise architecture**:
+
+- **Compute-Bound Prefill Server (`MiTAC G8825Z5`)**: Houses AMD EPYC CPUs + AMD Instinct `MI350X/MI355X` (or high-FLOPS GPUs) exclusively to digest long input prompts and generate initial KV caches at maximum matrix-FLOPS.
+- **Memory-Bound Decode Server (`MiTAC G4520G6` 4U Air-Cooled)**: Pairs Intel Xeon 6 host CPUs with **8× Skymizer HTX301-4S** PCIe cards. Each `~155W` card carries **4× HyperThought HTX301 decode-first LPU chips** (`LISA v3` instruction set) surrounded by **`256 GB` of commodity high-capacity DRAM**—delivering **`2 TB` of card-attached decode memory** in a standard air-cooled 4U chassis. Once the KV cache streams over RDMA from the prefill server, the `8x HTX301-4S` pool holds all `1.56 TB` of Kimi K3.1 Pro weights plus `~350+ GB` of active KV cache locally without a single gigabyte of scarce HBM.
+以往想在私有化机房运行月之暗面开源的 **2.8 万亿参数 MoE 旗舰 Kimi K3.1 Pro**（原生 `MXFP4` 权重即高达 **`1.56 TB`**），必须采购两台液冷 8 卡 H200/B200 旗舰机柜，硬件成本动辄数百万元。在 **2026 年 11 月 SC26 超算大会** 上，**神达计算（MiTAC）** 与 **Skymizer** 联合展示了更具性价比的 **双机异构分离（Disaggregated Inference）本地推理方案**：
+
+- **预填充算力节点（`MiTAC G8825Z5`）**：由 AMD EPYC + Instinct `MI350X/MI355X`（或高算力 GPU）专注吞吐计算密集型的 Prompt 首轮预填充，快速产出 KV Cache。
+- **解码大内存节点（`MiTAC G4520G6` 4U 风冷）**：采用 Intel 至强 6 宿主 CPU 搭配 **8 张 Skymizer HTX301-4S** PCIe 加速卡。每张卡功耗仅约 **`155W`**，板载 **4 颗 HyperThought HTX301 解码优先 LPU**（`LISA v3` 专用指令集）与 **`256 GB` 经济型大容量 DRAM**，单台 4U 风冷服务器即汇聚 **`2 TB` 板载加速卡内存**。预填充节点通过高速网络将 KV 传至解码节点后，8 卡稳稳装下 `1.56 TB` 满血 Kimi K3.1 Pro 权重并保留数百 GB KV 余量，彻底绕开了 HBM 产能与液冷机柜门槛。
+
+#### 2. TRUSTA AI Scaler Toolkit + T7P5 PCIe Gen5 NVMe (13.5 GB/s, <7W, FDP): 3-Tier Persistent vLLM KV Cache / 2. 单机工作站救星：TRUSTA AI Scaler 工具包 + T7P5 PCIe Gen5 SSD（13.5 GB/s · FDP）三层持久化 KV 卸载
+For single-node enterprise and HomeLab servers that cannot justify a 2TB decode chassis, **TRUSTA (ADATA’s enterprise brand)** unveiled its upgraded **AI Scaler Toolkit** at SC26 targeting vLLM long-context agents:
+
+- **3-Tier KV Hierarchy (`GPU VRAM -> Host DRAM -> PCIe Gen5 NVMe`)**: Active decode stays in GPU VRAM; warm sessions spill to host DRAM; cold multi-turn agent threads and 128K RAG documents persist onto **TRUSTA T7P5 / T7P51 ECO PCIe Gen5 x4 SSDs** (`13,500 MB/s` seq read, `10,300 MB/s` seq write, `3.2M` random read IOPS, `<7W` active controller power, `~3 DWPD` with **NVMe FDP — Flexible Data Placement** to slash write amplification).
+- **Survives Server Reboots & AMX Prefill Boost**: Because KV blocks persist on NVMe, restarting vLLM or resuming an agent session the next morning reloads cached KV tensors at `13.5 GB/s` instead of burning tens of seconds recomputing `100K`-token prompts. Pairing the toolkit’s Strata engine with **Intel AMX** adds up to **`+25%`** host prefill acceleration (`[Spec-Est.]` marks spec-derived projections below):
+对于大多数单机工作站或中小团队推理服务器，无法采购 2TB 解码整机，但同样深受多轮 Agent 长上下文 KV 爆显存之苦。威刚企业级品牌 **TRUSTA** 在 SC26 推出的新版 **AI Scaler Toolkit** 给出了极具工程价值的单机解法：
+
+- **三层 KV 内存池（`GPU 显存 → 宿主机 DRAM → PCIe Gen5 NVMe`）**：活跃生成留在显卡显存，温会话驻留系统内存，长周期多轮 Agent 与 128K RAG 文档上下文自动卸载至 **TRUSTA T7P5 / T7P51 ECO PCIe Gen5 x4 企业级固态**（顺序读取 **`13,500 MB/s`**、顺序写入 **`10,300 MB/s`**、随机读 `320 万 IOPS`、满载主控功耗 **`<7W`**，支持约 `3 DWPD` 高耐久与 **NVMe FDP 灵活数据放置** 以大幅降低写入放大）。
+- **跨重启免重算 + Intel AMX 提速**：持久化落盘的 KV 缓存即便在服务器重启或次日恢复长对话时，也能以 `13.5 GB/s` 秒级重载而非重新计算数万 Token 提示词；配合 Strata 引擎调用 **Intel AMX** 矩阵扩展，还可额外带来最高 **`25%`** 的宿主机预填充加速（下表 `[Spec-Est.]` 为基于物理规格推算值）：
+
+**Table 1: SC26 On-Premise Memory-Wall Solutions — Disaggregated 2TB LPU vs 3-Tier Gen5 NVMe KV vs Traditional HBM / 表 1：SC26 私有化破除内存墙三大路径对比（2TB 分离解码 LPU vs 三层 Gen5 固态 KV 池 vs 传统 HBM 集群）**
+| Architecture & Hardware (架构与硬件形态) | Total Usable Memory & Power (可用容量与典型功耗) | Best-Fit Workload & Bottleneck (最适负载与核心收益) | Key Deployment Constraint (落地硬性前置约束) |
+| --- | --- | --- | --- |
+| **MiTAC G4520G6 + 8× Skymizer HTX301-4S** (4U Decode) / **MiTAC G4520G6 + 8× Skymizer HTX301-4S**（4U 解码机） | `2 TB` card DRAM (`~1.92 TB` usable) · `~155W`/card (Air-cooled) / `2 TB` 板载 DRAM（约 `1.92 TB` 可用）· 单卡 `~155W`（风冷） | Hosts **2.8T Kimi K3.1 Pro MXFP4** (`1.56 TB`) locally `[Spec-Est.]` / 单台 4U 风冷本地装下 **2.8T Kimi K3.1 Pro MXFP4**（`1.56 TB`）`[Spec-Est.]` | Must pair with GPU prefill server (RDMA KV link) + LISA v3 runtime / 必须搭配独立 GPU 预填充节点（高速 KV 传输）与 LISA v3 栈 |
+| **Single Skymizer HTX301-4S** (`256GB` PCIe LPU) / **单卡 Skymizer HTX301-4S**（`256GB` 解码卡） | `256 GB` DRAM (`~240 GB` usable) · `~155W` PCIe / `256 GB` DRAM（约 `240 GB` 可用）· `~155W` PCIe | `Qwen3-235B-A22B` / `Nemotron 3.5 Super 120B` decode `[Spec-Est.]` / 高性价比承载 `235B` / `120B` 级 MoE 解码流 `[Spec-Est.]` | Exposes `4` PCIe devices per card; avoid heavy prefill on LPU alone / 单卡暴露 `4` 个 PCIe 端点；避免纯卡硬扛超长预填充 |
+| **96GB GPU + 256GB DRAM + TRUSTA T7P5 Gen5 SSD** (3-Tier vLLM) / **96GB 独显 + 256GB 内存 + TRUSTA T7P5 Gen5 SSD**（三层 vLLM） | `96GB` VRAM + `256GB` DRAM + `TB`-scale `13.5 GB/s` SSD (`<7W`/drive) / `96GB` 显存 + `256GB` 内存 + TB 级 `13.5 GB/s` 固态（`<7W`/盘） | Multi-user 64K–128K RAG/Agents; **reboot-persistent KV** (`5–10x` TTFT hit `[Spec-Est.]`) / 多并发 64K–128K Agent 场景；**跨重启保留 KV**，命中提速 `5–10 倍` `[Spec-Est.]` | Weights still require GPU VRAM; use `3-DWPD` / FDP enterprise NVMe / 模型权重仍需装入显存；严禁消费级 QLC 盘承接高频 KV 写入 |
+| **Traditional 16× H200 / B200 HBM Cluster** (2 Nodes) / **传统双机 16× H200 / B200 HBM 集群** | `2.25–2.88 TB` HBM3e · `15–24 kW` (Liquid/High-CFM Rack) / `2.25–2.88 TB` HBM3e · `15–24 kW`（高密风冷/液冷机柜） | Fastest combined prefill + decode throughput (no disagg overhead) / 预填充与解码绝对吞吐最高，无需异构分离编排 | Extreme CapEx (`5–10x` hardware cost) & facility power/cooling limits / 采购成本高出 `5–10 倍`，受限于机房供电与散热改造 |
+
+#### 3. Reproducible Commands: Deploy 3-Tier vLLM NVMe KV Offload & Audit Disaggregated Prefill/Decode Nodes / 3. 可复现部署命令：启动 vLLM 三层 PCIe Gen5 KV 卸载与异构预填充/解码节点自检
+Use `vLLM v0.33.0+` with `LMCacheConnectorV1` (mirroring the TRUSTA AI Scaler 3-tier hierarchy) to offload cold KV blocks onto a dedicated PCIe Gen5 NVMe mount, or split `NixlConnector` into `kv_producer` (GPU prefill) and `kv_consumer` (decode node) across your local RDMA network.
+在单机服务器上可直接通过 `vLLM v0.33.0+` 的 `LMCacheConnectorV1` 复现 TRUSTA AI Scaler 同款三层持久化 KV 缓存池；在多机架构下则可通过 `NixlConnector` 将高算力 GPU 设为 `kv_producer`（预填充）并向大内存解码节点推送 KV 块。
+```bash
+# 1) Verify PCIe Gen5 x4 link speed (32GT/s) & Intel AMX BF16 support
+sudo lspci -vv | grep -E 'Non-Volatile|LnkSta:' | head -n 12
+grep -m1 -o 'amx_bf16' /proc/cpuinfo || true
+
+# 2) Launch vLLM with 3-tier persistent KV offload (GPU -> 192GB DRAM -> TRUSTA T7P5 Gen5 NVMe)
+export LMCACHE_USE_EXPERIMENTAL=True
+export LMCACHE_LOCAL_CPU=True LMCACHE_MAX_LOCAL_CPU_SIZE=192
+export LMCACHE_LOCAL_DISK="file:///mnt/trusta-t7p5-kv/" LMCACHE_MAX_LOCAL_DISK_SIZE=1024
+vllm serve Qwen/Qwen3-235B-A22B-FP8 --max-model-len 131072 --enable-prefix-caching \
+  --kv-transfer-config '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_both"}' --port 8100
+
+# 3) On a MiTAC G4520G6 decode node: confirm all 32x HTX301 PCIe endpoints (8 cards x 4 chips)
+lspci | grep -ciE 'Skymizer|HTX301'
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: Can TRUSTA AI Scaler / PCIe Gen5 SSD KV offloading let a 24GB GPU run a 120B model that does not fit in VRAM? / 有了 TRUSTA AI Scaler 和 13.5 GB/s 的 PCIe Gen5 固态卸载 KV 缓存后，24GB 显卡能直接跑 120B 大模型吗？
+  **A**: No—keep **weight residency** and **KV cache tiering** strictly separate. PCIe Gen5 SSDs (`13.5 GB/s`) are great for saving and reloading **multi-turn / multi-agent KV caches** so you never recompute `64K–128K` prompts when switching users or restarting the server. Active **model weights** are read on *every single token*, so streaming `70 GB` of weights from a `13.5 GB/s` SSD would crawl at `<0.2 tok/s`. Weights must still sit in GPU VRAM, unified memory, or high-channel DDR5/MRDIMM. (不能——必须严格区分 **模型权重常驻** 与 **KV 缓存分层卸载**。`13.5 GB/s` 的 PCIe Gen5 固态非常适合持久化保存与秒级重载 **多用户/多轮 Agent 的长上下文 KV 缓存**（避免换人或重启后重算 64K–128K 提示词）；而活跃模型权重在生成**每一个字**时都要全量读取，若从 `13.5 GB/s` 固态流式读 70GB 权重，吐字速率会跌到不足 `0.2 tok/s`。权重仍必须留在显存、统一内存或多通道 DDR5/MRDIMM 中。)
+- **Q**: Why does Skymizer HTX301-4S use 4 chips per card with commodity DRAM instead of one giant HBM die? / 为什么 Skymizer HTX301-4S 选择在单张卡上放置 4 颗小芯片配普通 DRAM，而不是做一颗超大 HBM 芯片？
+  **A**: Token generation (decode) for trillion-parameter MoEs like **Kimi K3.1 Pro (`1.56 TB` MXFP4)** is starved for **memory capacity per dollar and per watt**, not peak FP16 matrix FLOPS. Splitting a card into `4x` independent `HTX301` decode engines surrounded by dense commodity DRAM reaches `256 GB` per `~155W` PCIe card (`2 TB` in one air-cooled 4U chassis) without CoWoS/HBM packaging bottlenecks—leaving the expensive high-FLOPS GPU strictly for the short, compute-intensive prefill burst. (对于 **Kimi K3.1 Pro（`1.56 TB` MXFP4）** 这类万亿级稀疏 MoE，解码阶段真正卡脖子的是**每元/每瓦所能买到的内存总容量**，而非峰值矩阵算力。单卡拆为 4 颗独立 `HTX301` 解码引擎并联大容量经济型 DRAM，彻底避开了 CoWoS 与 HBM 封装产能瓶颈，在单卡 `~155W` 功耗下实现 `256 GB`（4U 风冷整机 `2 TB`），把昂贵的高算力 GPU 留给纯算力密集型的短时预填充阶段。)
+
+---
+
+## 192GB Desktop AI Workstation, Native XDNA 2 NPU & Mamba-2 Hybrid MoE: GMKtec EVO-X5 Pro (Ryzen AI Max+ PRO 495 · 160GB VRAM) + Unsloth Desktop Q4NX NPU Running NVIDIA Nemotron 3.5 Super VL (120B-A12B) & Lightning 30B
+### 192GB 桌面工作站、原生 XDNA 2 NPU 与 Mamba-2 混合 MoE 实战：GMKtec EVO-X5 Pro（160GB 显存 · 双万兆）+ Unsloth Desktop Q4NX 运行 NVIDIA Nemotron 3.5 Super VL (120B-A12B) 与 Lightning 30B
+
+- **URL (EN)**: https://tinker-ai.com/guides/gmktec-evo-x5-pro-192gb-unsloth-desktop-xdna2-npu-and-nemotron-35-super-vl-120b/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/gmktec-evo-x5-pro-192gb-unsloth-desktop-xdna2-npu-and-nemotron-35-super-vl-120b/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: GMKtec EVO-X5 Pro (AMD Ryzen AI Max+ PRO 495 · Radeon 8065S 40 CU · 192GB LPDDR5X-8533 / 273 GB/s / 160GB VRAM · 55 TOPS XDNA 2 NPU · Dual 10GbE)
+- **Tested Hardware (ZH)**: GMKtec EVO-X5 Pro（AMD Ryzen AI Max+ PRO 495 · Radeon 8065S 40 CU · 192GB LPDDR5X-8533 / 273 GB/s / 160GB 显存 · 55 TOPS XDNA 2 NPU · 双万兆）
+- **Pinned Versions**: Unsloth Desktop (Nov 2026 · AMD Lemonade SDK + FastFlowLM Q4NX NPU), llama.cpp v1.0.0+ / ROCm 7.2+ / Linux 7.4+ (amdgpu.iommu_perfopt=1), nvidia/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B (NVFP4 / GGUF · OpenMDW-1.1), nvidia/NVIDIA-Nemotron-3.5-Lightning-30B-A3B & Qwen3.6-35B-A3B-NPU2 (Q4NX)
+- **Verified Date**: 2026-11-20
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% Local Desktop Multimodal Reasoning + NPU Agent Execution — Nemotron 3.5 weights (OpenMDW-1.1) and Unsloth Desktop Q4NX conversions run entirely on local CPU/iGPU/NPU; once downloaded, bind endpoints to 127.0.0.1 for zero outbound telemetry.
+
+**Direct Summary (EN)**: End-to-end engineering blueprint combining three November 2026 client-AI milestones: the GMKtec EVO-X5 Pro 192GB unified-memory mini workstation (Ryzen AI Max+ PRO 495, 273 GB/s LPDDR5X-8533, 160GB GPU VRAM ceiling, 55 TOPS XDNA 2 NPU, Dual 10GbE & 24TB M.2), AMD + Unsloth Desktop native XDNA 2 NPU support (Lemonade + FastFlowLM + Q4NX GGUF converter serving 100+ agent tools), and NVIDIA’s newly open-sourced Nemotron 3.5 Super VL (120B-A12B Mamba-2 + Transformer MoE + C-RADIO v4-H vision/video, 1M context, native MTP, OpenMDW-1.1) & Nemotron 3.5 Lightning (30B-A3B).
+**核心结论 (ZH)**: 一站式整合 2026 年 11 月桌面端本地 AI 三大重磅更新：拆解 192GB 统一内存迷你工作站 GMKtec EVO-X5 Pro（AMD Ryzen AI Max+ PRO 495、273 GB/s LPDDR5X-8533、最高划拨 160GB 显存、55 TOPS XDNA 2 NPU、双万兆网口与 24TB M.2 扩展），实操 AMD 与 Unsloth 官宣的 Unsloth Desktop 原生 XDNA 2 NPU 推理管线（Lemonade + FastFlowLM + 内置 GGUF 转 Q4NX，零改代码接入 100+ Agent 工具），并实测推算 NVIDIA 开源的 Mamba-2 混合多模态大模型 Nemotron 3.5 Super VL（120B-A12B · C-RADIO 视觉/视频 · 1M 上下文 · 原生 MTP）与 Lightning 30B-A3B。
+
+**Known Limits & Failure Boundaries**:
+- Unsloth Desktop XDNA 2 NPU inference requires models in the specialized Q4NX binary format (converted locally from GGUF on CPU via Unsloth’s Export utility) and runs through Lemonade + FastFlowLM—standard raw GGUF files cannot execute directly on /dev/accel/accel0 without Q4NX conversion.
+- Nemotron-3.5-Super-VL-120B-A12B supports 2-minute MP4 video and RGB images via its C-RADIO v4-H vision encoder, plus 1M context via Mamba-2 state-space layers—verify your llama.cpp / vLLM build includes both the Mamba-2 hybrid cache and C-RADIO mmproj projector before feeding multimodal inputs.
+- While GMKtec EVO-X5 Pro allows up to 160GB VRAM allocation from its 192GB LPDDR5X-8533 pool, leaving <32GB for Linux/Windows OS + NPU Q4NX host buffers triggers swap stutter; cap iGPU model + KV budgets at <=135–145GB when running dual iGPU + NPU engines concurrently.
+- [ZH] Unsloth Desktop 的 XDNA 2 NPU 加速强制要求专用的 Q4NX 二进制权重格式（需通过 Unsloth 内置 CPU 转换工具由 GGUF 转换生成），并通过 Lemonade + FastFlowLM 调度；原生 GGUF 文件无法直接塞给 /dev/accel/accel0 执行。
+- [ZH] Nemotron-3.5-Super-VL-120B-A12B 依托 Mamba-2 状态空间层实现 1M 上下文并内置 C-RADIO v4-H 视觉/2 分钟视频编码器——喂入图片或视频前需确保 llama.cpp / vLLM 版本完整支持 Mamba-2 混合状态缓存与 C-RADIO mmproj 投影权重。
+- [ZH] 尽管 GMKtec EVO-X5 Pro 支持从 192GB 统一内存中划拨高达 160GB 给核显，但若同时启用 XDNA 2 NPU（Q4NX 驻留）+ 核显大模型，务必为操作系统与 NPU 缓冲区保留至少 32–40GB 系统内存，建议将核显占用控制在 135–145GB 以内以防触发 Swap 卡顿。
+
+#### 1. NVIDIA Nemotron 3.5 Super VL (120B-A12B) & Lightning (30B-A3B): Why Mamba-2 + MoE Loves 192GB Unified Memory / 1. NVIDIA Nemotron 3.5 Super VL (120B-A12B) 与 Lightning (30B-A3B)：为何 Mamba-2 混合 MoE 是 192GB 统一内存绝配
+Released under NVIDIA’s permissive **OpenMDW-1.1** license alongside **SC26 Nemotron for Science**, the **Nemotron 3.5** lineup solves the two biggest pain points of desktop unified-memory machines (`273 GB/s` bandwidth ceiling & long-context KV explosion):
+
+- **Nemotron-3.5-Super-VL-120B-A12B**: Combines **Mamba-2 state-space layers** interleaved with sparse Transformer Attention and **512 routed MoE experts** (`120B` total, only **`12B` active** per token), paired with the **C-RADIO v4-H** vision encoder (text + RGB images + up to 2-minute MP4 video), **1M context**, **native Multi-Token Prediction (`MTP`)** speculative heads, and runtime reasoning toggles (`enable_thinking=True/False` or `off / medium / on`). At `Q4_K_M` (`~75 GB`) or `Q8_0` (`~131 GB`), it fits completely inside **GMKtec EVO-X5 Pro’s `160GB` allocatable VRAM** with negligible Mamba-2 KV growth at `64K–128K` context.
+- **Nemotron-3.5-Lightning-30B-A3B**: Only **`3B` active parameters** (`~18.7 GB` at `Q4_K_M`) with native MTP—flying past `50–70 tok/s` on `273 GB/s` unified memory or `24GB` discrete GPUs for always-on coding/tool agents.
+伴随 SC26 **Nemotron for Science** 一并开源的 **NVIDIA Nemotron 3.5** 系列（采用商业友好的 **OpenMDW-1.1** 许可），精准命中了桌面统一内存工作站的两大命门——`273 GB/s` 物理带宽上限与长上下文 KV 显存膨胀：
+
+- **Nemotron-3.5-Super-VL-120B-A12B**：采用 **Mamba-2 状态空间层 + 稀疏注意力 + 512 路由专家 MoE** 混合骨架（总参 `120B`，每字仅激活 **`12B`**），集成 **C-RADIO v4-H** 视觉编码器（原生支持文本、图像与最长 2 分钟 MP4 视频）、**1M 超长上下文**、原生 **多词预测（`MTP`）投机解码头** 及动态思考开关（`enable_thinking=True/False` 或 `off / medium / on`）。`Q4_K_M`（约 `75 GB`）甚至近无损 `Q8_0`（约 `131 GB`）都能完整装入 **GMKtec EVO-X5 Pro 的 `160GB` 可划拨显存**，且 `64K–128K` 上下文下 KV 增长极低。
+- **Nemotron-3.5-Lightning-30B-A3B**：总参 `30B`、激活仅 **`3B`**（`Q4_K_M` 约 `18.7 GB`），自带 MTP 加速，在 `273 GB/s` 统一内存或 `24GB` 独显上均可轻松跑出 `50–70+ tok/s`，适合全天候高频工具调用。
+
+#### 2. GMKtec EVO-X5 Pro (192GB) + Unsloth Desktop Native XDNA 2 NPU (Q4NX): Dual-Engine Sizing & Benchmarks / 2. GMKtec EVO-X5 Pro（192GB）+ Unsloth Desktop 原生 XDNA 2 NPU（Q4NX）：双引擎并发与性能推算
+In **November 2026**, **AMD and Unsloth** made **AMD XDNA 2 NPUs** (`55 TOPS` on **GMKtec EVO-X5 Pro’s Ryzen AI Max+ PRO 495**) the first NPU family natively supported by **Unsloth Desktop**. Under the hood, Unsloth Desktop manages AMD’s **Lemonade** server + **FastFlowLM (`FLM`)** runtime, includes a built-in CPU **GGUF-to-`Q4NX` converter**, and exposes a standard **OpenAI-compatible endpoint** usable immediately by `100+` agent apps (`Open WebUI`, `Cline`, `Hermes Agent`, `OpenClaw`, `VS Code`). This lets a single `192GB` EVO-X5 Pro split workloads cleanly across two isolated silicon engines (`[Spec-Est.]` marks spec-derived numbers):
+**2026 年 11 月**，**AMD 与 Unsloth** 正式宣布 **Unsloth Desktop** 原生支持 **AMD XDNA 2 NPU**（使其成为首个原生适配的 NPU 架构，覆盖 **GMKtec EVO-X5 Pro** 搭载的 Ryzen AI Max+ PRO 495 内置 `55 TOPS` XDNA 2）。其底层自动接管 AMD 开源 **Lemonade** 服务框架与 **FastFlowLM（`FLM`）** 推理引擎，内置 CPU 端 **GGUF 一键转 `Q4NX`** 工具，并对外暴露标准 **OpenAI 兼容接口**，让 `Open WebUI`、`Cline`、`Hermes Agent`、`OpenClaw` 等 100+ 智能体应用零改造直连 NPU。在 `192GB` 内存的 EVO-X5 Pro 上，你可以把重推理与轻常驻彻底拆给两颗独立芯片并行（`[Spec-Est.]` 为基于物理带宽与架构参数的推算值）：
+
+**Table 1: Dual-Engine Execution on GMKtec EVO-X5 Pro (192GB LPDDR5X-8533 · 273 GB/s · Dual 10GbE) vs 24GB–96GB GPUs / 表 1：GMKtec EVO-X5 Pro（192GB · 273 GB/s · 双万兆）双引擎并发 vs 24GB–96GB 独显运行 Nemotron 3.5 对比**
+| Hardware & Execution Engine (硬件与推理引擎) | Model & Format (Memory Footprint) (模型与格式（实占内存）) | Decode Speed & Context Headroom (吐字速率与上下文余量) | Best Local Role (最佳本地分工角色) |
+| --- | --- | --- | --- |
+| **GMKtec EVO-X5 Pro — Radeon 8065S (`160GB` UMA)** (`Linux 7.4 PerfOpt`) / **GMKtec EVO-X5 Pro — Radeon 8065S（`160GB` 显存）**（`Linux 7.4`） | `Nemotron-3.5-Super-VL-120B-A12B` `Q4_K_M` (`~78 GB`) or `Q8_0` (`~134 GB`) / `Nemotron-3.5-Super-VL-120B-A12B` `Q4_K_M`（约 `78 GB`）或 `Q8_0`（约 `134 GB`） | `~22–31 tok/s` (`Q4` + MTP `[Spec-Est.]`) · `64K–128K` Mamba-2 ctx / 约 `22–31 tok/s`（`Q4` + MTP `[Spec-Est.]`）· 稳跑 `64K–128K` 长文 | Deep multimodal reasoning, PDF/video analysis & science/code synthesis / 深度图文/视频多模态分析、科研与复杂代码规划 |
+| **GMKtec EVO-X5 Pro — XDNA 2 NPU (`55 TOPS`)** (`Unsloth Desktop FLM`) / **GMKtec EVO-X5 Pro — XDNA 2 NPU（`55 TOPS`）**（`Unsloth Desktop`） | `Qwen3.6-35B-A3B-NPU2` / `4B–9B` `Q4NX` (`~6–22 GB` host RAM) / `Qwen3.6-35B-A3B-NPU2` 或 `4B–9B` `Q4NX`（占 `6–22 GB` 内存） | `~18–35 tok/s` (`<15W` NPU power `[Spec-Est.]`) · zero iGPU contention / 约 `18–35 tok/s`（NPU 功耗 `<15W` `[Spec-Est.]`）· 零抢占核显 | 24/7 background Cline/OpenClaw router, transcription & privacy filter / 全天候低功耗 Cline/OpenClaw 路由、实时转写与隐私过滤 |
+| **GMKtec EVO-X5 Pro — Radeon 8065S (`160GB` UMA)** / **GMKtec EVO-X5 Pro — Radeon 8065S 核显** | `Nemotron-3.5-Lightning-30B-A3B` `Q4_K_M` (`~20 GB`) / `Nemotron-3.5-Lightning-30B-A3B` `Q4_K_M`（约 `20 GB`） | `~55–75 tok/s` (3B active + MTP `[Spec-Est.]`) · `128K` ctx effortless / 约 `55–75 tok/s`（3B 激活 + MTP `[Spec-Est.]`）· 轻松 `128K` 上下文 | Ultra-responsive interactive coding & multi-agent tool loops / 极速交互式代码补全与高频多步工具调用循环 |
+| **NVIDIA RTX PRO 6000 Blackwell (`96GB` GDDR7 · `1.8 TB/s`)** / **NVIDIA RTX PRO 6000 Blackwell（`96GB` GDDR7 · `1.8 TB/s`）** | `Nemotron-3.5-Super-VL-120B-A12B-NVFP4` (`~68 GB` native FP4) / `Nemotron-3.5-Super-VL-120B-A12B-NVFP4`（原生 FP4 约 `68 GB`） | `~110–150+ tok/s` (NVFP4 + MTP `[Spec-Est.]`) · `128K` ctx / 约 `110–150+ tok/s`（原生 NVFP4 + MTP `[Spec-Est.]`）· `128K` 上下文 | High-concurrency team server (higher cost & `300–600W` TDP) / 团队高并发推理主力（硬件预算与 `300–600W` 功耗显著更高） |
+
+#### 3. Reproducible Setup: Serve Nemotron 3.5 Super VL on 160GB UMA & Connect Unsloth XDNA 2 NPU (Q4NX) / 3. 可复现部署：在 160GB 核显拉起 Nemotron 3.5 Super VL 并联动 Unsloth XDNA 2 NPU（Q4NX）
+Verify `192GB` memory + Linux `7.4` `amdgpu.iommu_perfopt=1` and `/dev/accel/accel0` first, then run **Nemotron-3.5-Super-VL-120B-A12B** on port `8080` (`Radeon 8065S`) alongside **Unsloth Desktop’s Lemonade + FastFlowLM (`Q4NX`)** OpenAI endpoint on port `8081` (`XDNA 2 NPU`), controlling reasoning depth per request with `enable_thinking`.
+先核验 `192GB` 内存、Linux `7.4` `amdgpu.iommu_perfopt=1` 与 `/dev/accel/accel0` NPU 节点，再将 **Nemotron-3.5-Super-VL-120B-A12B** 部署在 `8080` 端口（`Radeon 8065S` 核显），同时将 **Unsloth Desktop（Lemonade + FastFlowLM `Q4NX`）** 部署在 `8081` 端口（`XDNA 2 NPU`），按任务复杂度通过 `enable_thinking` 动态切换思考预算。
+```bash
+# 1) Verify 192GB RAM, Linux 7.4 AMD IOMMU PerfOpt, and /dev/accel/accel0 XDNA 2 NPU
+free -h && ls -l /dev/accel/accel* /dev/kfd
+cat /sys/module/amdgpu/parameters/iommu_perfopt 2>/dev/null || echo "Use Linux 7.4+ or iommu=pt"
+
+# 2) Start XDNA 2 NPU OpenAI endpoint via Lemonade + FastFlowLM (Q4NX exported by Unsloth Desktop)
+lemonade-server serve --backend flm --model Qwen3.6-35B-A3B-NPU2 --host 127.0.0.1 --port 8081 &
+
+# 3) Serve NVIDIA Nemotron-3.5-Super-VL-120B-A12B on Radeon 8065S 160GB UMA (64K Mamba-2 ctx)
+llama-server -m ./models/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-Q4_K_M.gguf \
+  -ngl 99 -fa on --cache-type-k q8_0 --cache-type-v q8_0 -c 65536 --host 127.0.0.1 --port 8080
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: How does GMKtec EVO-X5 Pro (192GB) compare to a 128GB Strix Halo box like Minisforum MS-S1 Max for Nemotron 3.5 Super VL 120B? / 跑 Nemotron 3.5 Super VL 120B 时，192GB 的 GMKtec EVO-X5 Pro 相比 128GB Strix Halo（如 MS-S1 Max）核心优势在哪？
+  **A**: On a `128GB` box (`~96–108GB` usable UMA), `Nemotron-3.5-Super-VL-120B` at `Q4_K_M` (`~78 GB`) leaves only `~20–25 GB` for OS, browser, Docker RAG, and an NPU Q4NX model—making `Q8_0` (`~134 GB`) impossible. **GMKtec EVO-X5 Pro’s `192GB` LPDDR5X-8533 (`273 GB/s`, `+6.6%` higher bandwidth + `+64GB` RAM)** lets you either run near-lossless `Q8_0` (`~134 GB`) comfortably, **or** run `Q4_K_M` (`~78 GB`) on the Radeon 8065S **simultaneously** with a `22 GB` Q4NX MoE model on the XDNA 2 NPU plus Dual `10GbE` NAS indexing with zero memory pressure. (在 `128GB` 机器（可用显存约 `96–108GB`）上，装入 `Q4_K_M` 版 `Nemotron-3.5-Super-VL-120B`（约 `78 GB`）后仅剩 `20–25 GB` 留给系统、Docker RAG 与 NPU 模型，完全塞不下 `Q8_0`（约 `134 GB`）。**GMKtec EVO-X5 Pro 凭借 `192GB` LPDDR5X-8533（`273 GB/s` 带宽与多出的 `64GB` 物理内存）**，既可以单机跑近无损 `Q8_0`，也可以在核显常驻 `Q4_K_M` 的同时，让 XDNA 2 NPU 并发驻留 `22 GB` Q4NX MoE 模型并叠加双万兆 NAS 检索而游刃有余。)
+- **Q**: Why does Unsloth Desktop convert GGUF to Q4NX instead of running GGUF directly on AMD XDNA 2 NPUs? / 为什么 Unsloth Desktop 要先把 GGUF 转成 Q4NX 格式，而不能直接拿 GGUF 在 AMD XDNA 2 NPU 上推理？
+  **A**: Standard `GGUF` super-block layouts (`Q4_K_M`) are tuned for GPU SIMT warps and CPU AVX-512/NEON vector lanes. AMD’s **XDNA 2** is a spatial dataflow AIE (AI Engine) tile array with fixed SRAM scratchpads per tile. **FastFlowLM’s `Q4NX` format** pre-packs quantized weights, scales, and tiling alignments to stream cleanly through XDNA 2 AIE tiles without CPU dequantization stalls—delivering `<15W` sustained token generation while leaving the CPU and Radeon iGPU 100% idle. (标准 `GGUF` 的量化块布局（如 `Q4_K_M`）是为 GPU SIMT 线程束与 CPU AVX-512/NEON 矢量指令设计的，而 AMD **XDNA 2** 是带有片上固定 SRAM 阵列的空间数据流 AIE 架构。**FastFlowLM 的 `Q4NX` 格式** 预先将量化权重、缩放因子与分块边界对齐到 XDNA 2 硬件瓦片尺寸，避免 CPU 反量化拖累，从而在 `<15W` 极低功耗下实现稳定吐字，同时让 CPU 与核显保持 100% 空闲。)
+
+---
+
 ## Default Parameterized Artifacts
 
 ### run-mac-benchmark.sh (Apple Silicon Mac Fixed-Task Speed & Context Benchmark Script / Mac 本地模型固定任务、上下文与生成速度复现脚本)
@@ -6428,6 +6577,105 @@ fi
 
 ```
 
+### launch-disagg-or-trusta-kv-vllm.sh (SC26 Disaggregated Inference (Skymizer HTX301-4S 2TB) & TRUSTA PCIe Gen5 3-Tier vLLM KV Offload Launcher / SC26 预填充/解码分离（Skymizer HTX301-4S 2TB）与 TRUSTA PCIe Gen5 三层 vLLM KV 卸载启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/skymizer-disagg-trusta-vllm-kv-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/skymizer-disagg-trusta-vllm-kv-launcher/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — SC26 Disaggregated Prefill/Decode (Skymizer HTX301-4S 2TB) & TRUSTA PCIe Gen5 3-Tier vLLM KV Offload (Guide #59)
+set -euo pipefail
+
+MODE="trusta_tiered_kv_vllm"
+MODEL="Qwen/Qwen3-235B-A22B-FP8"
+KV_DIR="/mnt/trusta-t7p5-kv"
+DRAM_GB="192"
+PORT="8100"
+
+echo "=== [SC26 Storage & Accelerator Audit] Checking PCIe Gen5 NVMe Links & CPU AMX ==="
+lspci -vv 2>/dev/null | grep -E 'Non-Volatile|LnkSta:' | head -n 16 || true
+grep -m1 -o 'amx_bf16' /proc/cpuinfo && echo "[OK] Intel AMX BF16 detected (accelerates host prefill up to ~25%)" || echo "[INFO] Non-AMX CPU detected"
+
+if [ "$MODE" = "trusta_tiered_kv_vllm" ]; then
+  echo "=== [TRUSTA AI Scaler / 3-Tier vLLM KV Pool] GPU VRAM -> ${DRAM_GB}GB DRAM -> $KV_DIR (PCIe Gen5 NVMe) ==="
+  mkdir -p "$KV_DIR"
+  df -h "$KV_DIR"
+  export LMCACHE_USE_EXPERIMENTAL=True
+  export LMCACHE_LOCAL_CPU=True
+  export LMCACHE_MAX_LOCAL_CPU_SIZE="$DRAM_GB"
+  export LMCACHE_LOCAL_DISK="file://$KV_DIR/"
+  export LMCACHE_MAX_LOCAL_DISK_SIZE=1024
+  exec vllm serve "$MODEL" \
+    --max-model-len 131072 \
+    --enable-prefix-caching \
+    --gpu-memory-utilization 0.90 \
+    --kv-transfer-config '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_both"}' \
+    --host 0.0.0.0 --port "$PORT"
+elif [ "$MODE" = "disagg_prefill_node" ]; then
+  echo "=== [Disaggregated Prefill Node] Serving Compute-Bound Prefill Producer on Port $PORT ==="
+  exec vllm serve "$MODEL" \
+    --max-model-len 131072 \
+    --gpu-memory-utilization 0.92 \
+    --kv-transfer-config '{"kv_connector":"NixlConnector","kv_role":"kv_producer"}' \
+    --host 0.0.0.0 --port "$PORT"
+elif [ "$MODE" = "disagg_decode_htx301" ]; then
+  echo "=== [MiTAC G4520G6 + 8x Skymizer HTX301-4S] Auditing 32x PCIe Decode Endpoints (4x HTX301 per Card) ==="
+  HTX_COUNT="$(lspci | grep -ciE 'Skymizer|HTX301' || true)"
+  echo "Detected HTX301 PCIe endpoints: $HTX_COUNT (expected: 4 per HTX301-4S card, 32 for 8-card 2TB decode node)"
+  echo "[INFO] Launch LISA v3 decode consumer runtime pointing at prefill producer port $PORT for model $MODEL"
+  echo "Example: lisa-serve --role kv_consumer --model '$MODEL' --kv-port '$PORT' --mem-budget-gb 1920"
+else
+  echo "Unknown RUN_MODE=$MODE (expected: trusta_tiered_kv_vllm | disagg_prefill_node | disagg_decode_htx301)" >&2
+  exit 1
+fi
+
+```
+
+### run-evox5-unsloth-npu-nemotron35.sh (GMKtec EVO-X5 Pro (192GB / 160GB UMA) + Unsloth XDNA 2 NPU (Q4NX) & NVIDIA Nemotron 3.5 Super VL 120B Runner / GMKtec EVO-X5 Pro（192GB / 160GB 显存）+ Unsloth XDNA 2 NPU（Q4NX）与 Nemotron 3.5 Super VL 120B 脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/evo-x5-192gb-unsloth-npu-nemotron35-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/evo-x5-192gb-unsloth-npu-nemotron35-launcher/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — GMKtec EVO-X5 Pro (192GB / 160GB VRAM) + Unsloth XDNA 2 NPU (Q4NX) & Nemotron 3.5 Super VL 120B (Guide #60)
+set -euo pipefail
+
+MODE="evox5_nemotron35_super_vl"
+GGUF="./models/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-Q4_K_M.gguf"
+NPU_MODEL="Qwen3.6-35B-A3B-NPU2"
+CTX="65536"
+PORT="8080"
+NPU_PORT="$((PORT + 1))"
+
+echo "=== [EVO-X5 Pro Audit] Checking 192GB UMA, Linux 7.4 iommu_perfopt & XDNA 2 NPU ==="
+free -h
+cat /sys/module/amdgpu/parameters/iommu_perfopt 2>/dev/null || echo "[TIP] Upgrade to Linux 7.4+ or add iommu=pt for +18-23% UMA tok/s"
+ls -l /dev/accel/accel* 2>/dev/null || echo "[WARN] /dev/accel/accel0 not found; verify amdxdna driver for XDNA 2 NPU"
+
+if [ "$MODE" = "evox5_nemotron35_super_vl" ]; then
+  echo "=== [Radeon 8065S 160GB UMA] Serving Nemotron 3.5 Super VL 120B-A12B (Mamba-2 Hybrid, ctx=$CTX) ==="
+  exec llama-server \
+    -m "$GGUF" -ngl 99 -fa on \
+    --cache-type-k q8_0 --cache-type-v q8_0 \
+    -c "$CTX" --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "unsloth_xdna2_npu_q4nx" ]; then
+  echo "=== [Unsloth Desktop / Lemonade + FastFlowLM] Serving $NPU_MODEL (Q4NX) on 55 TOPS XDNA 2 NPU ==="
+  exec lemonade-server serve \
+    --backend flm \
+    --model "$NPU_MODEL" \
+    --host 127.0.0.1 --port "$NPU_PORT"
+elif [ "$MODE" = "dual_igpu_npu_agent" ]; then
+  echo "=== [Dual-Engine Concurrent Mode] iGPU ($PORT: Nemotron 3.5 VL) + XDNA 2 NPU ($NPU_PORT: $NPU_MODEL Q4NX) ==="
+  lemonade-server serve --backend flm --model "$NPU_MODEL" --host 127.0.0.1 --port "$NPU_PORT" &
+  exec llama-server \
+    -m "$GGUF" -ngl 99 -fa on \
+    --cache-type-k q8_0 --cache-type-v q8_0 \
+    -c "$CTX" --host 127.0.0.1 --port "$PORT"
+else
+  echo "Unknown EXEC_MODE=$MODE (expected: evox5_nemotron35_super_vl | unsloth_xdna2_npu_q4nx | dual_igpu_npu_agent)" >&2
+  exit 1
+fi
+
+```
+
 ## Local LLM Hardware Usable Limits & Model Presets Reference
 
 - **Apple Silicon Mac (16GB Unified)** (Apple Silicon Mac（16GB 统一内存）): Total Memory 16 GB | Safe Usable Ceiling: **11.5 GB** | Bandwidth: 120 GB/s — macOS reserves ~4.5GB for OS & WindowServer; exceeding ~11.5GB triggers SSD swap and severe slowdown.
@@ -6511,6 +6759,10 @@ fi
 - **Axelera Server 250p Quad-Europa PCIe AIPU (256GB LPDDR5 · 800 GB/s · 170W)** (Axelera Server 250p 四芯 PCIe AIPU（256GB LPDDR5 · 800 GB/s · 170W）): Total Memory 256 GB | Safe Usable Ceiling: **240 GB** | Bandwidth: 800 GB/s — 4x Europa AIPUs on FHFL PCIe Gen4 x16 (requires x4/x4/x4/x4 bifurcation & 50 CFM airflow); 256GB LPDDR5 @ 800 GB/s under 170W.
 - **EPYC / Xeon 6 + 4× Micron CZ120 CXL 2.0 Pool (1TB DDR5+CXL · 604 GB/s)** (EPYC / 至强 6 + 4× 美光 CZ120 CXL 2.0 扩展池（1TB DDR5+CXL · 604 GB/s）): Total Memory 1024 GB | Safe Usable Ceiling: **955 GB** | Bandwidth: 604 GB/s — 512GB DDR5 (460 GB/s) + 4x 128GB Micron CZ120 E3.S CXL 2.0 (144 GB/s) using Linux weighted_interleave or Xeon 6 Flat Memory Mode for 671B–744B MoEs.
 - **LattePanda Sigma 2 SBC (Core Ultra X7 358H · 64GB LPDDR5X · 59GB Xe3 VRAM)** (LattePanda Sigma 2 单板服务器（酷睿 Ultra X7 358H · 64GB · 59GB Xe3 显存）): Total Memory 64 GB | Safe Usable Ceiling: **59 GB** | Bandwidth: 136.5 GB/s — 3.5-inch x86 SBC with Arc B390 12-Xe3 iGPU (122 TOPS) + 50 TOPS NPU, Dual 10GbE, OCuLink & RP2350; runs 9B–35B MoE & Clairic 27B locally.
+- **Skymizer HTX301-4S PCIe Decode-First LPU (256GB DRAM · ~155W · 4× HTX301)** (Skymizer HTX301-4S PCIe 解码优先 LPU 加速卡（256GB DRAM · ~155W · 四芯）): Total Memory 256 GB | Safe Usable Ceiling: **240 GB** | Bandwidth: 640 GB/s — 4x HyperThought HTX301 chips on one PCIe card (~155W, LISA v3 ISA) with 256GB commodity DRAM; built for disaggregated decode of 120B–235B MoEs without HBM.
+- **MiTAC G4520G6 4U Decode Server (8× Skymizer HTX301-4S · 2TB Card DRAM)** (MiTAC G4520G6 4U 解码服务器（8× Skymizer HTX301-4S · 2TB 加速卡内存）): Total Memory 2048 GB | Safe Usable Ceiling: **1920 GB** | Bandwidth: 4800 GB/s — SC26 air-cooled 4U Xeon 6 decode node with 8x 256GB HTX301-4S cards (2TB aggregate DRAM); pairs with MI350X/GPU prefill node to host 2.8T Kimi K3.1 Pro MXFP4 (~1.56TB) on-premise.
+- **96GB GPU + 256GB DRAM + TRUSTA T7P5 PCIe Gen5 SSD (3-Tier vLLM KV Pool)** (96GB 独显 + 256GB 内存 + TRUSTA T7P5 PCIe Gen5 SSD（三层 vLLM KV 缓存池）): Total Memory 352 GB | Safe Usable Ceiling: **320 GB** | Bandwidth: 1200 GB/s — SC26 TRUSTA AI Scaler Toolkit + T7P5 Gen5 NVMe (13.5 GB/s, <7W, FDP): keeps weights in 96GB VRAM while tiering persistent multi-turn/agent KV caches across DRAM + Gen5 SSD.
+- **GMKtec EVO-X5 Pro (Ryzen AI Max+ PRO 495 · 192GB · 160GB VRAM + XDNA 2 NPU)** (GMKtec EVO-X5 Pro 迷你工作站（Ryzen AI Max+ PRO 495 · 192GB · 160GB 显存 + XDNA 2 NPU）): Total Memory 192 GB | Safe Usable Ceiling: **160 GB** | Bandwidth: 273 GB/s — 192GB LPDDR5X-8533 (273 GB/s, 160GB VRAM ceiling) + 55 TOPS XDNA 2 NPU (Unsloth Desktop Q4NX) + Dual 10GbE & 24TB M.2; runs Nemotron 3.5 Super VL 120B + NPU helper concurrently.
 
 - **Qwen2.5-1.5B-Instruct** (1.54B params, 28 layers, 2 KV heads): Ultra-low-power Raspberry Pi 5 voice loop & sub-100ms IDE FIM tab autocomplete (树莓派 5 极速离线语音对答、低配设备毫秒级 IDE 行间代码补全)
 - **Qwen2.5-3B-Instruct** (3.09B params, 36 layers, 2 KV heads): Edge devices, Raspberry Pi 5 (8GB), ultra-fast RSS/tag classification (边缘设备、树莓派 5 (8GB)、超低延迟 RSS 分类与轻量提取)
@@ -6562,6 +6814,8 @@ fi
 - **Mistral Large 4 (1.05T Total · 50B Active · 1M Ctx)** (1050B params, 88 layers, 8 KV heads): 1.05T granular multimodal MoE (~50B active + 1.6B vision, 1M ctx): needs 1TB EPYC SP7 for Q4_K_M or IQ3_XXS on 512GB 4-node DGX Spark ring (1.05T 细粒度多模态 MoE（激活约 50B + 1.6B 视觉，1M 上下文）：Q4_K_M 需 1TB EPYC SP7，512GB 四机 DGX Spark 环网需 IQ3_XXS)
 - **Cloudflare Clairic-Flash / Clef-Flash 9B (Apache 2.0 · Qwen3.5-9B System-1)** (9B params, 8 layers, 4 KV heads): Apache 2.0 parallel-slot document extractor & calibrated router (Qwen3.5-9B backbone, p_null + spans): fits 12GB–16GB GPUs or LattePanda Sigma 2 (Apache 2.0 并行槽位票据/PDF 提取与零 Token 路由模型（Qwen3.5-9B 底座，带 p_null 空值概率）：12GB–16GB 显卡与 Sigma 2 轻松常驻)
 - **Cloudflare Clairic / Clef 27B (Apache 2.0 · Qwen3.8-27B Typed Extraction)** (27B params, 16 layers, 4 KV heads): Apache 2.0 flagship 27B System-1 extractor (Qwen3.8-27B 16-KV-layer backbone): handles dense multi-page PDF tables on 24GB–32GB GPUs or 59GB Xe3 UMA (Apache 2.0 旗舰 27B 结构化提取与决策模型（Qwen3.8-27B 底座仅 16 层增长 KV）：24GB–32GB 显卡或 59GB Xe3 核显精准解析复杂跨页表格)
+- **NVIDIA Nemotron-3.5-Lightning-30B-A3B (Mamba-2 + MoE · 1M Ctx · MTP)** (30B params, 8 layers, 2 KV heads): Hybrid Mamba-2 + MoE 30B (3B active, native MTP speculative heads, OpenMDW-1.1): ultra-fast always-on agentic model for 24GB GPUs & 32GB+ UMA boxes (混合 Mamba-2 + MoE 30B 模型（单 Token 仅激活 3B，原生 MTP 多词预测，OpenMDW-1.1）：适配 24GB 独显与 32GB+ 统一内存的极速常驻 Agent 模型)
+- **NVIDIA Nemotron-3.5-Super-VL-120B-A12B (Mamba-2 + MoE + C-RADIO VL · 1M Ctx)** (120B params, 12 layers, 4 KV heads): OpenMDW-1.1 120B-A12B hybrid Mamba-2 + 512-expert MoE + C-RADIO v4-H vision/video encoder (1M ctx, NVFP4/GGUF): ideal for 96GB–192GB workstations (GMKtec EVO-X5 Pro / RTX PRO 6000) (OpenMDW-1.1 协议 120B-A12B 混合 Mamba-2 + 512 专家 MoE + C-RADIO v4-H 图文视频视觉编码器（1M 上下文，NVFP4/GGUF）：契合 96GB–192GB 工作站（EVO-X5 Pro / RTX PRO 6000）)
 
 ## Interactive Troubleshooter Root Causes & Verified Solutions
 
