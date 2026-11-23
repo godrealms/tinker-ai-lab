@@ -1,6 +1,6 @@
 # Tinker AI Lab — Full Reproducible Knowledge Base (llms-full.txt)
 
-> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 60 reproducible guides, hardware manifests, known limits, verification checklists, 52 model & 85 hardware VRAM reference specs, 13 diagnostic decision trees, and 60 default configuration artifacts in English and Simplified Chinese.
+> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 62 reproducible guides, hardware manifests, known limits, verification checklists, 54 model & 89 hardware VRAM reference specs, 13 diagnostic decision trees, and 62 default configuration artifacts in English and Simplified Chinese.
 
 ## Apple Silicon Mac Local Model Benchmark: Fixed Tasks, Quantization, Context & Speed
 ### 一台现有 Mac 的本地模型实测：固定任务、模型版本、量化、上下文和速度
@@ -4208,6 +4208,184 @@ llama-server -m ./models/NVIDIA-Nemotron-3.5-Super-VL-120B-A12B-Q4_K_M.gguf \
 
 ---
 
+## SC26 Non-HBM Memory Wall Breakers: Intel GPU D270 (160GB/480GB Xe3P LPDDR5X) & Qualcomm Dragonfly AI200 (768GB LPDDR) vs Phison NPU Computational Storage SSD (64GB · 130 GB/s)
+### SC26 绕开 HBM 内存墙三大新硬件拆解：Intel GPU D270（160GB/480GB Xe3P LPDDR5X）、高通 Dragonfly AI200（768GB LPDDR）对决群联内置 NPU 计算存储 SSD（64GB · 130 GB/s）
+
+- **URL (EN)**: https://tinker-ai.com/guides/sc26-lpddr5x-inference-intel-gpu-d270-qualcomm-dragonfly-ai200-vs-phison-npu-ssd/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/sc26-lpddr5x-inference-intel-gpu-d270-qualcomm-dragonfly-ai200-vs-phison-npu-ssd/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: Intel GPU D270 PCIe 5.0 (160GB/480GB LPDDR5X · 1.5 TB/s · 350W) vs Qualcomm Dragonfly AI200 (768GB LPDDR5X/card · 56-card rack) vs Phison NPU Computational Storage SSD (64GB · 130 GB/s PoC)
+- **Tested Hardware (ZH)**: Intel GPU D270 PCIe 5.0（160GB/480GB LPDDR5X · 1.5 TB/s · 350W）vs 高通 Dragonfly AI200（单卡 768GB LPDDR5X · 56 卡机柜）vs 群联 NPU 计算存储 SSD（64GB · 130 GB/s 概念盘）
+- **Pinned Versions**: Intel oneAPI / vLLM-XPU (Xe3P FP4 / FP8 / FP64 Runtime), Qualcomm AI Stack / Cloud AI SDK (Cirrascale AI Innovation Cloud), Phison Computational Storage Preview (PyTorch / vLLM / OpenVINO / llama.cpp), Linux 6.18+ / PCIe 5.0 x16 & NVMe Namespace Tooling
+- **Verified Date**: 2026-11-23
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% On-Premise PCIe / Rack Air-Gapped Inference & Near-Data RAG — All three architectures are designed for private enterprise servers or air-gapped data centers once shipped; Qualcomm Dragonfly AI200 is currently accessible via Cirrascale cloud evaluation trials ahead of direct rack deliveries, and Phison’s NPU-SSD remains a pre-production SC26 proof-of-concept.
+
+**Direct Summary (EN)**: Architecture and deployment guide to three SC26 (November 2026) hardware paradigms bypassing costly HBM stacks for long-context agentic AI and enterprise RAG: Intel GPU D270 (Xe3P, 160GB reference / up to 480GB ODM LPDDR5X @ 1.5 TB/s, 350W air-cooled PCIe 5.0, 1.3 PFLOPS FP8 + full-rate FP64), Qualcomm Dragonfly AI200 (768GB LPDDR5X per card, 56-card / ~43TB OCP ORv3 liquid-cooled racks entering Cirrascale cloud evaluations), and Phison’s proof-of-concept NPU-integrated computational storage SSD (64GB onboard @ 130 GB/s running PyTorch / vLLM / llama.cpp near data to cut PCIe traffic 10x–100x).
+**核心结论 (ZH)**: 深度拆解 2026 年 11 月 SC26 超算大会上三条绕开昂贵 HBM 封装的新硬件路线：一是正式定名落地的 Intel GPU D270（Xe3P 架构，公版 160GB / 合作款最高 480GB LPDDR5X、1.5 TB/s 带宽、350W 风冷 PCIe 5.0，支持 1.3 PFLOPS FP8 与全速 FP64）；二是高通 Dragonfly AI200（单卡高达 768GB LPDDR5X、56 卡约 43TB 液冷 OCP ORv3 机柜，已开放 Cirrascale 云测）；三是群联展示的内置 NPU 计算存储企业级 SSD 概念盘（64GB 板载高速内存 @ 130 GB/s，可在盘内直接运行 PyTorch / vLLM / llama.cpp，号称将近数据 RAG 检索的 PCIe 流量压降 10–100 倍）。
+
+**Known Limits & Failure Boundaries**:
+- Spec-derived engineering analysis (not lab-benchmarked yet): Intel GPU D270, Qualcomm Dragonfly AI200, and Phison’s NPU-SSD were detailed at SC26 (Nov 15–20, 2026) and are not yet retail shelf parts for HomeLab purchase.
+- Phison quoted 36,800 DMIPS for its computational storage drive—DMIPS is a legacy CPU scalar integer metric rather than modern neural TOPS, indicating companion scalar control cores rather than GPU-class dense prefill throughput; treat the SSD as a near-data RAG pre-filter/reranker, not a primary LLM generator.
+- Qualcomm Dragonfly AI200 requires a 140–160 kW OCP ORv3 direct liquid-cooled rack for its 56-card (~43TB) configuration and focuses on memory capacity + TCO rather than per-chip HBM3e peak bandwidth (higher near-memory bandwidth is deferred to the AI250 roadmap).
+- Intel GPU D270 strips out all legacy graphics/ray-tracing blocks (headless compute only) and relies on Intel’s oneAPI / vLLM-XPU ecosystem rather than CUDA—verify custom FP4/FP8 kernel parity before migrating CUDA-specific extensions.
+- [ZH] 本文基于 SC26（2026 年 11 月 15–20 日）公开硬件规格与厂商演示数据推算，三款产品尚未在消费级零售渠道铺货，不属于实验室实测跑分。
+- [ZH] 群联对 NPU 计算存储盘披露的算力指标为 36,800 DMIPS——DMIPS 是传统 CPU 标量整数指标而非现代 NPU 的 TOPS，说明其更偏向盘内标量控制核 + 轻量推理；它适合做近数据 RAG 预过滤与重排，绝非取代独显的主力生成卡。
+- [ZH] 高通 Dragonfly AI200 整柜 56 卡（约 43TB）形态需要 140–160 kW OCP ORv3 直接液冷机柜，设计重心是超大 LPDDR5X 容量与每 Token 成本（更高近存带宽留待后续 AI250 平台）。
+- [ZH] Intel GPU D270 彻底砍掉了图形与光追管线（纯无头计算卡），且依赖 oneAPI / vLLM-XPU 而非 CUDA，迁移依赖自定义 CUDA 算子的工作负载前须核验 FP4/FP8 算子覆盖率。
+
+#### 1. SC26 Non-HBM Memory Wall Matrix: Capacity, Bandwidth & Power Envelopes / 1. SC26 非 HBM 破墙硬件横评：容量、带宽与功耗边界
+By late 2026, two realities dominate local and on-premise AI infrastructure: HBM3e supply remains severely price-inflated, and long-context agentic loops (`128K–1M` tokens, multi-turn KV caches, and terabyte-scale RAG corpora) hit **memory capacity walls** long before they saturate GPU FLOPS. At **SC26 in Chicago (Nov 15–20, 2026)**, Intel, Qualcomm, and Phison showcased three sharply different escapes from the HBM tax.
+
+Compare the key engineering ratios below—especially **usable capacity per slot**, **memory bandwidth**, and **bandwidth-to-capacity ratio (`GB/s per GB`)**, which directly determines whether a card shines at fast single-stream decode or high-concurrency long-context residency (`[Spec-Est.]` marks vendor-spec derived projections):
+到 2026 年底，私有化 AI 算力最痛的瓶颈已从「算力不足」彻底转向「容量太贵」：HBM3e 封装溢价居高不下，而 `128K–1M` 长上下文 Agent、多轮持久化 KV 缓存与 TB 级企业 RAG 语料往往在吃满 GPU 算力前就先撞上**显存容量墙**。在 **2026 年 11 月芝加哥 SC26 大会** 上，Intel、高通与群联分别交出了三条截然不同的非 HBM 破局方案。
+
+下表将三款 SC26 新硬件与常见的 96GB GDDR7 工作站卡并列对比，重点关注**单卡容量、显存带宽与带容比**——这一比值直接决定它适合单路高速吐字，还是多并发长上下文驻留（`[Spec-Est.]` 为基于公开规格推算值）：
+
+**Table 1: SC26 Non-HBM Accelerators & Computational Storage vs 96GB GDDR7 Workstation Baseline / 表 1：SC26 非 HBM 推理加速卡与计算存储 SSD 对比 96GB GDDR7 工作站基线**
+| Hardware (SC26 / Baseline) (硬件平台（SC26 新秀 / 基线）) | Memory & Bandwidth (显存/内存容量与带宽) | Compute & Precision (算力与精度特性) | Power & Form Factor (功耗与物理形态) | Primary Engineering Sweet Spot (核心工程甜点场景) |
+| --- | --- | --- | --- | --- |
+| **Intel GPU D270** (`Xe3P`, ex-Crescent Island) / **Intel GPU D270**（`Xe3P`，原 Crescent Island） | `160GB` LPDDR5X (ODM up to `480GB`) · `1.5 TB/s` / `160GB` LPDDR5X（合作款最高 `480GB`）· `1.5 TB/s` | `32` Xe3P cores, `256` XMX · `1.3 PFLOPS` FP8, FP4 + **full-rate FP64** / `32` Xe3P 核、`256` XMX · `1.3 PFLOPS` FP8、FP4 + **全速 FP64** | `350W` air-cooled PCIe 5.0 / `350W` 风冷 PCIe 5.0 单卡 | Single-slot `120B–235B` MoE inference + converged FP64 HPC/finance `[Spec-Est.]` / 单卡装下 `120B–235B` MoE 推理 + 全速 FP64 科学/金融计算 `[Spec-Est.]` |
+| **Qualcomm Dragonfly AI200** (Rack Accelerator) / **高通 Dragonfly AI200**（机柜级推理卡） | `768GB` LPDDR5X / card (`~43TB` & `~414 TB/s` per 56-card rack) / 单卡 `768GB` LPDDR5X（56 卡整柜约 `43TB` / `414 TB/s`） | Scaled data-center **Hexagon NPU** architecture (inference-first) / 数据中心级扩展 **Hexagon NPU** 架构（推理优先） | `140–160 kW` OCP ORv3 DLC rack (`56` cards) / `140–160 kW` OCP ORv3 直接液冷机柜（`56` 卡） | Trillion-parameter & massive multi-agent KV residency at low TCO `[Spec-Est.]` / 万亿参数模型与海量多 Agent 长上下文低 TCO 常驻 `[Spec-Est.]` |
+| **Phison NPU Computational Storage SSD** (PoC) / **群联 NPU 计算存储企业级 SSD**（概念盘） | `64GB` onboard memory · `130 GB/s` internal bandwidth / `64GB` 板载高速内存 · `130 GB/s` 内部带宽 | Built-in NPU + scalar cores (`36,800 DMIPS` quoted); `llama.cpp`/`vLLM`/`PyTorch` / 内置 NPU + 标量核（标称 `36,800 DMIPS`）；支持 `llama.cpp`/`vLLM`/`PyTorch` | Enterprise NVMe SSD envelope (SC26 PoC, TBD) / 企业级 NVMe SSD 形态（SC26 概念验证，规格待定） | Near-data RAG filtering & vector scan cutting host PCIe traffic `10x–100x` / 盘内近数据 RAG 预过滤与向量扫描，压降宿主机 PCIe 流量 `10–100` 倍 |
+| **NVIDIA RTX PRO 6000 Blackwell** (Baseline) / **NVIDIA RTX PRO 6000 Blackwell**（参照基线） | `96GB` GDDR7 ECC · `~1.79 TB/s` / `96GB` GDDR7 ECC · 约 `1.79 TB/s` | Blackwell Tensor Cores (`NVFP4` / `FP8`; reduced FP64) / Blackwell Tensor Core（`NVFP4` / `FP8`；非全速 FP64） | `300W` Max-Q or `600W` PCIe 5.0 / `300W` Max-Q 或 `600W` PCIe 5.0 | Fastest CUDA / NVFP4 workstation single-card decode `<=96GB` / `96GB` 显存内生态最成熟的 CUDA / NVFP4 单卡高速推理 |
+
+#### 2. Intel GPU D270 vs Qualcomm Dragonfly AI200: Bandwidth-to-Capacity Reality / 2. Intel GPU D270 对决高通 Dragonfly AI200：LPDDR5X 的带容比账本
+Intel’s **GPU D270** (formerly codenamed *Crescent Island*) answers the single biggest complaint about mid-tier enterprise GPUs: `96GB` GDDR7 still forces you to split `120B–235B` MoE models across two PCIe cards when running long contexts. By wiring **`160GB` of LPDDR5X at `1.5 TB/s`** inside a standard **`350W` air-cooled PCIe 5.0 card** (with partner ODM variants scaling to **`480GB`**), a single D270 holds a `Q4_K_M` or `FP8` `120B–235B` sparse MoE plus `64K–128K` KV cache without cross-card PCIe/NCCL overhead. Even more unusually, Intel stripped out all display/ray-tracing silicon to fund **full-rate FP64** alongside FP4/FP8 (`1.3 PFLOPS` FP8)—letting HPC and quant teams claim up to **`5.9x` higher throughput than RTX PRO 6000 Blackwell Server Edition** on financial Monte Carlo / Black-Scholes simulations at `350W` vs `600W`.
+
+**Qualcomm Dragonfly AI200** pushes the LPDDR5X capacity bet to its logical extreme: **`768GB` per accelerator card**, scaling to **`~43TB` across `56` liquid-cooled cards** inside a single OCP ORv3 rack (`140–160 kW`) now entering customer cloud evaluations via **Cirrascale’s AI Innovation Cloud**. Instead of chasing peak single-user `tok/s` on dense models, `768GB` per card eliminates tensor-parallel sharding across 8+ GPUs for frontier MoE weights and giant persistent agent KV caches—cutting interconnect power and rack TCO dramatically. If your bottleneck is ultra-low latency per single user rather than memory capacity per dollar, note that Qualcomm explicitly reserves its next-gen High Bandwidth Compute near-memory tier for the upcoming **AI250**.
+正式定名的 **Intel GPU D270**（原代号 Crescent Island）直击 `96GB` GDDR7 显卡的最大痛点：在长上下文场景下，`120B–235B` 级 MoE 依然被迫拆成双卡承担 PCIe 跨卡同步开销。D270 在标准 **`350W` 风冷 PCIe 5.0 单卡**中塞入 **`160GB` LPDDR5X（`1.5 TB/s` 带宽）**，合作 OEM 方案甚至可扩展至 **`480GB`**，单卡即可完整装下 `Q4_K_M` / `FP8` 的 `120B–235B` 稀疏 MoE 与 `64K–128K` KV 缓存。更罕见的是，Intel 彻底剔除图形与光追单元，在保留 `1.3 PFLOPS` FP8 / FP4 的同时提供了**全速 FP64 双精度**——SC26 上 Intel 公布预量产实测在金融蒙特卡洛 / Black-Scholes 模拟中以 `350W` 对 `600W` 取得最高 **`5.9` 倍于 RTX PRO 6000 Blackwell Server Edition** 的吞吐。
+
+**高通 Dragonfly AI200** 则把 LPDDR5X 大容量路线推向极致：**单卡 `768GB` LPDDR5X**，单个 OCP ORv3 直接液冷机柜塞入 `56` 卡、聚合 **约 `43TB` 内存**（`140–160 kW`），并在 SC26 期间联合 **Cirrascale AI Innovation Cloud** 开放客户云测。它的核心价值不是拼单并发极速，而是让 `671B–1T+` 参数大模型与海量多 Agent KV 缓存免于跨 8 卡甚至跨机切分，大幅压降互联功耗与机柜 TCO。如果你的核心指标是极低单路延迟，高通已明确将更高近存带宽留给下一代 **AI250**。
+
+#### 3. Phison NPU Computational Storage SSD: Brilliant RAG Pre-Filter, Not a GPU Replacement / 3. 群联内置 NPU 计算存储 SSD 冷静拆解：极佳的近数据 RAG 过滤器，但别当主推理卡用
+Phison’s SC26 preview enterprise SSD integrates an **onboard NPU plus `64GB` of local memory at `130 GB/s`** and demonstrates running standard **PyTorch, vLLM, OpenVINO, and llama.cpp** directly on the drive—no proprietary storage DSL required. Why does `130 GB/s` inside an SSD matter? A PCIe Gen5 x4 NVMe link maxes out around `14 GB/s` per drive. When a RAG pipeline scans tens of gigabytes of parquet chunks, embeddings, or log shards across `8–24` NVMe bays, streaming raw data over the PCIe root complex saturates CPU memory channels before a single token is generated. Filtering, embedding, or small-model reranking *inside* each drive cuts host PCIe transfer volume by **`10x–100x`**.
+
+However, do not fall for headline hype: Phison’s published compute figure is **`36,800 DMIPS`** (Dhrystone Million Instructions Per Second)—a legacy scalar CPU integer benchmark, not a modern matrix-math TOPS rating—and `130 GB/s` is roughly one-twelfth of Intel GPU D270’s `1.5 TB/s`. Even on a small `7B–8B Q4_K_M` model (`~4.8 GB`), `130 GB/s` caps theoretical memory-bound decode around `~15–18 tok/s` before compute limits kick in. The winning architecture is **hierarchical**: let NPU-SSDs execute local vector filtering, metadata extraction, and small-model triage near flash, while handing curated context windows to a `160GB` D270 or `96GB` GPU for heavy reasoning.
+群联在 SC26 展示的企业级计算存储概念盘在 SSD 内部集成了 **NPU 与 `64GB` 板载内存（`130 GB/s` 内部带宽）**，并主打无需专有存储编程语言、直接在盘内运行 **PyTorch、vLLM、OpenVINO 与 llama.cpp**。为什么盘内 `130 GB/s` 极具工程意义？单条 PCIe Gen5 x4 NVMe 总线的极限吞吐约 `14 GB/s`；当 `8–24` 块盘组成的企业 RAG 集群扫描几十 GB 向量分片或日志时，把原始数据全拉进宿主机内存会直接打满 PCIe 根复合体与内存通道。在盘内直接完成向量筛选、嵌入或小模型重排，可将跨 PCIe 搬运量压降 **`10–100` 倍**。
+
+但必须保持工程清醒：群联公布的算力数字是 **`36,800 DMIPS`**——这是传统标量 CPU 整数指标，并非现代 NPU 的矩阵 TOPS 算力；且 `130 GB/s` 仅为 Intel GPU D270（`1.5 TB/s`）的约十二分之一，即便跑 `7B–8B Q4_K_M`（约 `4.8 GB`），纯带宽理论上限也仅在 `15–18 tok/s` 左右。真正合理的架构是**分层协同**：用计算存储 SSD 在闪存侧完成近数据检索、清洗与轻量重排，再把浓缩后的高价值上下文喂给 `160GB` D270 或大显存 GPU 执行深度推理。
+
+#### 4. Reproducible Host Readiness Audit: PCIe 5.0 Topology, vLLM-XPU & Near-Data NVMe Baseline / 4. 可复现宿主机预检与演练：PCIe 5.0 拓扑核查、vLLM-XPU 与近数据 NVMe 基线测试
+Before evaluating Intel GPU D270 / Xe3P PCIe 5.0 cards or benchmarking whether your RAG pipeline is actually bottlenecked by PCIe NVMe ingestion (making computational storage worthwhile), run the audit below to measure PCIe link width/speed, NUMA locality, Intel XPU / vLLM container readiness, and raw NVMe-to-RAM transfer ceiling:
+在引入 Intel GPU D270 等 PCIe 5.0 无头大内存加速卡，或评估现有企业 RAG 是否真的卡死在 NVMe-to-Host PCIe 吞吐（从而值得关注计算存储盘）之前，先执行以下预检脚本，核查 PCIe 5.0 速率、NUMA 亲和性、Intel XPU / vLLM 容器环境与原始 NVMe 吞吐基线：
+```bash
+# 1) Verify PCIe 5.0 x16 (32GT/s) accelerator slots & NVMe Gen5 x4 link status
+lspci -vv 2>/dev/null | grep -E 'Display|Processing accelerators|Non-Volatile|LnkSta:' | head -n 24
+
+# 2) Check NUMA node topology so 160GB-480GB cards & NVMe bays share the same CPU socket
+numactl --hardware | grep -E 'available|node [0-9]+ cpus|node [0-9]+ size'
+
+# 3) Launch Intel oneAPI / vLLM-XPU OpenAI server (Xe3P / Arc Pro XPU compatible stack)
+docker run --rm --device=/dev/dri -p 8000:8000 \
+  -e ZE_AFFINITY_MASK=0 -e VLLM_USE_V1=1 \
+  intel/vllm-xpu:latest \
+  --model Qwen/Qwen3-235B-A22B-FP8 \
+  --dtype bfloat16 --max-model-len 65536 \
+  --gpu-memory-utilization 0.90
+
+# 4) Measure raw NVMe -> Host RAM scan ceiling to quantify near-data RAG payoff
+fio --name=rag-seq-scan --filename=/mnt/nvme-corpus/test.bin --size=8G \
+  --rw=read --bs=1M --iodepth=32 --ioengine=io_uring --direct=1 --group_reporting
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: How is Intel GPU D270 different from the earlier “Crescent Island” preview? / SC26 公布的 Intel GPU D270 与此前传闻的 “Crescent Island” 有何关系？
+  **A**: **Intel GPU D270** is the official product name for the Xe3P accelerator formerly codenamed **Crescent Island**. SC26 locked in its detailed spec sheet: **32 Xe3P cores, 256 XMX matrix engines, 160GB LPDDR5X at 1.5 TB/s** on Intel’s 350W air-cooled PCIe 5.0 card (scalable to **480GB** in ODM partner designs), **1.3 PFLOPS FP8**, and **full-rate FP64** for converged HPC + agentic AI workloads. (**Intel GPU D270** 就是原代号 **Crescent Island** 的正式商用定名。SC26 进一步明确了其完整工程规格：**32 个 Xe3P 核心、256 个 XMX 矩阵引擎、公版 350W 风冷 PCIe 5.0 配备 160GB LPDDR5X（1.5 TB/s 带宽）**、合作 OEM 款可扩展至 **480GB**，同时支持 **1.3 PFLOPS FP8** 与**全速 FP64** 双精度。)
+- **Q**: Can Phison’s 64GB NPU-integrated SSD replace a GPU for running 70B local LLMs? / 群联这块带 64GB 内存和 NPU 的计算存储 SSD，能直接替代显卡跑 70B 本地大模型吗？
+  **A**: No. Even though `64GB` onboard memory can physically hold a quantized `70B Q4_K_M` file (`~42 GB`), its **`130 GB/s`** internal bandwidth caps memory-bound decode of a dense 70B model to roughly **~2 tok/s**, and Phison’s quoted `36,800 DMIPS` reflects scalar control compute rather than GPU-grade prefill FLOPS. Its real breakthrough is **near-data RAG**: filtering, indexing, and running compact `1B–8B` rerankers/extractors directly inside storage so only tiny, high-signal snippets cross PCIe to your main GPU. (不能。尽管 `64GB` 板载内存物理上塞得下 `70B Q4_K_M`（约 `42 GB`），但 **`130 GB/s`** 带宽跑稠密 70B 的解码速度理论上限仅约 **2 tok/s**，且 `36,800 DMIPS` 是标量整数指标而非 GPU 级 Prefill 算力。它真正的杀手锏是**近数据 RAG**：在盘内运行轻量检索、向量过滤与 `1B–8B` 级重排/摘要模型，把跨 PCIe 传输的原始数据量压降 10–100 倍，再交由主力推理卡生成最终回答。)
+
+---
+
+## NVIDIA RTX Spark Retail Mini PCs (ASUS ProArt GR1X & MSI EdgeMesa N AI+) + Looped MoE & Omni-Video: Running Thinking Machines Inkling 2 Mini (26.4B-A3B · 1M Ctx · NVFP4) & Tencent WeMM-Video-35B-A3B
+### NVIDIA RTX Spark 零售迷你主机（华硕 ProArt GR1X / 微星 EdgeMesa N AI+）与 11 月新架构开源模型实战：Thinking Machines Inkling 2 Mini（26.4B 循环 MoE · 1M 上下文 · NVFP4）与腾讯混元 WeMM-Video-35B-A3B
+
+- **URL (EN)**: https://tinker-ai.com/guides/rtx-spark-oem-proart-gr1x-edgemesa-n-and-inkling2-mini-looped-moe-wemm-video/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/rtx-spark-oem-proart-gr1x-edgemesa-n-and-inkling2-mini-looped-moe-wemm-video/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: ASUS ProArt GR1X (1.15L) / MSI EdgeMesa N AI+ (1.3L) — RTX Spark N1X (128GB UMA · 300 GB/s · 6,144 Blackwell CUDA Cores · 140W) vs RTX 5090 32GB & MacBook Pro 32GB/64GB
+- **Tested Hardware (ZH)**: 华硕 ProArt GR1X（1.15L）/ 微星 EdgeMesa N AI+（1.3L）— RTX Spark N1X（128GB 统一内存 · 300 GB/s · 6,144 Blackwell CUDA 核 · 140W）vs RTX 5090 32GB 与 MacBook Pro 32GB/64GB
+- **Pinned Versions**: Thinking Machines Inkling 2 Mini (26.4B-A3B · 48 Logical Passes · Apache 2.0 · NVFP4/MXFP8), Tencent WeMM-Video-35B-A3B (tencent/WeMM-Video-35BA3B · Apache 2.0 · BF16/FP8/NVFP4/GGUF), vLLM (Day-0 Looped KV + DSpark MTP Speculator) / SGLang / llama.cpp + Unsloth GGUF / MLX, Windows 11 Pro on Arm64 + WSL2 CUDA / Linux CUDA 12.8+ (Blackwell Native NVFP4)
+- **Verified Date**: 2026-11-23
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% Local Offline Execution (Text, Vision, Audio & Video) — Both Inkling 2 Mini and WeMM-Video-35B-A3B ship under Apache 2.0 with ungated Hugging Face weights; once cached locally, long-context coding agents and bilingual audio-visual video analysis run fully offline with zero cloud API fees.
+
+**Direct Summary (EN)**: Hands-on sizing and deployment guide for the mid-November 2026 retail NVIDIA RTX Spark (N1X) Windows-on-Arm mini PCs—ASUS ProArt GR1X (1.15L, 140W, dual Gen5/Gen4 M.2, $4,499–$6,999) and MSI EdgeMesa N AI+ (1.3L vapor chamber, 140W, $4,699+)—paired with two breakthrough Apache 2.0 models dropped on Nov 20, 2026: Thinking Machines Lab’s Inkling 2 Mini (26.4B-A3B Looped Transformer executing 24 physical layers as 48 logical KV passes, 1M context, native NVFP4/MXFP8 + DSpark speculator) and Tencent Hunyuan’s WeMM-Video-35B-A3B bilingual audio-visual MoE.
+**核心结论 (ZH)**: 拆解 2026 年 11 月中下旬正式开售的零售级 NVIDIA RTX Spark（N1X）Windows-on-Arm 迷你主机——华硕 ProArt GR1X（1.15L、140W、双 Gen5/Gen4 M.2、$4,499–$6,999）与微星 EdgeMesa N AI+（1.3L 均热板、140W、$4,699 起）——并给出 11 月 20 日同日发布的两大 Apache 2.0 破局开源模型部署方案：Thinking Machines Lab 的 Inkling 2 Mini（26.4B-A3B 循环 Transformer，24 层物理权重循环执行 48 逻辑 KV 层、1M 上下文、原生 NVFP4/MXFP8 + DSpark 投机解码）与腾讯混元 WeMM-Video-35B-A3B 中英双语音画全模态 MoE。
+
+**Known Limits & Failure Boundaries**:
+- Looped Transformer KV cache trap on Inkling 2 Mini: although the checkpoint has only 24 physical decoder layers (~20 GB NVFP4/MXFP8), its middle 12 layers loop 3x with independent per-pass KV caches (48 logical KV layers total)—budget KV cache as a 48-layer model or you will silently OOM on 32GB machines beyond 64K–128K context.
+- Retail RTX Spark OEM pricing ($4,499 base to $6,499–$6,999 for maxed 128GB ProArt GR1X) is steep vs DGX Spark GB10 Linux developer units and 192GB AMD Strix Halo boxes (~273 GB/s); Windows 11 on Arm also requires verifying native Arm64 CUDA/WSL2 wheel availability for bleeding-edge vLLM/SGLang builds.
+- WeMM-Video-35B-A3B GGUF splits weights into separate language.gguf, mmproj.gguf, and audio.gguf components—standard single-file llama-cli cannot ingest joint audio+video tracks without Tencent’s multi-encoder loader or patched vLLM FP8/NVFP4 serving.
+- 300 GB/s unified memory bandwidth on RTX Spark N1X excels at sparse MoE models (3B–12B active params like Inkling 2 Mini and WeMM-Video-35B-A3B) and Blackwell NVFP4 prefill, but still trails discrete RTX 5090 (1,792 GB/s) by ~5x on dense 24B–32B token generation.
+- [ZH] Inkling 2 Mini 的循环层 KV 缓存陷阱：虽然物理权重仅 24 层（原生 NVFP4/MXFP8 约 20 GB），但中间 12 层循环执行 3 次且每次循环维护独立 KV 缓存（共 48 个逻辑 KV 层）——显存预算必须按 48 层计算，否则 32GB 机器拉到 64K–128K 上下文会直接 OOM。
+- [ZH] 零售 RTX Spark 整机溢价较高（ProArt GR1X 起步约 $4,499，128GB 顶配达 $6,499–$6,999），对比 Linux 版 DGX Spark GB10 或 192GB Strix Halo 工作站需权衡性价比；且 Windows 11 on Arm 跑前沿 vLLM/SGLang 须核验 Arm64 原生或 WSL2 CUDA 轮子可用性。
+- [ZH] WeMM-Video-35B-A3B 的 GGUF 包拆分为 language.gguf + mmproj.gguf + audio.gguf 三部分，标准单文件 llama-cli 无法直接喂入音画同步视频，需使用官方多编码器加载脚本或带 ModelOpt/Marlin 补丁的 vLLM FP8/NVFP4 服务。
+- [ZH] RTX Spark N1X 的 300 GB/s 统一内存带宽非常契合激活参数仅 3B–12B 的稀疏 MoE（如 Inkling 2 Mini 与 WeMM-Video-35B-A3B）及 NVFP4 预填充，但跑稠密 24B–32B 生成速度仍落后 RTX 5090（1,792 GB/s）约 5 倍。
+
+#### 1. Retail RTX Spark OEM Mini PCs vs 2026 Unified-Memory & Discrete Alternatives / 1. RTX Spark 零售整机（ProArt GR1X / EdgeMesa N AI+）横评与 2026 选型坐标
+In mid-November 2026, NVIDIA’s **RTX Spark (`N1X`)** platform finally graduated from preview silicon to retail Windows 11 Pro on Arm mini PCs led by **ASUS ProArt GR1X** (`~1.15L`, dual-fan `140W` sustained, dual Gen5/Gen4 M.2 up to `4TB`, `10GbE` + Wi-Fi 7) and **MSI EdgeMesa N AI+** (`~1.3L` aluminum chassis, AI Pulse vapor chamber `140W` sustained, `10GbE` + Wi-Fi 7, `4x 20Gbps` USB-C), alongside Microsoft’s Surface RTX Spark Dev Box. Every N1X system pairs a 20-core Grace CPU with a **`6,144`-CUDA-core Blackwell GPU (`1 PFLOP` FP4)** over NVLink-C2C sharing up to **`128GB` LPDDR5X at `300 GB/s`**.
+
+Where do these `$4.5K–$7K` compact desktops actually make sense versus a Linux DGX Spark GB10, a `192GB` GMKtec EVO-X5 Pro, a `64GB` Mac mini M5 Pro, or a discrete `32GB` RTX 5090? Check the real memory-capacity vs bandwidth vs OS trade-offs below:
+2026 年 11 月中旬，NVIDIA **RTX Spark（`N1X`）** 终于从预览芯片走向零售桌面——华硕首发 **ProArt GR1X**（约 `1.15L`、双风扇 `140W` 持续释放、双 Gen5/Gen4 M.2 最高 `4TB`、万兆网口 + Wi-Fi 7），微星同步推出 **EdgeMesa N AI+**（约 `1.3L` 铝合金机身、AI Pulse 均热板 `140W` 持续释放、万兆 + Wi-Fi 7 + 四路 `20Gbps` USB-C），微软亦跟进 Surface RTX Spark Dev Box。核心规格一致：20 核 Grace CPU + **`6,144` CUDA 核 Blackwell GPU（`1 PFLOP` FP4）** + NVLink-C2C 互联最高 **`128GB` LPDDR5X（`300 GB/s`）**。
+
+面对 `$4,499` 起、`128GB` 顶配高达 `$6,499–$6,999` 的价格标签，它相比 Linux 版 DGX Spark、`192GB` Strix Halo（EVO-X5 Pro）、`64GB` Mac mini M5 Pro 与 `32GB` RTX 5090 究竟赢在哪、输在哪？下表一图看清：
+
+**Table 1: Nov 2026 Retail RTX Spark OEM Mini PCs vs 192GB Strix Halo & Discrete RTX 5090 / 表 1：2026 年 11 月零售 RTX Spark 迷你主机 vs 192GB Strix Halo 与 32GB 独显对比**
+| System (Nov 2026 Retail) (硬件平台（2026.11 零售）) | Usable VRAM / RAM & BW (可用显存与带宽) | Native FP4 & Compute Stack (原生 FP4 与生态栈) | Cooling, I/O & Street Price (散热、接口与参考售价) | Best Local Model Workload (最佳本地模型归宿) |
+| --- | --- | --- | --- | --- |
+| **ASUS ProArt GR1X** (RTX Spark N1X `128GB`) / **华硕 ProArt GR1X**（RTX Spark N1X `128GB`） | `~108GB` usable / `128GB` · `300 GB/s` / 约 `108GB` 可用 / `128GB` · `300 GB/s` | Blackwell `6,144` CUDA · `1 PFLOP` NVFP4 (`Win 11 Arm + WSL2`) / Blackwell `6,144` CUDA · `1 PFLOP` NVFP4（`Win 11 Arm + WSL2`） | `1.15L` dual-fan `140W` · `2x` M.2 (Gen5+Gen4), `10GbE` · `$4,499–$6,999` / `1.15L` 双风扇 `140W` · 双 M.2（Gen5+Gen4）、万兆 · `$4,499–$6,999` | `128K–1M` NVFP4 MoEs (`Inkling 2 Mini`) + BF16/FP8 `WeMM-Video-35B` / `128K–1M` NVFP4 MoE（`Inkling 2 Mini`）+ BF16/FP8 `WeMM-Video-35B` |
+| **MSI EdgeMesa N AI+** (RTX Spark N1X) / **微星 EdgeMesa N AI+**（RTX Spark N1X） | `64GB–128GB` UMA (`~108GB` usable) · `300 GB/s` / `64GB–128GB` 统一内存 · `300 GB/s` | Blackwell `6,144` CUDA · `1 PFLOP` NVFP4 (`Win 11 Arm + WSL2`) / Blackwell `6,144` CUDA · `1 PFLOP` NVFP4（`Win 11 Arm + WSL2`） | `1.3L` aluminum vapor chamber `140W` · `10GbE`, `4x` USB-C · `$4,699+` (64GB) / `1.3L` 铝合金均热板 `140W` · 万兆、`4x` USB-C · `$4,699` 起（64GB） | Quiet 24/7 creator + local agent desktop workstation / 静音 7×24 小时创作 + 本地 Agent 桌面工作站 |
+| **GMKtec EVO-X5 Pro** (Ryzen AI Max+ PRO 495) / **GMKtec EVO-X5 Pro**（Ryzen AI Max+ PRO 495） | `160GB` VRAM / `192GB` · `273 GB/s` / `160GB` 显存 / `192GB` · `273 GB/s` | RDNA 3.5 ROCm 7.2 + `55 TOPS` XDNA 2 NPU (`Q4NX`) / RDNA 3.5 ROCm 7.2 + `55 TOPS` XDNA 2 NPU（`Q4NX`） | `x86_64` Linux/Win · Dual `10GbE`, `24TB` M.2 · `~$2,999–$3,599` / `x86_64` 完整兼容 · 双万兆、`24TB` M.2 · 约 `$2,999–$3,599` | Larger `120B–235B` Q4/Q8 models + concurrent NPU helper / 更大参数 `120B–235B` Q4/Q8 模型 + NPU 双引擎并发 |
+| **NVIDIA RTX 5090** (`32GB` Discrete) / **NVIDIA RTX 5090**（`32GB` 桌面独显） | `30.5GB` usable · `1,792 GB/s` / 约 `30.5GB` 可用 · `1,792 GB/s` | Blackwell CUDA · Native `NVFP4` (`Linux/Win x86`) / Blackwell CUDA · 原生 `NVFP4`（`Linux/Win x86`） | `450W–575W` desktop PCIe card · `~$2,000+` GPU only / `450W–575W` 桌面独显 · 仅显卡约 `$2,000+` | Ultra-fast `Inkling 2 Mini` (`~20GB` NVFP4) & `WeMM-Video` NVFP4 (`~24.1GB`) / 极速运行 `Inkling 2 Mini`（`~20GB` NVFP4）与 `WeMM-Video` NVFP4（`~24.1GB`） |
+
+#### 2. Looped Transformer Math: Why Inkling 2 Mini’s 26.4B Weights Behave Like 48 Layers / 2. 循环 Transformer 显存账本：为什么 Inkling 2 Mini 的 26.4B 权重必须按 48 层算 KV？
+Released under **Apache 2.0 on November 20, 2026**, Thinking Machines Lab’s **Inkling 2 Mini** introduces a major architectural shift for local hardware: instead of stacking `48–64` distinct layers that double VRAM requirements, it packs **`~26.4B` physical parameters** across **`24` physical decoder layers** (`128` experts/layer, `8` active, `~3.1B` unique weights per token), structured into three stages: **Prelude (layers `0–5`, run `1x`)** → **Loop Core (layers `6–17`, run `3x` sequentially with cross-pass gated messaging)** → **Coda (layers `18–23`, run `1x`)**. That gives every token **`48` logical layer passes** of iterative internal reasoning inside a compact **`~20 GB` mixed `NVFP4` (experts) + `MXFP8` (final layers)** checkpoint—plus a bundled **DSpark** multi-token speculator (`mtp.safetensors`) and native **1-million-token context**.
+
+Here is the critical engineering gotcha most early adopters miss: **each of the 3 loop passes stores its own separate KV cache**. With `48` logical KV layers, `8` GQA KV heads, and `head_dim=128`, a `65,536`-token context consumes **`~12.9 GB` at FP16 KV** (or **`~6.8 GB` at `Q8_0` KV**). Add the `~20 GB` checkpoint and `~2 GB` compute buffers and a `32GB` MacBook Pro or `32GB` RTX 5090 is already tight at `64K–128K`! On a **`128GB` RTX Spark (ProArt GR1X / EdgeMesa N AI+)**, however, `~108 GB` usable unified memory easily holds Inkling 2 Mini + DSpark + **`256K–1M` context** with Blackwell native NVFP4 acceleration.
+2026 年 11 月 20 日以 **Apache 2.0** 开源的 Thinking Machines Lab **Inkling 2 Mini** 为本地大模型带来了架构级革新：它没有靠线性堆叠 `48–64` 层把权重撑爆显存，而是仅用 **`24` 层物理权重（总参约 `26.4B`**，每层 `128` 选 `8` 专家，单 Token 独立激活权重约 `3.1B`）拆成三段：**前导段（`0–5` 层，执行 `1` 次）→ 循环核心段（`6–17` 层，带跨轮门控消息传递循环执行 `3` 次）→ 尾段（`18–23` 层，执行 `1` 次）**。每个 Token 实际穿过 **`48` 个逻辑层**完成深度隐式推理，但整个原生 **`NVFP4`（专家）+ `MXFP8`（末层）** 权重包仅约 **`20 GB`**，还随库附带 **DSpark** 多词投机头（`mtp.safetensors`）与原生 **100 万 Token 上下文**。
+
+但必须警惕最容易踩坑的显存细节：**`3` 次循环的每一轮都维护独立的 KV Cache**。按 `48` 个逻辑 KV 层、`8` 个 KV 头、`head_dim=128` 核算，`65,536` 上下文在 FP16 KV 下就要吃掉 **约 `12.9 GB`**（开启 `Q8_0` KV 减半至 **约 `6.8 GB`**）；叠加 `~20 GB` 权重与计算缓冲后，`32GB` MacBook Pro 或 RTX 5090 在 `64K–128K` 就已逼近红线！而在 **`128GB` RTX Spark（ProArt GR1X / EdgeMesa N AI+）** 上，`~108 GB` 可用统一内存不仅原生吃满 Blackwell NVFP4 加速，还能轻松承载 Inkling 2 Mini + DSpark 与 **`256K–1M` 超长上下文**。
+
+#### 3. Bilingual Audio-Visual Omni-Model: Sizing Tencent WeMM-Video-35B-A3B / 3. 中英双语音画全模态：腾讯混元 WeMM-Video-35B-A3B 量化档位与显存实算
+Dropped on the exact same day (**November 20, 2026**, Apache 2.0, `tencent/WeMM-Video-35BA3B`), **WeMM-Video-35B-A3B** (alongside compact `2B`/`4B`/`9B` siblings) solves a classic local-AI gap: understanding **video frames + native soundtrack audio + speech + text simultaneously** across a **`256K` context window** using only **`3B` active parameters** out of `~35B` total (`40` layers, `2` KV heads, `head_dim=128`). Because GQA uses only `2` KV heads, its KV cache grows remarkably slowly—only `~2.7 GB` at `64K` FP16 (`~1.4 GB` at `Q8_0`), leaving almost all VRAM for weights and dense video-frame token bursts.
+
+Choose your weight format strictly by available memory: **BF16 safetensors (`~68–72 GiB`)** runs natively on a **`128GB` RTX Spark** or `80GB+` datacenter GPU; **FP8 Block128 (`~36–39 GiB`)** fits `48GB–64GB` workstations; and **NVFP4 W4A16 (`~24.1 GiB`)** squeezes onto a **`32GB` RTX 5090** with `~6 GB` left for encoders and short-to-medium video clips. If using the GGUF bundle (`tencent/WeMM-Video-35BA3B-GGUF`), remember it separates `language.gguf`, `mmproj.gguf`, and `audio.gguf`—use Tencent’s multi-encoder loader rather than a bare single-file `llama-cli` call.
+同日（**2026 年 11 月 20 日**）以 Apache 2.0 开源的腾讯混元 **WeMM-Video-35B-A3B**（同系列还有 `2B`/`4B`/`9B`）补齐了本地离线全模态的一大空白：同时喂入**视频画面、原声音轨、语音与文本**，支持 **`256K` 上下文**，总参约 `35B` 但每 Token 仅激活 **`3B`**（`40` 层、`2` 个 KV 头、`head_dim=128`）。得益于仅 `2` 个 KV 头的极简 GQA 设计，其 `64K` 上下文 FP16 KV 仅约 `2.7 GB`（`Q8_0` 仅约 `1.4 GB`），把绝大部分显存让给了权重与多帧视频视觉编码器。
+
+量化档位按硬件对号入座：**BF16 原版（约 `68–72 GiB`）**可在 **`128GB` RTX Spark** 或 `80GB+` 服务器卡上无损直跑；**FP8 Block128（约 `36–39 GiB`）**契合 `48GB–64GB` 工作站；**NVFP4 W4A16（约 `24.1 GiB`）**正好压进 **`32GB` RTX 5090** 并留出约 `6 GB` 处理编码器与短视频上下文。若下载 GGUF 包（`tencent/WeMM-Video-35BA3B-GGUF`），务必注意它拆分为 `language.gguf`、`mmproj.gguf` 与 `audio.gguf` 三个文件，必须通过项目配套的多编码器加载脚本启动。
+
+#### 4. Reproducible Launch Commands: vLLM DSpark Speculator, llama.cpp/MLX & WeMM-Video / 4. 可复现一键启动命令：vLLM + DSpark 投机解码、llama.cpp/MLX 与 WeMM-Video 全模态服务
+Use the three validated invocation patterns below depending on whether you are running native Blackwell NVFP4 + DSpark speculative decoding on an RTX Spark / RTX 5090, GGUF/MLX on a `32GB` MacBook Pro, or WeMM-Video-35B-A3B audio-visual serving:
+根据你的硬件环境（RTX Spark / RTX 5090 原生 Blackwell NVFP4 + DSpark 投机解码、`32GB` MacBook Pro 的 llama.cpp/MLX，或 WeMM-Video-35B-A3B 音视频服务），直接套用以下三组命令：
+```bash
+# 1) RTX Spark (WSL2 Arm64 CUDA) / RTX 5090: vLLM + Inkling 2 Mini NVFP4 + DSpark MTP Speculator
+vllm serve thinking-machines/Inkling-2-Mini \
+  --kv-cache-dtype fp8 \
+  --max-model-len 131072 \
+  --speculative-config '{"method": "mtp", "num_speculative_tokens": 3}' \
+  --gpu-memory-utilization 0.85 --port 8000
+
+# 2) 32GB MacBook Pro / Desktop GPU: llama.cpp GGUF with Q8_0 KV (critical for 48 logical loop layers!)
+llama-server -m ./Inkling-2-Mini-Q4_K_M.gguf \
+  -ngl 99 -fa on --cache-type-k q8_0 --cache-type-v q8_0 \
+  -c 65536 --host 127.0.0.1 --port 8080
+
+# 3) RTX Spark 128GB (FP8) or RTX 5090 32GB (NVFP4): Tencent WeMM-Video-35B-A3B via vLLM
+vllm serve tencent/WeMM-Video-35BA3B-NVFP4 \
+  --trust-remote-code --kv-cache-dtype fp8 \
+  --max-model-len 65536 --limit-mm-per-prompt '{"video": 2, "audio": 2}' \
+  --gpu-memory-utilization 0.88 --port 8001
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: Why does a 128GB ASUS ProArt GR1X cost ~$6,500–$7,000 when a 192GB AMD Strix Halo mini PC is around $3,000–$3,600? / 为什么 128GB 华硕 ProArt GR1X 卖到 $6,500–$7,000，比 192GB AMD Strix Halo 迷你主机贵近一倍？
+  **A**: You are paying a steep premium for **NVIDIA Blackwell CUDA + native 1 PFLOP FP4 Tensor Cores** inside a `1.15L` silent Windows desktop. On models distributed in native **NVFP4** (like Inkling 2 Mini, WeMM-Video-35B-A3B-NVFP4, and Nemotron 3.5), Blackwell’s FP4 Tensor Cores crush RDNA 3.5 on prompt **prefill latency (TTFT)** and deliver Day-0 vLLM/SGLang/TensorRT-LLM compatibility. However, if your top priority is raw memory capacity per dollar (`160GB` VRAM ceiling + x86_64 Linux compatibility) and you mostly run `GGUF Q4/Q8`, a 192GB Strix Halo workstation (like GMKtec EVO-X5 Pro) delivers dramatically better value. (高溢价主要来自 `1.15L` 静音 Windows 桌面形态下的 **NVIDIA Blackwell CUDA 与原生 1 PFLOP FP4 Tensor Core**。面对原生 **NVFP4** 发布的模型（如 Inkling 2 Mini、WeMM-Video-35B-A3B-NVFP4、Nemotron 3.5），Blackwell 在长上下文 **Prefill 首字延迟（TTFT）** 与 vLLM/SGLang/TensorRT-LLM 首日支持上大幅领先 RDNA 3.5；但如果你更看重每美元显存容量（`160GB` 可用显存 + 原生 x86_64 Linux）且主要跑 `GGUF Q4/Q8`，192GB Strix Halo 工作站（如 GMKtec EVO-X5 Pro）性价比高得多。)
+- **Q**: Does looping middle layers 3 times make Inkling 2 Mini 3x slower than a normal 26B-A3B MoE? / 把中间 12 层循环执行 3 次，会让 Inkling 2 Mini 比普通 26B-A3B MoE 慢 3 倍吗？
+  **A**: Not 3x slower—roughly **~1.7x–2.0x** more weight reads per token (`~5.4B` effective active reads vs `~3.1B` unique weights, since the 6 prelude + 6 coda layers only run once while the 12 middle layers run 3x). In exchange, Thinking Machines Lab pairs the looped core with the bundled **DSpark** multi-token speculator, which recovers much of that decode throughput while delivering deeper internal reasoning without burning thousands of visible chain-of-thought tokens. (不会慢 3 倍——前导 6 层与尾段 6 层只执行 1 次，仅中间 12 层循环 3 次，因此每 Token 等效读取权重约 `5.4B`（相对 `3.1B` 独立激活权重约增加 **1.7–2.0 倍**内存带宽开销）。作为补偿，官方随模型内置了 **DSpark** 多词投机头，在拉回吐字速度的同时，用隐式循环深度替代冗长的显式思维链输出，综合端到端完成任务反而更快。)
+
+---
+
 ## Default Parameterized Artifacts
 
 ### run-mac-benchmark.sh (Apple Silicon Mac Fixed-Task Speed & Context Benchmark Script / Mac 本地模型固定任务、上下文与生成速度复现脚本)
@@ -6676,6 +6854,94 @@ fi
 
 ```
 
+### audit-lpddr5x-accelerator-and-nvme-rag.sh (SC26 Non-HBM LPDDR5X Accelerator (Intel GPU D270 Xe3P) & Near-Data NVMe RAG Audit Launcher / SC26 非 HBM 大内存推理卡（Intel GPU D270 Xe3P）与近数据 NVMe RAG 吞吐预检启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/sc26-d270-dragonfly-phison-ssd-evaluator/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/sc26-d270-dragonfly-phison-ssd-evaluator/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — SC26 Non-HBM LPDDR5X Accelerator (Intel GPU D270 Xe3P) & Near-Data NVMe RAG Audit (Guide #61)
+set -euo pipefail
+
+MODE="pcie5_numa_audit"
+MODEL="Qwen/Qwen3-235B-A22B-FP8"
+MAX_LEN="65536"
+NVME_FILE="/mnt/nvme-corpus/tinker-rag-bench.bin"
+PORT="8000"
+
+echo "=== [SC26 Host Audit] PCIe 5.0 Accelerator & NVMe Link Topology ==="
+lspci -vv 2>/dev/null | grep -E 'Display|Processing accelerators|Non-Volatile|LnkSta:' | head -n 28 || true
+if command -v numactl >/dev/null 2>&1; then
+  numactl --hardware | grep -E 'available|node [0-9]+ cpus|node [0-9]+ size' || true
+fi
+
+if [ "$MODE" = "pcie5_numa_audit" ]; then
+  echo "=== [Audit Complete] Verify 32GT/s (PCIe 5.0) x16 for D270-class cards and same-socket NUMA for NVMe ==="
+  ls -la /dev/dri 2>/dev/null || echo "[INFO] /dev/dri not present on this host"
+elif [ "$MODE" = "vllm_xpu_d270_serve" ]; then
+  echo "=== [Intel vLLM-XPU] Launching $MODEL (max_len=$MAX_LEN) on port $PORT ==="
+  exec docker run --rm --device=/dev/dri -p "$PORT:$PORT" \
+    -e ZE_AFFINITY_MASK=0 -e VLLM_USE_V1=1 \
+    intel/vllm-xpu:latest \
+    --model "$MODEL" \
+    --dtype bfloat16 --max-model-len "$MAX_LEN" \
+    --gpu-memory-utilization 0.90 --port "$PORT"
+elif [ "$MODE" = "nvme_rag_fio_bench" ]; then
+  echo "=== [Near-Data RAG Baseline] Measuring Host NVMe -> RAM Sequential Scan Ceiling ==="
+  mkdir -p "$(dirname "$NVME_FILE")"
+  exec fio --name=tinker-rag-seq-scan --filename="$NVME_FILE" --size=8G \
+    --rw=read --bs=1M --iodepth=32 --ioengine=io_uring --direct=1 --group_reporting
+else
+  echo "Unknown AUDIT_MODE=$MODE (expected: pcie5_numa_audit | vllm_xpu_d270_serve | nvme_rag_fio_bench)" >&2
+  exit 1
+fi
+
+```
+
+### run-inkling2-looped-and-wemm-video.sh (RTX Spark (ProArt GR1X / EdgeMesa N AI+) & 32GB GPU Launcher for Inkling 2 Mini (Looped MoE + DSpark) & WeMM-Video-35B-A3B / RTX Spark（ProArt GR1X / EdgeMesa N AI+）与 32GB 设备启动脚本：Inkling 2 Mini（循环 MoE + DSpark）与 WeMM-Video-35B-A3B)
+- **URL (EN)**: https://tinker-ai.com/artifacts/rtx-spark-oem-inkling2-wemm-video-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/rtx-spark-oem-inkling2-wemm-video-launcher/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — RTX Spark OEM (ProArt GR1X / EdgeMesa N AI+) + Inkling 2 Mini (Looped MoE) & WeMM-Video-35B-A3B (Guide #62)
+set -euo pipefail
+
+MODE="vllm_inkling2_dspark"
+GGUF="./models/Inkling-2-Mini-Q4_K_M.gguf"
+CTX="131072"
+MTP="3"
+PORT="8000"
+
+echo "=== [Hardware & Arch Check] Host Arch: $(uname -m) ==="
+nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>/dev/null || echo "[INFO] nvidia-smi unavailable (Apple Silicon / CPU mode)"
+
+if [ "$MODE" = "vllm_inkling2_dspark" ]; then
+  echo "=== [vLLM + DSpark MTP] Serving Thinking Machines Inkling 2 Mini (48 logical KV passes, ctx=$CTX, mtp=$MTP) ==="
+  exec vllm serve thinking-machines/Inkling-2-Mini \
+    --kv-cache-dtype fp8 \
+    --max-model-len "$CTX" \
+    --speculative-config "{\"method\": \"mtp\", \"num_speculative_tokens\": $MTP}" \
+    --gpu-memory-utilization 0.85 --port "$PORT"
+elif [ "$MODE" = "llamacpp_inkling2_q8kv" ]; then
+  echo "=== [llama.cpp Q8_0 KV] Serving $GGUF (48-pass KV guard enabled, ctx=$CTX) ==="
+  exec llama-server -m "$GGUF" \
+    -ngl 99 -fa on \
+    --cache-type-k q8_0 --cache-type-v q8_0 \
+    -c "$CTX" --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "vllm_wemm_video_nvfp4" ]; then
+  echo "=== [vLLM Omni-Modal] Serving Tencent WeMM-Video-35B-A3B-NVFP4 (ctx=$CTX) ==="
+  exec vllm serve tencent/WeMM-Video-35BA3B-NVFP4 \
+    --trust-remote-code \
+    --kv-cache-dtype fp8 \
+    --max-model-len "$CTX" \
+    --limit-mm-per-prompt '{"video": 2, "audio": 2}' \
+    --gpu-memory-utilization 0.88 --port "$PORT"
+else
+  echo "Unknown SERVE_MODE=$MODE (expected: vllm_inkling2_dspark | llamacpp_inkling2_q8kv | vllm_wemm_video_nvfp4)" >&2
+  exit 1
+fi
+
+```
+
 ## Local LLM Hardware Usable Limits & Model Presets Reference
 
 - **Apple Silicon Mac (16GB Unified)** (Apple Silicon Mac（16GB 统一内存）): Total Memory 16 GB | Safe Usable Ceiling: **11.5 GB** | Bandwidth: 120 GB/s — macOS reserves ~4.5GB for OS & WindowServer; exceeding ~11.5GB triggers SSD swap and severe slowdown.
@@ -6763,6 +7029,10 @@ fi
 - **MiTAC G4520G6 4U Decode Server (8× Skymizer HTX301-4S · 2TB Card DRAM)** (MiTAC G4520G6 4U 解码服务器（8× Skymizer HTX301-4S · 2TB 加速卡内存）): Total Memory 2048 GB | Safe Usable Ceiling: **1920 GB** | Bandwidth: 4800 GB/s — SC26 air-cooled 4U Xeon 6 decode node with 8x 256GB HTX301-4S cards (2TB aggregate DRAM); pairs with MI350X/GPU prefill node to host 2.8T Kimi K3.1 Pro MXFP4 (~1.56TB) on-premise.
 - **96GB GPU + 256GB DRAM + TRUSTA T7P5 PCIe Gen5 SSD (3-Tier vLLM KV Pool)** (96GB 独显 + 256GB 内存 + TRUSTA T7P5 PCIe Gen5 SSD（三层 vLLM KV 缓存池）): Total Memory 352 GB | Safe Usable Ceiling: **320 GB** | Bandwidth: 1200 GB/s — SC26 TRUSTA AI Scaler Toolkit + T7P5 Gen5 NVMe (13.5 GB/s, <7W, FDP): keeps weights in 96GB VRAM while tiering persistent multi-turn/agent KV caches across DRAM + Gen5 SSD.
 - **GMKtec EVO-X5 Pro (Ryzen AI Max+ PRO 495 · 192GB · 160GB VRAM + XDNA 2 NPU)** (GMKtec EVO-X5 Pro 迷你工作站（Ryzen AI Max+ PRO 495 · 192GB · 160GB 显存 + XDNA 2 NPU）): Total Memory 192 GB | Safe Usable Ceiling: **160 GB** | Bandwidth: 273 GB/s — 192GB LPDDR5X-8533 (273 GB/s, 160GB VRAM ceiling) + 55 TOPS XDNA 2 NPU (Unsloth Desktop Q4NX) + Dual 10GbE & 24TB M.2; runs Nemotron 3.5 Super VL 120B + NPU helper concurrently.
+- **Intel GPU D270 PCIe 5.0 (Xe3P · 160GB LPDDR5X · 1.5 TB/s · 350W)** (Intel GPU D270 PCIe 5.0 推理卡（Xe3P · 160GB LPDDR5X · 1.5 TB/s · 350W）): Total Memory 160 GB | Safe Usable Ceiling: **152 GB** | Bandwidth: 1500 GB/s — SC26 Xe3P air-cooled PCIe 5.0 card (32 Xe3P cores, 256 XMX, 1.3 PFLOPS FP8 + full-rate FP64, 160GB LPDDR5X @ 1.5 TB/s; ODM up to 480GB); hosts 120B–235B MoEs in one 350W slot.
+- **Qualcomm Dragonfly AI200 Card (768GB LPDDR5X · Hexagon NPU · Rack-Scale)** (高通 Dragonfly AI200 单卡（768GB LPDDR5X · Hexagon NPU · 机柜级推理）): Total Memory 768 GB | Safe Usable Ceiling: **720 GB** | Bandwidth: 1200 GB/s — SC26 Cirrascale evaluation card with 768GB LPDDR5X (56 cards = ~43TB / ~414 TB/s rack-level spec, 140–160kW DLC); per-card bandwidth modeled conservatively for single-card sizing.
+- **Phison NPU Computational Storage SSD (64GB Onboard · 130 GB/s · Near-Data PoC)** (群联内置 NPU 计算存储 SSD（64GB 板载内存 · 130 GB/s · 近数据概念版）): Total Memory 64 GB | Safe Usable Ceiling: **56 GB** | Bandwidth: 130 GB/s — SC26 PoC enterprise SSD integrating an NPU (36,800 DMIPS scalar quote) + 64GB onboard memory (130 GB/s) running llama.cpp/vLLM/PyTorch near data to cut host PCIe transfers 10x–100x.
+- **ASUS ProArt GR1X / MSI EdgeMesa N AI+ (RTX Spark N1X · 128GB UMA · 300 GB/s)** (华硕 ProArt GR1X / 微星 EdgeMesa N AI+（RTX Spark N1X · 128GB 统一内存 · 300 GB/s）): Total Memory 128 GB | Safe Usable Ceiling: **108 GB** | Bandwidth: 300 GB/s — Retail 1.15L–1.3L Windows-on-Arm mini PCs (140W sustained, 6,144 Blackwell CUDA cores, 1 PFLOP FP4, 10GbE + Wi-Fi 7); ~108GB usable under Windows 11 Pro for Inkling 2 Mini & WeMM-Video-35B.
 
 - **Qwen2.5-1.5B-Instruct** (1.54B params, 28 layers, 2 KV heads): Ultra-low-power Raspberry Pi 5 voice loop & sub-100ms IDE FIM tab autocomplete (树莓派 5 极速离线语音对答、低配设备毫秒级 IDE 行间代码补全)
 - **Qwen2.5-3B-Instruct** (3.09B params, 36 layers, 2 KV heads): Edge devices, Raspberry Pi 5 (8GB), ultra-fast RSS/tag classification (边缘设备、树莓派 5 (8GB)、超低延迟 RSS 分类与轻量提取)
@@ -6816,6 +7086,8 @@ fi
 - **Cloudflare Clairic / Clef 27B (Apache 2.0 · Qwen3.8-27B Typed Extraction)** (27B params, 16 layers, 4 KV heads): Apache 2.0 flagship 27B System-1 extractor (Qwen3.8-27B 16-KV-layer backbone): handles dense multi-page PDF tables on 24GB–32GB GPUs or 59GB Xe3 UMA (Apache 2.0 旗舰 27B 结构化提取与决策模型（Qwen3.8-27B 底座仅 16 层增长 KV）：24GB–32GB 显卡或 59GB Xe3 核显精准解析复杂跨页表格)
 - **NVIDIA Nemotron-3.5-Lightning-30B-A3B (Mamba-2 + MoE · 1M Ctx · MTP)** (30B params, 8 layers, 2 KV heads): Hybrid Mamba-2 + MoE 30B (3B active, native MTP speculative heads, OpenMDW-1.1): ultra-fast always-on agentic model for 24GB GPUs & 32GB+ UMA boxes (混合 Mamba-2 + MoE 30B 模型（单 Token 仅激活 3B，原生 MTP 多词预测，OpenMDW-1.1）：适配 24GB 独显与 32GB+ 统一内存的极速常驻 Agent 模型)
 - **NVIDIA Nemotron-3.5-Super-VL-120B-A12B (Mamba-2 + MoE + C-RADIO VL · 1M Ctx)** (120B params, 12 layers, 4 KV heads): OpenMDW-1.1 120B-A12B hybrid Mamba-2 + 512-expert MoE + C-RADIO v4-H vision/video encoder (1M ctx, NVFP4/GGUF): ideal for 96GB–192GB workstations (GMKtec EVO-X5 Pro / RTX PRO 6000) (OpenMDW-1.1 协议 120B-A12B 混合 Mamba-2 + 512 专家 MoE + C-RADIO v4-H 图文视频视觉编码器（1M 上下文，NVFP4/GGUF）：契合 96GB–192GB 工作站（EVO-X5 Pro / RTX PRO 6000）)
+- **Thinking Machines Inkling 2 Mini (26.4B-A3B · 48-Pass Looped MoE · 1M Ctx)** (26.4B params, 48 layers, 8 KV heads): Apache 2.0 multimodal Looped Transformer MoE (26.4B total / ~3.1B unique active weights, 24 physical layers looping middle 12 layers 3x = 48 logical KV passes, DSpark MTP, 1M ctx, NVFP4/MXFP8/GGUF): fits 32GB Mac/GPU & 128GB RTX Spark (Apache 2.0 多模态循环 Transformer MoE（总参 26.4B / 仅 3.1B 独立激活权重，24 层物理权重中段循环 3 次 = 48 逻辑 KV 层，自带 DSpark 投机头与 1M 上下文，原生 NVFP4/MXFP8/GGUF）：适配 32GB Mac/独显与 128GB RTX Spark)
+- **Tencent WeMM-Video-35B-A3B (Bilingual Audio-Visual MoE · 256K Ctx)** (35B params, 40 layers, 2 KV heads): Apache 2.0 Chinese-English omni-modal audio + video + image + text MoE (35B total / 3B active, 256K ctx, BF16 ~68–72 GiB / NVFP4 ~24.1 GiB): ideal for 32GB RTX 5090 (NVFP4) or 128GB RTX Spark (FP8/BF16) (Apache 2.0 中英双语音画全模态理解 MoE（总参 35B / 激活 3B，256K 上下文，BF16 约 68–72 GiB / NVFP4 约 24.1 GiB）：适配 32GB RTX 5090（NVFP4）或 128GB RTX Spark（FP8/BF16）)
 
 ## Interactive Troubleshooter Root Causes & Verified Solutions
 
