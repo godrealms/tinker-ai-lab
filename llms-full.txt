@@ -1,6 +1,6 @@
 # Tinker AI Lab — Full Reproducible Knowledge Base (llms-full.txt)
 
-> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 62 reproducible guides, hardware manifests, known limits, verification checklists, 54 model & 89 hardware VRAM reference specs, 13 diagnostic decision trees, and 62 default configuration artifacts in English and Simplified Chinese.
+> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 64 reproducible guides, hardware manifests, known limits, verification checklists, 57 model & 93 hardware VRAM reference specs, 13 diagnostic decision trees, and 64 default configuration artifacts in English and Simplified Chinese.
 
 ## Apple Silicon Mac Local Model Benchmark: Fixed Tasks, Quantization, Context & Speed
 ### 一台现有 Mac 的本地模型实测：固定任务、模型版本、量化、上下文和速度
@@ -4386,6 +4386,207 @@ vllm serve tencent/WeMM-Video-35BA3B-NVFP4 \
 
 ---
 
+## SC26 Optical, CXL & NVMe-oF KV Cache Pooling vs Deskside GB300 Towers: Penguin MemoryAI Photonic (576GB HBM3E + 16TB DDR5), SK hynix MARS CMM-DDR5 & AIC F2026 26-Bay Gen5 JBOF vs MSI WS300 / GIGABYTE W775-V10 Running Inkling 2 Small (594B-A17B)
+### SC26 光互联、CXL 与 NVMe-oF 远程 KV 缓存池对决 GB300 桌边塔式超算：Penguin MemoryAI 硅光内存盒（576GB HBM3E + 16TB DDR5）、SK hynix MARS CMM-DDR5 与 AIC F2026（26 盘位 Gen5 JBOF）对比微星 WS300 / 技嘉 W775-V10 运行 Inkling 2 Small (594B-A17B)
+
+- **URL (EN)**: https://tinker-ai.com/guides/sc26-optical-cxl-kv-pooling-penguin-photonic-sk-hynix-mars-aic-f2026-jbof-and-inkling2-small-594b/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/sc26-optical-cxl-kv-pooling-penguin-photonic-sk-hynix-mars-aic-f2026-jbof-and-inkling2-small-594b/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: Penguin MemoryAI Photonic (576GB HBM3E + 16TB DDR5 · 7.2 TB/s) vs SK hynix MARS (256GB CMM-DDR5 @ 80 GB/s) vs AIC F2026 (2U 26-Bay Gen5 JBOF + 4× DPU) vs MSI XpertStation WS300 / GIGABYTE W775-V10-L01 (GB300 · 748GB Coherent · ConnectX-8 800GbE)
+- **Tested Hardware (ZH)**: Penguin MemoryAI 硅光内存盒（576GB HBM3E + 16TB DDR5 · 7.2 TB/s）vs SK hynix MARS（256GB CMM-DDR5 @ 80 GB/s）vs AIC F2026（2U 26 盘位 Gen5 JBOF + 4× DPU）vs 微星 XpertStation WS300 / 技嘉 W775-V10-L01（GB300 · 748GB 相干内存 · ConnectX-8 800GbE）
+- **Pinned Versions**: Thinking Machines Inkling 2 Small (594B-A17B · 8/384 Experts · 48-Layer Hybrid Attention · 1M Ctx · MXFP8/NVFP4), vLLM + LMCache Connector v1 (GPU HBM3e -> CXL / LPDDR5X -> PCIe Gen6/Gen5 NVMe-oF Tiering), Marvell Photonic Fabric (PF-NIC PCIe 6.0 / CXL 3.1) & SK hynix CMM-DDR5 CXL 2.0/3.1 Tiering, Ubuntu 24.04 LTS Arm64 (GB300 NVLink-C2C 900 GB/s + ConnectX-8 SuperNIC / NVIDIA OpenShell)
+- **Verified Date**: 2026-11-24
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% On-Premise Deskside Tower or Rack-Local Optical/CXL Air-Gapped Execution — MSI XpertStation WS300 and GIGABYTE W775-V10-L01 run 594B–1T models completely offline on a single 1600W office circuit; Penguin MemoryAI Photonic, SK hynix MARS, and AIC F2026 JBOF operate entirely across local optical/CXL/NVMe-oF fabrics with zero cloud dependency.
+
+**Direct Summary (EN)**: Deep engineering comparison of four SC26 (November 2026) memory-wall architectures for 500B–1T agentic AI and 1M-token multi-turn KV caches: Penguin Solutions + Marvell’s MemoryAI Photonic Appliance (576GB HBM3E cache tier + 16TB DDR5 pooled over 57.6 Tbps / 7.2 TB/s silicon photonics PF-NICs with PCIe 6.0 & CXL 3.1), SK hynix MARS CXL KV pooling (256GB CMM-DDR5 @ 80 GB/s + Hybrid CXL DRAM/SSD cutting multi-turn TTFT >80%), AIC’s F2026 2U 26-bay PCIe Gen5 JBOF (with 4× DPUs for NVMe-oF KV streaming), and retail/enterprise deskside GB300 OEM towers (MSI XpertStation WS300 & GIGABYTE W775-V10-L01 packing 748GB coherent memory, ConnectX-8 800GbE, and dual PCIe Gen6 M.2 scratch bays at 44–46 dBA) running Thinking Machines Lab’s 594B-A17B Inkling 2 Small.
+**核心结论 (ZH)**: 深度拆解 2026 年 11 月 SC26 大会上针对 500B–1T 大模型与百万上下文多轮 Agent KV 缓存的四大硬件架构：一是 Penguin Solutions 联合 Marvell 发布的 MemoryAI 硅光远程内存设备（通过 PCIe 6.0 / CXL 3.1 硅光 PF-NIC 聚合 576GB HBM3E 高速缓存层 + 16TB DDR5，光互联总带宽达 57.6 Tbps / 7.2 TB/s）；二是 SK hynix MARS 机柜级 CXL KV 内存池（第二代 256GB CMM-DDR5 @ 80 GB/s + CXL 混合内存将多轮对话首字延迟 TTFT 压降逾 80%）；三是 AIC F2026 2U 26 盘位双端口 PCIe Gen5 JBOF（内置 4 颗 DPU 承载 NVMe-oF KV 流式卸载）；四是正式落地的 OEM 桌边 GB300 塔式静音超算（微星 XpertStation WS300 与技嘉 W775-V10-L01：748GB 相干内存、ConnectX-8 双 400GbE 与双 PCIe Gen6 M.2 暂存盘，44–46 dBA 办公插座直驱）单机跑通 Thinking Machines Lab 594B-A17B Inkling 2 Small。
+
+**Known Limits & Failure Boundaries**:
+- Spec-derived engineering analysis: Penguin MemoryAI Photonic Appliance, SK hynix MARS CXL KV pools, AIC F2026 JBOF, and OEM GB300 towers (MSI WS300 / GIGABYTE W775-V10-L01) were showcased at SC26 (Nov 15–20, 2026); performance figures reflect vendor SC26 technical disclosures and memory-bandwidth modeling.
+- On MSI XpertStation WS300 / GIGABYTE W775-V10-L01 (748GB total = 252GB HBM3e @ 7.1 TB/s + 496GB LPDDR5X ECC @ 396 GB/s), a 594B model like Inkling 2 Small (~320 GB in NVFP4 or ~352 GB in Q4_K_M) exceeds the 252GB HBM3e pool—active router/attention layers must stay pinned in HBM3e while cold routed experts spill over the 900 GB/s NVLink-C2C bus into Grace LPDDR5X.
+- Penguin Solutions’ MemoryAI Photonic Appliance relies on Marvell Photonic Fabric (Celestial AI silicon photonics) PF-NICs with PCIe 6.0 / CXL 3.1 host interfaces, making it an enterprise multi-rack appliance rather than a drop-in card for legacy PCIe 4.0/5.0 HomeLab motherboards.
+- Offloading KV caches to AIC F2026 26-bay PCIe Gen5 JBOF over NVMe-oF saves multi-turn recomputation FLOPS, but network transport still requires 200GbE/400GbE RDMA (RoCEv2 / DPU offload) to avoid saturating host CPU interrupts during bursty 128K–1M context recalls.
+- [ZH] 本文为基于 SC26（2026 年 11 月 15–20 日）厂商公开规格与技术白皮书的工程推算：Penguin MemoryAI 硅光内存盒、SK hynix MARS、AIC F2026 JBOF 与微星/技嘉 GB300 量产整机均属企业级新品，相关吞吐数据带 `[Spec-Est.]` 标注。
+- [ZH] 在微星 XpertStation WS300 / 技嘉 W775-V10-L01（总相干内存 748GB = 252GB HBM3e @ 7.1 TB/s + 496GB LPDDR5X ECC @ 396 GB/s）上运行 594B 的 Inkling 2 Small（NVFP4 约 320 GB，Q4_K_M 约 352 GB）时，总权重超过 252GB HBM3e 容量上限——必须将高频共享层与 KV 缓存锁在 HBM3e，让低频路由专家通过 900 GB/s NVLink-C2C 驻留于 Grace LPDDR5X。
+- [ZH] Penguin MemoryAI 硅光内存盒依赖 Marvell Photonic Fabric（源自 Celestial AI 硅光技术）的 PCIe 6.0 / CXL 3.1 PF-NIC 光互联网卡，面向多机柜数据中心内存池化，无法直接插在普通 PCIe 4.0/5.0 消费级主板上使用。
+- [ZH] 使用 AIC F2026（26 盘位 PCIe Gen5 JBOF）通过 NVMe-oF 卸载海量多轮 KV 缓存时，宿主机侧必须配备 200GbE/400GbE RoCEv2 RDMA 或 DPU 硬件卸载，否则百万上下文并发召回会瞬间打满宿主机 CPU 中断。
+
+#### 1. SC26 Memory-Tier Spectrum: Optical HBM/DDR5 Pooling vs CXL CMM-DDR5 vs Gen5 JBOF vs Deskside GB300 / 1. SC26 四级内存破壁矩阵：硅光 HBM/DDR5 内存池、SK hynix CXL、AIC Gen5 全闪 JBOF 与桌边 GB300 超算
+When serving frontier sparse MoE models (`500B–1T` parameters) alongside persistent multi-turn agentic KV caches (`128K–1M` tokens across dozens of concurrent sessions), standard `80GB–192GB` HBM GPUs hit a brutal wall: **evicting and recomputing a 256K-token prompt takes 60–90 seconds of pure prefill compute**, while buying extra HBM GPUs just to park idle KV tensors ruins cluster TCO. At **SC26 in Chicago (Nov 15–20, 2026)**, hardware vendors attacked this bottleneck across four distinct tiers—from **optical HBM3E+DDR5 appliances** down to **quiet 45 dBA deskside GB300 towers**.
+
+Compare the four SC26 hardware tiers below on memory hierarchy, aggregate bandwidth, interconnect latency, and multi-turn KV recovery speed (`[Spec-Est.]` denotes vendor-spec derived projections):
+在运行 `500B–1T` 级超大稀疏 MoE 模型并同时维持数十路 `128K–1M` 长上下文多轮 Agent 会话时，传统 `80GB–192GB` 显存的 GPU 会遭遇残酷的「KV 缓存驱逐惩罚」：**一旦多轮历史 KV 因显存不足被踢出，下一轮对话重新做 256K 上下文 Prefill 往往要傻等 60–90 秒**；而单纯为了存静态权重与闲置 KV 去堆砌昂贵的 HBM GPU 又会让成本失控。在 **2026 年 11 月芝加哥 SC26 大会** 上，业界给出了从**跨机柜硅光内存盒**到**办公室 45 分贝静音 GB300 塔式工作站**的四级破局方案。
+
+下表横向对比这四套 SC26 代表性硬件的内存层级、聚合带宽、互联协议与适用边界（`[Spec-Est.]` 代表基于 SC26 公开规格推算）：
+
+**Table 1: SC26 Optical / CXL / NVMe-oF Memory Pooling Tiers vs OEM Deskside GB300 Workstations / 表 1：SC26 硅光内存池 / CXL 内存池 / NVMe-oF 全闪 JBOF 与 OEM 桌边 GB300 塔式超算横评**
+| SC26 System / Platform (SC26 硬件平台) | Memory / Storage Hierarchy (内存 / 存储容量层级) | Bandwidth & Interconnect (聚合带宽与互联总线) | Power / Acoustics / Form Factor (功耗 / 噪音 / 物理形态) | Primary Workload Sweet Spot (核心工程甜点场景) |
+| --- | --- | --- | --- | --- |
+| **Penguin MemoryAI Photonic Appliance** (Marvell Photonic Fabric) / **Penguin MemoryAI 硅光内存盒**（Marvell Photonic Fabric） | `576GB` HBM3E cache tier + `16TB` DDR5 per appliance / 单台 `576GB` HBM3E 高速缓存层 + `16TB` DDR5 容量层 | `57.6 Tbps` (`7.2 TB/s`) optical via **PF-NIC (PCIe 6.0 / CXL 3.1)** / `57.6 Tbps`（`7.2 TB/s`）硅光互联，配 **PF-NIC（PCIe 6.0 / CXL 3.1）** | Multi-rack optical memory appliance / 跨机柜硅光远程内存池专用设备 | HBM-speed disaggregation of multi-TB weights & hot KV across racks `[Spec-Est.]` / 跨机柜以准 HBM 速率共享 TB 级权重与热 KV 缓存 `[Spec-Est.]` |
+| **SK hynix MARS CXL KV Pool** (2nd-Gen `CMM-DDR5` + Hybrid CXL) / **SK hynix MARS 机柜级 CXL 内存池**（二代 `CMM-DDR5` + 混合 CXL） | `256GB` per CMM-DDR5 module (`2TB+` pool) + CXL Hybrid DRAM/SSD / 单条 `256GB` CMM-DDR5（整池 `2TB+`）+ CXL DRAM/SSD 混合层 | `80 GB/s` per CMM-DDR5 module (`2x` Gen1) over CXL 2.0/3.1 / 单模块 `80 GB/s`（较初代翻倍），走 CXL 2.0/3.1 总线 | Standard CXL E3.S / rack memory tray / 标准 CXL 扩展模组 / MARS 机柜内存托盘 | Cuts multi-turn agent **TTFT by >80%** (`~80s -> ~15s`) vs KV eviction `[Spec-Est.]` / 避免多轮 KV 驱逐重算，将多轮 **TTFT 压降逾 80%**（`80s -> 15s`）`[Spec-Est.]` |
+| **AIC F2026 2U Gen5 JBOF** (w/ MangoBoost KESAR-E / 4× DPUs) / **AIC F2026 2U Gen5 全闪 JBOF**（含 MangoBoost / 4× DPU） | `26` hot-swap dual-port PCIe Gen5 NVMe bays (`400TB–1.5PB` flash) / `26` 个热插拔双端口 PCIe Gen5 NVMe 盘位（`400TB–1.5PB` 全闪） | `~350 GB/s` internal Gen5 flash -> **NVMe-oF via up to 4 DPUs** / 内部约 `350 GB/s` Gen5 闪存带宽 -> **最多 4 颗 DPU 驱动 NVMe-oF** | 2U dual-canister enterprise JBOF (plus `SB201-SU` CXL 2.0 server) / 2U 双控制器高可用全闪扩展柜（可配 `SB201-SU` CXL 2.0 服务器） | Cluster-wide persistent multi-day conversation KV & RAG corpus pool / 集群级跨天持久化多轮对话 KV 缓存与海量 RAG 向量池 |
+| **MSI XpertStation WS300 / GIGABYTE W775-V10-L01** (Deskside GB300) / **微星 XpertStation WS300 / 技嘉 W775-V10-L01**（桌边 GB300） | `748GB` coherent (`252GB` HBM3e + `496GB` LPDDR5X ECC) + **2× Gen6 M.2** / `748GB` 相干内存（`252GB` HBM3e + `496GB` LPDDR5X ECC）+ **2× Gen6 M.2** | `7.1 TB/s` HBM3e + `900 GB/s` NVLink-C2C + **ConnectX-8 2×400GbE** / `7.1 TB/s` HBM3e + `900 GB/s` NVLink-C2C + **ConnectX-8 双 400GbE** | `1600W` 80+ Platinum · **`44–46 dBA` closed-loop liquid tower** / `1600W` 白金单电源 · **`44–46 dBA` 闭环水冷静音塔式机箱** | Single-tower air-gapped `594B` Inkling 2 Small & `1T` MoE at a desk `[Spec-Est.]` / 办公室桌边单机离线跑通 `594B` Inkling 2 Small 与 `1T` 旗舰 MoE `[Spec-Est.]` |
+
+#### 2. Optical vs CXL vs NVMe-oF KV Tiering: Penguin Photonic Fabric, SK hynix MARS & AIC F2026 / 2. 硅光 vs CXL vs NVMe-oF 三层远程 KV 池化拆解：Penguin、SK hynix 与 AIC F2026
+Why did SC26 feature three seemingly competing memory-expansion fabrics at once? Because each targets a different **latency-vs-capacity knee** in the LLM KV cache lifecycle:
+
+1. **Optical HBM3E + DDR5 Disaggregation (Penguin MemoryAI Photonic Appliance)**: Built on **Marvell Photonic Fabric** (originating from Celestial AI silicon photonics), Penguin’s appliance connects to host servers via **PF-NICs supporting PCIe 6.0 and CXL 3.1** over optical fibers instead of copper. Each appliance pools **`576GB` of HBM3E** (acting as a high-speed remote cache tier) backed by **`16TB` of DDR5** at an aggregate optical bandwidth of **`57.6 Tbps` (`7.2 TB/s`)**. Unlike copper CXL cables that degrade past a single chassis, silicon photonics lets multiple racks share a unified memory pool with near-local memory bandwidth.
+2. **CXL Computational & Hybrid Memory (SK hynix MARS)**: For single-rack and 2U server deployments (like AIC’s dual-Xeon 6 `SB201-SU`), SK hynix’s **Memory-centric AI Rack System (MARS)** pairs 2nd-generation **`256GB` CMM-DDR5 modules (`80 GB/s` per module, double Gen1 bandwidth)** with **CXL Hybrid Memory (DRAM + NAND flash on a CXL bus)**. Predictive prefetching promotes active conversation turns from flash into CMM-DDR5 before the GPU requests them—slashing multi-turn **Time-to-First-Token (TTFT) by over 80% (`~80s` recomputation down to `~15s` CXL fetch)** in SK hynix + Intel SC26 validations, while embedded near-memory compute handles lightweight token filtering inside the pool.
+3. **DPU-Accelerated PCIe Gen5 JBOF (AIC F2026 & HA2026-HC)**: When retaining weeks of agent context across a cluster, DRAM remains too expensive per terabyte. AIC’s 2U **F2026 JBOF** packs **`26` hot-swap dual-port PCIe Gen5 NVMe bays** and up to **four DPUs** (powering turn-key appliances like MangoBoost’s *Mango KESAR-E*), streaming KV chunks directly into GPU memory over **NVMe-oF / GPUDirect Storage** without taxing host CPUs.
+为什么 SC26 会同时涌现硅光、CXL 与 NVMe-oF 三种看似重叠的扩展方案？因为它们分别卡位了大模型 KV 缓存在生命周期中完全不同的**「延迟-容量-每 TB 成本」拐点**：
+
+1. **硅光 HBM3E + DDR5 远程内存池（Penguin MemoryAI Photonic Appliance）**：基于 **Marvell Photonic Fabric**（收购自 Celestial AI 的硅光互联技术），通过支持 **PCIe 6.0 与 CXL 3.1 的硅光网卡（PF-NIC）** 以光纤替代铜缆。单台设备内部整合 **`576GB` HBM3E 高速缓存层**与 **`16TB` DDR5 容量层**，聚合光带宽高达 **`57.6 Tbps`（`7.2 TB/s`）**。它打破了传统铜缆 CXL 无法跨机柜的距离枷锁，让多机柜 GPU 共享准 HBM 级远程内存池。
+2. **机柜级 CXL 混合内存与计算内存池（SK hynix MARS）**：面向单机柜与标准 2U 服务器（如 AIC 双路至强 6 `SB201-SU`），SK hynix **MARS（以内存为中心的 AI 机柜系统）** 采用第二代 **`256GB` CMM-DDR5 模组（单模组带宽翻倍至 `80 GB/s`）** 配合 **CXL 混合内存（DRAM + 闪存同挂 CXL 总线）**。通过预测算法提前将即将复用的历史会话从闪存预热至 CMM-DDR5，SK hynix 与 Intel 在 SC26 联合验证中将多轮对话 **首字延迟（TTFT）大幅压降 80% 以上（从重算所需的约 `80 秒` 降至约 `15 秒`）**，并支持在内存池内完成轻量级预处理。
+3. **DPU 硬件卸载的 26 盘位 PCIe Gen5 JBOF（AIC F2026 / HA2026-HC）**：当企业需要将多轮 Agent 状态跨天甚至跨周持久化时，DRAM 的每 TB 成本依然过高。AIC **F2026** 在 2U 空间内塞入 **`26` 块热插拔双端口 PCIe Gen5 NVMe** 并支持内置 **4 颗 DPU**（已被 MangoBoost 选为 *Mango KESAR-E* 上下文缓存柜底座），通过 **NVMe-oF 与 GPUDirect Storage** 将全闪 KV 块直传 GPU，彻底解放宿主机 CPU。
+
+#### 3. OEM Deskside GB300 Towers (MSI XpertStation WS300 & GIGABYTE W775-V10-L01) + Thinking Machines Inkling 2 Small (594B-A17B) / 3. 桌边静音塔式超算（微星 WS300 / 技嘉 W775-V10-L01）单机跑通 Thinking Machines Inkling 2 Small (594B-A17B)
+What if your security policy forbids data-center racks altogether and demands a **single air-gapped box under an engineer’s desk**? At SC26, **MSI (`XpertStation WS300`)** and **GIGABYTE (`W775-V10-L01`)** unveiled production OEM tower workstations built on the **NVIDIA GB300 Grace Blackwell Ultra Desktop Superchip**. Check the engineering details that distinguish these retail/enterprise OEM towers from early reference briefs:
+
+- **Coherent Memory & 20 PFLOPS FP4**: `252GB` HBM3e (`7.1 TB/s`) + up to `496GB` LPDDR5X ECC (`396 GB/s`) = **`748GB` coherent memory** unified by a **`900 GB/s` NVLink-C2C** link between the 72-core Grace CPU and Blackwell Ultra GPU.
+- **ConnectX-8 800GbE + Dual PCIe Gen6 x4 M.2 Scratch Bays**: Beyond two Grace-attached PCIe Gen5 x4 M.2 boot drives (RAID 1), both boards wire **two M.2 2280 PCIe Gen6 x4 slots directly to the onboard NVIDIA ConnectX-8 SuperNIC (dual `400Gb/s` QSFP112 = `800Gb/s`)**—creating an ultra-low-latency local NVMe scratch tier for LMCache KV offloading or RDMA cluster staging.
+- **Office-Friendly 1600W & 44–46 dBA Acoustics**: A full-coverage closed-loop liquid cold plate (cooling CPU, GPU, LPDDR5X, and ConnectX-8) keeps full-load noise around **`44–46 dBA`** off a single `1600W` 80 PLUS Platinum PSU, managed via an **ASPEED AST2600 BMC** (IPMI 2.0 / Redfish).
+
+That `748GB` coherent ceiling is a textbook match for **Thinking Machines Lab’s `Inkling 2 Small` (`594B` total / `17B` active parameters, released Nov 2026)**—the big sibling to `Inkling 2 Mini`. Routing each token to **`8 of 384` experts** across a **48-layer hybrid local/global attention** backbone with native multimodal vision and a **`1M`-token context window**, `Inkling 2 Small` weighs **`~320 GB` in native `NVFP4`** (or `~352 GB` in `Q4_K_M`, `~615 GB` in `MXFP8`). On a single MSI WS300 or GIGABYTE W775-V10, the entire `NVFP4` or `MXFP8` checkpoint fits in one box with **`130GB–400GB` of headroom left over for 256K–1M KV caches**; and because only **`17B` parameters activate per token**, coherent HBM3e + NVLink-C2C sustains roughly **`38–58 tok/s` `[Spec-Est.]`** without multi-node tensor parallelism.
+如果团队处于高敏研发环境、根本没有液冷数据中心机房，只想在**办公室工位旁放一台单相插座就能跑 500B–1T 大模型的物理隔离主机**呢？在 SC26 上，**微星（`XpertStation WS300`）**与**技嘉（`W775-V10-L01`）**正式展出了基于 **NVIDIA GB300 Grace Blackwell Ultra Desktop Superchip** 的量产级塔式工作站，其工程细节极具亮点：
+
+- **748GB 硬件相干内存 + 20 PFLOPS FP4 算力**：`252GB` HBM3e（`7.1 TB/s`）与最高 `496GB` LPDDR5X ECC（`396 GB/s`）通过 **`900 GB/s` NVLink-C2C** 与 72 核 Grace CPU 紧耦合，形成 **`748GB` 统一寻址空间**。
+- **ConnectX-8 双 400GbE + 直连双路 PCIe Gen6 x4 M.2 暂存盘**：除直连 Grace CPU 的 2 个 PCIe Gen5 x4 M.2 系统盘（支持 RAID 1）外，主板还将 **2 个 M.2 2280 PCIe Gen6 x4 插槽直接挂在板载 NVIDIA ConnectX-8 SuperNIC（双口 `400Gb/s` QSFP112，聚合 `800Gb/s`）** 下——专为本地极速 LMCache KV 缓存落盘与跨机 RDMA 数据暂存而生。
+- **单 1600W 办公电源与 44–46 dBA 静音水冷**：定制全覆盖闭环水冷头同时覆盖 CPU、GPU、内存与 ConnectX-8 网卡，满载噪音控制在 **`44–46 dBA`**，自带 **ASPEED AST2600 BMC**（支持 IPMI 2.0 / Redfish 远程带外管理）。
+
+这套 `748GB` 桌边塔式超算恰好完美承接 **Thinking Machines Lab 于 2026 年 11 月发布的 `Inkling 2 Small`（总参数 `594B` / 每 Token 仅激活 `17B`）**。作为 `Inkling 2 Mini` 的主力大哥，`Inkling 2 Small` 采用 **48 层混合局部/全局注意力 + `384 选 8` 稀疏专家路由**，原生支持图文多模态与 **`1M` 百万上下文**。在原生 **`NVFP4`** 下其权重约 **`320 GB`**（`Q4_K_M` 约 `352 GB`，原生 `MXFP8` 约 `615 GB`）：单台微星 WS300 或技嘉 W775-V10 即可在单机内装下完整模型，并留出 **`130GB–400GB` 余量容纳 256K–1M 长上下文 KV 缓存**；由于每 Token 仅需读取 **`17B` 激活参数**，依托 HBM3e + 900 GB/s NVLink-C2C 预计可达 **`38–58 tok/s` `[Spec-Est.]`**，彻底省去多机分布式切分的运维噩梦。
+
+#### 4. Reproducible Deployment: GB300 Deskside NVFP4 Serving & LMCache CXL / Gen6 NVMe KV Tiering / 4. 可复现部署演练：桌边 GB300 原生 NVFP4 启动 Inkling 2 Small 与 LMCache CXL / Gen6 NVMe 多级 KV 卸载
+Use the commands below on an MSI XpertStation WS300 / GIGABYTE W775-V10-L01 or a CXL/NVMe-oF server to audit NUMA/CXL memory tiers, verify ConnectX-8 400GbE and Gen6 M.2 scratch mounts, and launch **Thinking Machines `Inkling 2 Small` (`594B-A17B`)** with vLLM + LMCache multi-tier KV pooling:
+在微星 XpertStation WS300 / 技嘉 W775-V10-L01 或配备 CXL 内存池 / NVMe-oF 的服务器上，可执行以下命令核查 HBM3e + LPDDR5X / CXL 内存拓扑、ConnectX-8 网卡与 Gen6 M.2 挂载状态，并拉起 **Thinking Machines `Inkling 2 Small` (`594B-A17B`)** 的 vLLM NVFP4 服务或 LMCache 多级 KV 缓存池：
+```bash
+# 1) Audit HBM3e + Grace LPDDR5X / CXL NUMA nodes, ConnectX-8 400GbE & Gen6/Gen5 NVMe links
+numactl --hardware | grep -E 'available|node [0-9]+ size|node distances'
+lspci -vv 2>/dev/null | grep -E 'CXL|ConnectX-8|Non-Volatile|LnkSta:' | head -n 20
+
+# 2) Serve Inkling 2 Small (594B-A17B, ~320GB NVFP4) on single 748GB MSI WS300 / GIGABYTE W775-V10
+vllm serve thinking-machines/Inkling-2-Small-NVFP4 \
+  --quantization nvfp4 --kv-cache-dtype fp8 \
+  --max-model-len 262144 --enable-prefix-caching \
+  --gpu-memory-utilization 0.92 --port 8000
+
+# 3) Enable 3-Tier LMCache KV Offloading (GPU HBM3e -> CXL / Host DRAM -> Gen6 M.2 / AIC NVMe-oF)
+export LMCACHE_MAX_LOCAL_CPU_SIZE="256.0"
+export LMCACHE_LOCAL_DISK="file:///mnt/gen6-kv-scratch/"
+export LMCACHE_MAX_LOCAL_DISK_SIZE="2048.0"
+vllm serve thinking-machines/Inkling-2-Small-NVFP4 \
+  --kv-cache-dtype fp8 --max-model-len 524288 \
+  --kv-transfer-config '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_both"}' \
+  --gpu-memory-utilization 0.88 --port 8000
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: How does Penguin Solutions’ MemoryAI Photonic Appliance differ from standard CXL 2.0 memory expanders like Micron CZ120 or SK hynix CMM-DDR5? / Penguin Solutions 在 SC26 展示的 MemoryAI 硅光内存盒与普通 CXL 2.0 内存扩展卡（如美光 CZ120、SK hynix CMM-DDR5）有什么本质区别？
+  **A**: Standard **CXL 2.0 E3.S expanders** (like Micron CZ120 or SK hynix `256GB` CMM-DDR5 at `80 GB/s`) plug into PCIe/CXL copper slots inside a single server or tray to add `512GB–2TB` of DRAM locally. **Penguin’s MemoryAI Photonic Appliance** uses **Marvell Photonic Fabric (silicon photonics)** over optical fibers via **PCIe 6.0 / CXL 3.1 PF-NICs** and embeds **`576GB` of HBM3E** in front of **`16TB` of DDR5** at **`57.6 Tbps` (`7.2 TB/s`)** aggregate bandwidth—allowing accelerators across *multiple racks* to share an HBM-tiered remote memory pool over meters of fiber without copper signal loss. (标准 **CXL 2.0 E3.S 扩展模组**（如美光 CZ120 或单条 `80 GB/s` 的 SK hynix `256GB` CMM-DDR5）通过铜线插在单台服务器内部，主要为单机或单托盘补充 `512GB–2TB` 内存；而 **Penguin MemoryAI 硅光内存盒**基于 **Marvell Photonic Fabric 硅光互联技术**，通过 **PCIe 6.0 / CXL 3.1 光网卡（PF-NIC）** 走光纤传输，且设备内部自带 **`576GB` HBM3E 高速缓存层 + `16TB` DDR5 容量层**（聚合光带宽达 **`57.6 Tbps` / `7.2 TB/s`**），能够跨多个机柜实现准 HBM 级远程内存共享。)
+- **Q**: Can a single MSI XpertStation WS300 or GIGABYTE W775-V10-L01 really run the 594B Inkling 2 Small off a normal office wall outlet? / 单台微星 XpertStation WS300 或技嘉 W775-V10-L01 真的靠普通办公室插座就能流畅跑 594B 的 Inkling 2 Small 吗？
+  **A**: Yes. Both deskside GB300 towers use a single **`1600W` 80 PLUS Platinum PSU** (`44–46 dBA` closed-loop liquid cooling) and expose **`748GB` of coherent memory** (`252GB` HBM3e + `496GB` LPDDR5X). Because **Inkling 2 Small (`594B-A17B`)** compresses to **`~320 GB` in native `NVFP4`** (or `~352 GB` in `Q4_K_M`) and activates only **`17B` parameters (`8 of 384` experts) per token**, the entire checkpoint loads inside one tower with over `350 GB` free for long-context KV cache, delivering smooth interactive agent speeds without data-center 3-phase power. (完全可以。这两款量产 GB300 塔式工作站均采用单颗 **`1600W` 80 PLUS 白金电源**与 **`44–46 dBA` 闭环水冷**，提供 **`748GB` 硬件相干内存**（`252GB` HBM3e + `496GB` LPDDR5X）。由于 **Inkling 2 Small（`594B-A17B`）** 在原生 **`NVFP4`** 下权重仅约 **`320 GB`**（`Q4_K_M` 约 `352 GB`），且每生成一个 Token 仅激活 **`17B` 参数（384 选 8 专家）**，单台主机无需机房三相电即可全量装入模型并留出逾 `350 GB` 空间给长上下文 KV 缓存。)
+
+---
+
+## November 2026 Ultra-Sparse Multimodal MoEs: Tencent Hunyuan Hy4-Flash (224B-A12B · 64B Engram · LatentMoE · 1/6 KV Cache · DFly2) & Ant Group LingSante-3.1-air-VL (124B-A5.5B) / Flash (560B-A25B) Local Deployment
+### 2026 年 11 月超稀疏多模态 MoE 双雄实战：腾讯混元 Hy4-Flash（224B-A12B · 64B Engram 记忆表 · LatentMoE · 1/6 KV 缓存 · DFly2 投机解码）与蚂蚁医疗开源大模型 LingSante-3.1-air-VL（124B-A5.5B）/ Flash（560B-A25B）本地部署全解
+
+- **URL (EN)**: https://tinker-ai.com/guides/tencent-hy4-flash-224b-a12b-engram-latentmoe-dfly2-and-ant-lingsante-31-medical-vl-local-ai/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/tencent-hy4-flash-224b-a12b-engram-latentmoe-dfly2-and-ant-lingsante-31-medical-vl-local-ai/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: 96GB RTX PRO 6000 / 128GB MacBook Pro M5 Max & RTX Spark / 192GB GMKtec EVO-X5 Pro / 512GB Mac Studio M5 Ultra & 748GB GB300 Workstation
+- **Tested Hardware (ZH)**: 96GB RTX PRO 6000 / 128GB MacBook Pro M5 Max & RTX Spark / 192GB 极摩客 EVO-X5 Pro / 512GB Mac Studio M5 Ultra 与 748GB GB300 工作站
+- **Pinned Versions**: Tencent Hy4-Flash (tencent/Hy4-flash · tencent/Hy4-flash-FP8 · AngelSlim/Hy4-flash-GGUF · Tencent Hy License 1.0), Ant Group LingSante-3.1 (inclusionAI/LingSante-3.1-air-VL 124B-A5.5B & LingSante-3.1-flash 560B-A25B · MIT License), vLLM (vllm/vllm-openai:hy4-flash · --reasoning-parser hy_v4 · DFly2 Speculator) & SGLang Recipes, llama.cpp v1.0+ (-ot "engram\..*=CPU" Host RAM Hash-Table Offload + Q8_0 KV Cache)
+- **Verified Date**: 2026-11-24
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% Air-Gapped Local Execution (Essential for Clinical / PHI & Enterprise Document Privacy) — Once weights are downloaded from Hugging Face (tencent/Hy4-flash-FP8, AngelSlim/Hy4-flash-GGUF, inclusionAI/LingSante-3.1-air-VL), set HF_HUB_OFFLINE=1 to run 1M-context office/document agents and multimodal medical imaging analysis with zero external telemetry. Note: LingSante-3.1 models are MIT-licensed research prototypes and not certified clinical diagnostic devices.
+
+**Direct Summary (EN)**: Architecture breakdown, VRAM sizing, and local deployment guide for two mid-to-late November 2026 open-weight multimodal MoE families: Tencent Hunyuan’s Hy4-Flash (224B total / 12B active with a 64B Engram n-gram hash table at layers 1/11/21/31, LatentMoE 3072->1536 latent projection, 1:3 SWA/sparse attention cutting 1M-token KV cache to 1/6th, and a 0.85B DFly2 speculator via AngelSlim) alongside Ant Group’s MIT-licensed LingSante-3.1 medical AI duo—LingSante-3.1-air-VL (124B total / 5.5B active, 256K context for air-gapped radiology, dermatology & clinical GUI agents on 96GB–128GB desktops) and LingSante-3.1-flash (560B total / 25B active, 1M context clinical reasoning).
+**核心结论 (ZH)**: 深度拆解 2026 年 11 月中下旬开源的两大超稀疏多模态 MoE 家族并提供本地显存选型与部署脚本：一是腾讯混元 Hy4-Flash（总参 224B / 仅激活 12B，在 1/11/21/31 层外挂 64B Engram 多头哈希 N-Gram 记忆表、采用 3072->1536 降维 LatentMoE、通过 1:3 滑动窗口/稀疏混合注意力将百万上下文 KV 显存砍至 1/6，并自带 0.85B DFly2 投机头与 AngelSlim GGUF/FP8 工具链）；二是蚂蚁集团 11 月 24 日以 MIT 协议开源的医疗健康大模型双星——LingSante-3.1-air-VL（124B 总参 / 仅 5.5B 激活、256K 上下文，单台 96GB–128GB 桌面机即可全离线跑影像报告、120+ 皮肤病识别与医疗 GUI Agent）与 LingSante-3.1-flash（560B 总参 / 25B 激活、1M 上下文循证临床推理）。
+
+**Known Limits & Failure Boundaries**:
+- Spec-derived engineering analysis: Tencent Hy4-Flash (Nov 17, 2026) and Ant Group LingSante-3.1-air-VL / LingSante-3.1-flash (Nov 24, 2026) are brand-new late-November 2026 releases; throughput ranges reflect active-parameter bandwidth modeling and vendor technical reports.
+- Hy4-Flash’s ~224B total checkpoint includes a ~64B Engram n-gram lookup table alongside the routed MoE backbone—if you load all 224B in Q4_K_M (~131 GB) flat into a 128GB device, it will OOM; use llama.cpp -ot "engram\..*=CPU" to pin the sparse hash lookup tables in system DDR5 while keeping the 12B active transformer/LatentMoE weights in GPU VRAM.
+- To achieve Tencent’s 150+ tok/s decode benchmark on Hy4-Flash, you must load the companion 0.85B 5-layer DFly2 speculative drafter (trained with AngelSpec to reuse the main model’s sparse KV indices) and pass --reasoning-parser hy_v4 in vLLM.
+- Ant Group LingSante-3.1-air-VL and LingSante-3.1-flash are strictly open-source medical research prototypes (powering scenarios behind Ant’s Afu health assistant)—any hospital or clinic pilot must keep a human clinician in the loop and enforce HIPAA/PIPL air-gapped logging.
+- [ZH] 本文为基于腾讯混元 Hy4-Flash（2026 年 11 月 17 日发布）与蚂蚁集团 LingSante-3.1 系列（2026 年 11 月 24 日发布）官方技术报告与激活参数带宽模型的工程推算，性能区间标注 `[Spec-Est.]`。
+- [ZH] Hy4-Flash 的 ~224B 总参数中包含约 64B 的 Engram 多头哈希 N-Gram 静态记忆表——若在 128GB 设备上无差别全量加载 224B Q4_K_M（约 131 GB）会直接爆显存；本地部署应利用 llama.cpp 的 `-ot "engram\..*=CPU"` 将仅做 O(1) 哈希查表的 64B Engram 留在系统 DDR5 内存，仅把高频计算层与 LatentMoE 放进显存。
+- [ZH] 若要在服务端复现 Hy4-Flash 超过 150+ tok/s 的吐字速度，必须在 vLLM/SGLang 中同时挂载随模型发布的 0.85B 5 层 DFly2 投机草稿头（复用主模型稀疏 KV 索引）并启用 `--reasoning-parser hy_v4`。
+- [ZH] 蚂蚁 LingSante-3.1-air-VL 与 LingSante-3.1-flash 明确声明为医疗 AI 开源研究原型（非获批医疗器械），在医疗机构内网做辅助读片或循证检索试点时必须保留医生人工复核闭环。
+
+#### 1. Architecture & Memory Matrix: Hy4-Flash (224B-A12B) vs LingSante-3.1-air-VL (124B-A5.5B) vs LingSante-3.1-flash (560B-A25B) / 1. 架构与显存账本横评：混元 Hy4-Flash (224B-A12B) 对决蚂蚁 LingSante-3.1-air-VL (124B-A5.5B) 与 Flash (560B-A25B)
+Late November 2026 cemented a major shift in open-weight multimodal LLM design: **decoupling knowledge capacity from per-token active FLOPS and KV cache growth**. On **November 17, 2026**, Tencent Hunyuan released **`Hy4-Flash` (`~224B` total / `12B` active)** alongside **`AngelSlim`** FP8 and GGUF toolchains; one week later on **November 24, 2026**, Ant Group open-sourced its **MIT-licensed `LingSante-3.1` medical family** (`inclusionAI/LingSante-3.1-air-VL` at **`124B` total / `5.5B` active** and `inclusionAI/LingSante-3.1-flash` at **`560B` total / `25B` active**).
+
+Look at how these three models compare on total vs active parameters, quantized weight footprints, long-context KV cache scaling, and minimum local hardware tiers (`[Spec-Est.]` marks spec-derived throughput projections):
+2026 年 11 月中下旬的两场重量级开源发布，将「**百亿/千亿级知识总容量与极低单 Token 激活开销解耦**」推向了新高度：**11 月 17 日**，腾讯混元发布 **`Hy4-Flash`（总参约 `224B` / 激活仅 `12B`）** 及配套 **`AngelSlim`** 压缩工具链；**11 月 24 日**，蚂蚁集团在 Hugging Face（`inclusionAI`）以 **MIT 协议**开源了支撑「阿福（Afu）」健康应用的 **`LingSante-3.1` 医疗大模型双星**——轻量全模态 **`LingSante-3.1-air-VL`（总参 `124B` / 激活仅 `5.5B`）** 与深度循证旗舰 **`LingSante-3.1-flash`（总参 `560B` / 激活 `25B`）**。
+
+下表列出三款模型的参数拆解、量化体积、长上下文 KV 膨胀率与本地硬件甜点档位（`[Spec-Est.]` 为基于公开规格推算值）：
+
+**Table 1: Nov 2026 Ultra-Sparse Multimodal MoEs — Architecture, VRAM Footprint & Local Hardware Sizing / 表 1：2026 年 11 月三大超稀疏多模态 MoE 架构拆解、显存占用与本地硬件选型表**
+| Model & License (模型名称与开源协议) | Total / Active Params & Sub-Modules (总参数 / 激活参数与核心子模块) | Quantized Weights (`Q4_K_M` / `FP8`) (量化权重体积（`Q4_K_M` / `FP8`）) | Context & KV Cache Architecture (上下文窗口与 KV 缓存机制) | Sweet-Spot Local Hardware & Speed (推荐本地硬件与预估吞吐) |
+| --- | --- | --- | --- | --- |
+| **Tencent Hunyuan Hy4-Flash** (`tencent/Hy4-flash` · Tencent Hy 1.0) / **腾讯混元 Hy4-Flash**（`tencent/Hy4-flash` · Tencent Hy 1.0） | `~224B` total (`~64B` Engram + MoE + `0.43B` SigLIP2 + `0.85B` DFly2) / **`12B` active** (`11.3B` text) / 约 `224B` 总参（含 `64B` Engram + MoE + `0.43B` SigLIP2 + `0.85B` DFly2）/ **`12B` 激活** | `Q4_K_M`: `~131 GB` (`~93 GB` active MoE + `~38 GB` CPU Engram) · `FP8`: `~228 GB` / `Q4_K_M`：约 `131 GB`（MoE 主干约 `93 GB` + CPU Engram 约 `38 GB`）· `FP8`：约 `228 GB` | `1M` ctx · **1:3 Sparse + 512-tok SWA** (`1/6` of Hy4 KV, `1/24` of Hy3 KV) / `1M` 上下文 · **1:3 稀疏 + 512 窗口 SWA**（KV 显存仅为 Hy4 的 `1/6`、Hy3 的 `1/24`） | `192GB` EVO-X5 Pro / `128GB` Hybrid (`55–95 tok/s`); Multi-GPU FP8+DFly2 `150+ tok/s` `[Spec-Est.]` / `192GB` EVO-X5 Pro / `128GB` 异构（`55–95 tok/s`）；服务端 FP8+DFly2 达 `150+ tok/s` `[Spec-Est.]` |
+| **Ant LingSante-3.1-air-VL** (`inclusionAI/LingSante-3.1-air-VL` · **MIT**) / **蚂蚁 LingSante-3.1-air-VL**（`inclusionAI/LingSante-3.1-air-VL` · **MIT**） | `124B` total / **`5.5B` active** (Text + Image + Video + Medical GUI Agent) / `124B` 总参 / **仅 `5.5B` 激活**（文本 + 医疗影像 + 视频 + 医疗 GUI Agent） | `Q4_K_M`: `~72.6 GB` · `Q8_0`: `~131.5 GB` · `FP8`: `~128 GB` / `Q4_K_M`：约 `72.6 GB` · `Q8_0`：约 `131.5 GB` · `FP8`：约 `128 GB` | `256K` ctx · Sparse GQA multimodal KV (`~3.6 GB` @ `64K` `Q8_0`) / `256K` 上下文 · 稀疏 GQA 多模态 KV（`64K` `Q8_0` 仅占约 `3.6 GB`） | `96GB` RTX PRO 6000 (`95–135 tok/s`) or `128GB` M5 Max / RTX Spark (`48–75 tok/s`) `[Spec-Est.]` / `96GB` RTX PRO 6000（`95–135 tok/s`）或 `128GB` M5 Max / RTX Spark（`48–75 tok/s`）`[Spec-Est.]` |
+| **Ant LingSante-3.1-flash** (`inclusionAI/LingSante-3.1-flash` · **MIT**) / **蚂蚁 LingSante-3.1-flash**（`inclusionAI/LingSante-3.1-flash` · **MIT**） | `560B` total / **`25B` active** (Deep clinical reasoning & evidence cross-check) / `560B` 总参 / **`25B` 激活**（深度循证医学推理与多源证据冲突核验） | `Q4_K_M`: `~328 GB` · `FP8`: `~570 GB` / `Q4_K_M`：约 `328 GB` · `FP8`：约 `570 GB` | `1M` ctx · Long-horizon clinical evidence synthesis KV / `1M` 百万上下文 · 长周期病历与多篇文献交叉核验 KV | `512GB` Mac Studio M5 Ultra (`32–46 tok/s`) or `748GB` GB300 WS300 (`42–60 tok/s`) `[Spec-Est.]` / `512GB` Mac Studio M5 Ultra（`32–46 tok/s`）或 `748GB` GB300 WS300（`42–60 tok/s`）`[Spec-Est.]` |
+
+#### 2. Inside Tencent Hy4-Flash: 64B Engram Hash Tables, LatentMoE (3072->1536), 1/6 KV Cache & DFly2 Speculator / 2. 深度拆解腾讯混元 Hy4-Flash：64B Engram 哈希记忆表、LatentMoE 降维、1/6 KV 缓存与 DFly2 投机头
+Why does a `224B`-parameter model like **Tencent Hunyuan `Hy4-Flash`** run with the memory-bandwidth agility of a `12B` model while holding `1M` tokens of context? Four engineering mechanisms work together:
+
+1. **`~64B` Engram N-Gram Hash Memory (Inserted at Layers 1, 11, 21, and 31)**: Instead of forcing every factual lookup through dense FFN matrix multiplications, `Hy4-Flash` stores `~64B` parameters in external **learned bigram/trigram multi-head hash tables** at layers 1, 11, 21, and 31. Because an Engram lookup is an $O(1)$ index gather rather than a dense GEMM, **local `llama.cpp` users (`AngelSlim/Hy4-flash-GGUF`) can pin the `~38 GB` (`Q4_K_M`) Engram tensors in system DDR5 RAM (`-ot "engram\..*=CPU"`) with almost zero latency penalty**, shrinking the GPU VRAM requirement from `~131 GB` down to **`~93 GB`**!
+2. **LatentMoE (`3,072 -> 1,536` Latent Projection)**: Before routing tokens to **`16 routed experts + 1 shared expert`**, `Hy4-Flash` projects hidden states from `3,072` dimensions down to a `1,536`-dimensional latent bottleneck. This cuts expert weight reads and multi-GPU all-to-all traffic in half while preserving fine-grained 17-expert combinatorics.
+3. **1:3 Hybrid Sparse & Sliding-Window Attention (`512`-Token SWA)**: Three out of every four layers use a tight `512`-token sliding window while every fourth layer performs indexed sparse attention across the `1M` context—shrinking the KV cache footprint to **1/6th of Hy4 and 1/24th of Hy3**.
+4. **`0.85B` DFly2 Speculative Drafter + `AngelSlim`**: Trained with Tencent’s *AngelSpec* toolkit, the 5-layer `0.85B` **DFly2** drafter shares the main model’s sparse KV indices to draft multiple tokens in parallel, pushing vLLM/SGLang 4-bit/FP8 throughput past **`150+ tok/s`**.
+为什么总参数高达 `224B` 的 **腾讯混元 `Hy4-Flash`** 能够拥有 `12B` 小模型的吐字敏捷度，同时轻松撑起 `1M` 百万上下文？核心在于四项环环相扣的架构创新：
+
+1. **外挂 `~64B` Engram 多头哈希 N-Gram 记忆表（插入第 1、11、21、31 层）**：`Hy4-Flash` 没有把所有长尾百科知识都塞进需要全量乘加的 FFN 专家层，而是将约 `64B` 参数做成基于二元/三元词组的多头哈希查找表，仅在第 1、11、21、31 层按索引做 $O(1)$ 查表。这对本地玩家意味着一个神级技巧：**使用 `AngelSlim/Hy4-flash-GGUF` 配合 `llama.cpp` 时，可通过 `-ot "engram\..*=CPU"` 将约 `38 GB`（`Q4_K_M`）的 Engram 静态哈希表直接锁在宿主机 DDR5 内存里，几乎不损失解码速度**，从而把 GPU 显存需求从 `131 GB` 一举压到 **`93 GB` 左右**（单张 `96GB` RTX PRO 6000 或 `128GB` 统一内存主机即可吃下）！
+2. **LatentMoE 潜在空间降维路由（`3,072 -> 1,536` 维）**：在把 Token 分发给 **`16 个路由专家 + 1 个共享专家`** 之前，先将隐藏层维度从 `3,072` 压缩至 `1,536` 维潜在空间，使多卡 All-to-All 通信量与专家访存带宽直接减半。
+3. **1:3 稀疏注意力与 `512` 窗口滑动注意力（SWA）交织**：每 4 层中有 3 层仅维护 `512` Token 的局部滑动窗口，仅 1 层执行全局稀疏索引注意力，将长上下文 KV 缓存体积暴砍至 **Hy4 的 1/6、Hy3 的 1/24**。
+4. **`0.85B` DFly2 投机解码草稿头 + `AngelSlim` 工具链**：基于 *AngelSpec* 训练的 5 层 `0.85B` **DFly2** 投机头直接复用主模型的稀疏 KV 索引并行起草多个 Token，在 vLLM/SGLang 下配合 4-bit/FP8 算子可突破 **`150+ tok/s`**。
+
+#### 3. Ant Group LingSante-3.1-air-VL (124B-A5.5B) & Flash (560B-A25B): Air-Gapped MIT Medical AI on Local Workstations / 3. 蚂蚁开源医疗大模型 LingSante-3.1-air-VL (124B-A5.5B) 与 Flash (560B-A25B)：96GB–128GB 本地全离线部署
+Healthcare is the single most privacy-sensitive domain for AI: hospital radiology departments, dermatology clinics, and clinical research teams cannot upload raw patient X-rays or electronic health records (PHI) to third-party cloud APIs. On **November 24, 2026**, Ant Group’s healthcare team released **`LingSante-3.1-air-VL`** and **`LingSante-3.1-flash`** on Hugging Face (`inclusionAI`) under a permissive **MIT License**.
+
+- **`LingSante-3.1-air-VL` (`124B` total / `5.5B` active · `256K` context)**: Built atop *Ling-3.0-flash-VL*, this multimodal MoE ingests **text, high-resolution medical images, and video**. It is trained for chest X-ray multi-finding reporting (pneumonia, pleural effusion, cardiomegaly), dermatological triage across **120+ skin conditions**, lab report & nutritional analysis, and **medical GUI agent automation**. Because only **`5.5B` parameters activate per token** and its `Q4_K_M` checkpoint is **`~72.6 GB`**, a single **`96GB` RTX PRO 6000 Blackwell** (`95–135 tok/s`), **`128GB` MacBook Pro M5 Max / RTX Spark** (`48–75 tok/s`), or **`192GB` GMKtec EVO-X5 Pro** runs it 100% offline with ample headroom for `64K–128K` multimodal context.
+- **`LingSante-3.1-flash` (`560B` total / `25B` active · `1M` context)**: Engineered for deep evidence-based clinical reasoning, multi-guideline cross-referencing, and resolving conflicting clinical evidence across up to **1 million tokens** of medical literature and longitudinal patient histories. At `~328 GB` (`Q4_K_M`), it slots cleanly into a single **`512GB` Mac Studio M5 Ultra** or **`748GB` MSI XpertStation WS300 / GIGABYTE W775-V10 GB300 tower**.
+医疗健康是对数据隐私与物理隔离要求最严苛的行业：医院影像科、皮肤科门诊与临床科研团队绝不可能将患者原始胸片（DICOM/X-ray）或电子病历（PHI）上传至外部公有云 API。**2026 年 11 月 24 日**，蚂蚁集团医疗 AI 团队在 Hugging Face（`inclusionAI`）以极其宽松的 **MIT 开源协议**发布了 **`LingSante-3.1-air-VL`** 与 **`LingSante-3.1-flash`**：
+
+- **`LingSante-3.1-air-VL`（总参 `124B` / 每 Token 仅激活 `5.5B` · `256K` 上下文）**：基于 *Ling-3.0-flash-VL* 打造的原有多模态 MoE，同时支持**文本、高分辨率医学图像与视频**输入，覆盖胸部 X 光多病灶辅助读片（肺炎、胸腔积液等）、**120 余种皮肤病视觉识别**、检验单解读、膳食营养评估及**医疗系统 GUI Agent 自动化操作**。由于其 **`Q4_K_M` 权重仅约 `72.6 GB`** 且每 Token 仅激活 **`5.5B` 参数**，单张 **`96GB` RTX PRO 6000 Blackwell**（`95–135 tok/s`）、**`128GB` MacBook Pro M5 Max / RTX Spark**（`48–75 tok/s`）或 **`192GB` 极摩客 EVO-X5 Pro** 即可在科室本地 100% 断网流畅运行。
+- **`LingSante-3.1-flash`（总参 `560B` / 激活 `25B` · `1M` 百万上下文）**：专攻复杂临床循证推理、跨科室指南冲突核验与长周期病历深度综合分析。其 `Q4_K_M` 权重约 `328 GB`，单台 **`512GB` Mac Studio M5 Ultra** 或 **`748GB` 微星 WS300 / 技嘉 W775-V10 GB300 塔式工作站**即可全量驻留内存。
+
+#### 4. Reproducible Local Launchers: vLLM Hy4-Flash + DFly2, llama.cpp Engram CPU Offload & Air-Gapped LingSante-3.1-air-VL / 4. 可复现本地部署命令：vLLM Hy4-Flash + DFly2 投机加速、llama.cpp Engram 内存卸载与 LingSante-3.1 全离线启动
+Run the commands below to serve **Tencent `Hy4-Flash`** either via official vLLM FP8 + `DFly2` speculative decoding or via `llama.cpp` (`AngelSlim/Hy4-flash-GGUF`) with `-ot "engram\..*=CPU"` to fit `96GB–128GB` machines, or launch **Ant Group’s `LingSante-3.1-air-VL` (`124B-A5.5B`)** in strict air-gapped mode (`HF_HUB_OFFLINE=1`):
+使用以下命令即可通过官方 vLLM FP8 + `DFly2` 投机头或 `llama.cpp`（利用 `-ot "engram\..*=CPU"` 将 64B Engram 静态哈希表卸载至系统内存以塞进 `96GB–128GB` 机器）启动 **腾讯混元 `Hy4-Flash`**，或在严格断网模式（`HF_HUB_OFFLINE=1`）下部署 **蚂蚁 `LingSante-3.1-air-VL` (`124B-A5.5B`)**：
+```bash
+# 1) vLLM FP8 + DFly2 (0.85B 5-layer speculator) + hy_v4 reasoning parser for Tencent Hy4-Flash
+vllm serve tencent/Hy4-flash-FP8 \
+  --trust-remote-code --kv-cache-dtype fp8 \
+  --max-model-len 262144 --reasoning-parser hy_v4 \
+  --speculative-config '{"model":"tencent/Hy4-flash-DFly2-0.85B","num_speculative_tokens":4}' \
+  --gpu-memory-utilization 0.90 --port 8000
+
+# 2) Fit 224B Hy4-Flash on a 96GB-128GB Workstation: pin 64B Engram hash tables (~38GB) to Host DDR5 RAM
+llama-server -m ./models/AngelSlim-Hy4-flash-Q4_K_M.gguf \
+  -ngl 99 -fa on \
+  -ot "engram\..*=CPU" \
+  --cache-type-k q8_0 --cache-type-v q8_0 \
+  -c 131072 --host 127.0.0.1 --port 8000
+
+# 3) Air-Gapped Medical Multimodal MoE: Ant Group LingSante-3.1-air-VL (124B-A5.5B, MIT License)
+export HF_HUB_OFFLINE=1
+vllm serve inclusionAI/LingSante-3.1-air-VL \
+  --trust-remote-code --kv-cache-dtype fp8 \
+  --max-model-len 131072 --limit-mm-per-prompt '{"image": 6, "video": 1}' \
+  --gpu-memory-utilization 0.88 --port 8001
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: Why doesn’t offloading Hy4-Flash’s 64B Engram parameters to CPU RAM destroy token generation speed like normal CPU layer offloading? / 为什么把混元 Hy4-Flash 的 64B Engram 参数卸载到 CPU 内存，不会像普通层卸载那样导致吐字速度暴跌？
+  **A**: When you offload a standard Transformer layer or MoE expert to CPU RAM, the CPU must read megabytes to gigabytes of weight matrices and execute heavy GEMM math on every token. By contrast, **Hy4-Flash’s `~64B` Engram module** (inserted only at layers 1, 11, 21, and 31) is a **multi-head n-gram hash lookup table**: for any given token bigram/trigram, the engine only fetches a tiny handful of embedding vectors ($O(1)$ sparse index lookup, kilobytes rather than gigabytes). Keeping that `~38 GB` (`Q4_K_M`) table in system DDR5 saves massive GPU VRAM with negligible PCIe bandwidth impact. (普通 Transformer 层或 MoE 专家卸载到 CPU 时，每生成一个 Token 都要在内存中读取数 GB 权重矩阵并做密集矩阵乘法；而 **Hy4-Flash 的 `~64B` Engram 模块**（仅插在第 1、11、21、31 层）本质是**多头 N-Gram 哈希查找表**——对当前词组只需做 $O(1)$ 稀疏索引查表，每次仅跨 PCIe 读取几 KB 的嵌入向量。因此将这约 `38 GB`（`Q4_K_M`）的哈希表留在系统 DDR5 内存中，既省下了宝贵显存，又几乎不拖累 GPU 吐字速度。)
+- **Q**: What hardware do I need to run Ant Group’s LingSante-3.1-air-VL (124B-A5.5B) locally in a clinic or research lab? / 在科室或实验室本地跑蚂蚁开源的 LingSante-3.1-air-VL（124B-A5.5B），最低和推荐配什么硬件？
+  **A**: Because **LingSante-3.1-air-VL** has `124B` total parameters (`~72.6 GB` in `Q4_K_M`) but activates only **`5.5B` parameters per token**, your primary constraint is **memory capacity (`>=80–96 GB` usable)** rather than raw FLOPS. A single **`96GB` NVIDIA RTX PRO 6000 Blackwell** (`~95–135 tok/s`), a **`128GB` MacBook Pro M5 Max / Mac Studio / RTX Spark mini PC** (`~48–75 tok/s`), or a **`192GB` GMKtec EVO-X5 Pro / AMD Strix Halo workstation** (`~42–65 tok/s`) can run it 100% offline with room for high-resolution X-ray/dermatology images and `64K–128K` context. (由于 **LingSante-3.1-air-VL** 总参数为 `124B`（`Q4_K_M` 权重约 `72.6 GB`），但每 Token 仅激活 **`5.5B` 参数**，硬件选型的第一门槛是**可用显存/统一内存容量（建议 `>=80–96 GB`）**。单张 **`96GB` NVIDIA RTX PRO 6000 Blackwell**（约 `95–135 tok/s`）、**`128GB` MacBook Pro M5 Max / Mac Studio / RTX Spark 迷你主机**（约 `48–75 tok/s`），或高性价比的 **`192GB` 极摩客 EVO-X5 Pro 工作站**（约 `42–65 tok/s`）均可单机 100% 离线运行并同时处理多张高分辨率医学影像与 `64K–128K` 上下文。)
+
+---
+
 ## Default Parameterized Artifacts
 
 ### run-mac-benchmark.sh (Apple Silicon Mac Fixed-Task Speed & Context Benchmark Script / Mac 本地模型固定任务、上下文与生成速度复现脚本)
@@ -6942,6 +7143,103 @@ fi
 
 ```
 
+### run-gb300-ws300-inkling2-small-and-kv-pool.sh (SC26 Optical / CXL / NVMe-oF KV Pool & Deskside GB300 (MSI WS300 / GIGABYTE W775-V10) Inkling 2 Small (594B-A17B) Launcher / SC26 光互联 / CXL / NVMe-oF KV 缓存池与桌边 GB300（微星 WS300 / 技嘉 W775-V10）运行 Inkling 2 Small (594B-A17B) 启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/sc26-optical-cxl-kv-pool-and-gb300-ws300-inkling2-small-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/sc26-optical-cxl-kv-pool-and-gb300-ws300-inkling2-small-launcher/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — SC26 Optical/CXL/NVMe-oF KV Pool & Deskside GB300 (MSI WS300 / GIGABYTE W775-V10) Inkling 2 Small Launcher (Guide #63)
+set -euo pipefail
+
+MODE="vllm_ws300_inkling2_small_nvfp4"
+MODEL="thinking-machines/Inkling-2-Small-NVFP4"
+CTX="262144"
+KV_DIR="/mnt/gen6-kv-scratch"
+PORT="8000"
+
+echo "=== [SC26 Deskside GB300 & CXL/NVMe-oF KV Tier Audit] ==="
+numactl --hardware 2>/dev/null | grep -E 'available|node [0-9]+ size|node distances' || true
+lspci -vv 2>/dev/null | grep -E 'CXL|ConnectX-8|ConnectX-7|Non-Volatile|LnkSta:' | head -n 24 || true
+
+if [ "$MODE" = "audit_gb300_cxl_topology" ]; then
+  echo "=== [Topology Check] Verifying HBM3e + LPDDR5X / CXL DAX tiers & ConnectX-8 400GbE links ==="
+  nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>/dev/null || true
+  ibv_devinfo -l 2>/dev/null || echo "[INFO] ibv_devinfo not installed"
+elif [ "$MODE" = "vllm_ws300_inkling2_small_nvfp4" ]; then
+  echo "=== [GB300 748GB Coherent] Serving $MODEL (594B-A17B, ctx=$CTX) on MSI WS300 / GIGABYTE W775-V10 ==="
+  exec vllm serve "$MODEL" \
+    --quantization nvfp4 \
+    --kv-cache-dtype fp8 \
+    --max-model-len "$CTX" \
+    --enable-prefix-caching \
+    --gpu-memory-utilization 0.92 --port "$PORT"
+elif [ "$MODE" = "vllm_lmcache_cxl_nvmeof_pool" ]; then
+  echo "=== [LMCache Tiered KV Pool] Offloading Multi-Turn KV to CXL DRAM + $KV_DIR ==="
+  mkdir -p "$KV_DIR"
+  export LMCACHE_MAX_LOCAL_CPU_SIZE="256.0"
+  export LMCACHE_LOCAL_DISK="file://$KV_DIR/"
+  export LMCACHE_MAX_LOCAL_DISK_SIZE="2048.0"
+  exec vllm serve "$MODEL" \
+    --kv-cache-dtype fp8 \
+    --max-model-len "$CTX" \
+    --kv-transfer-config '{"kv_connector":"LMCacheConnectorV1","kv_role":"kv_both"}' \
+    --gpu-memory-utilization 0.88 --port "$PORT"
+else
+  echo "Unknown DEPLOY_MODE=$MODE (expected: audit_gb300_cxl_topology | vllm_ws300_inkling2_small_nvfp4 | vllm_lmcache_cxl_nvmeof_pool)" >&2
+  exit 1
+fi
+
+```
+
+### run-hy4-flash-and-lingsante31-medical.sh (Tencent Hunyuan Hy4-Flash (224B-A12B · Engram + DFly2) & Ant Group LingSante-3.1-air-VL (124B-A5.5B) / Flash (560B-A25B) Local Launcher / 腾讯混元 Hy4-Flash（224B-A12B · Engram + DFly2）与蚂蚁医疗 LingSante-3.1-air-VL（124B-A5.5B）/ Flash（560B-A25B）本地启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/hy4-flash-engram-dfly2-and-lingsante31-medical-vl-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/hy4-flash-engram-dfly2-and-lingsante31-medical-vl-launcher/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — Tencent Hy4-Flash (224B-A12B · Engram + LatentMoE + DFly2) & Ant LingSante-3.1 Medical MoE Launcher (Guide #64)
+set -euo pipefail
+
+MODE="vllm_hy4_flash_dfly2_fp8"
+HY4_GGUF="./models/AngelSlim-Hy4-flash-Q4_K_M.gguf"
+LINGSANTE="inclusionAI/LingSante-3.1-air-VL"
+CTX="131072"
+PORT="8000"
+
+echo "=== [Host Memory & GPU Check] ==="
+nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>/dev/null || echo "[INFO] Running on Unified Memory / Apple Silicon / CPU-GPU Hybrid"
+
+if [ "$MODE" = "vllm_hy4_flash_dfly2_fp8" ]; then
+  echo "=== [vLLM Hy4-Flash FP8 + DFly2 0.85B Speculator] Serving tencent/Hy4-flash-FP8 (ctx=$CTX) ==="
+  exec vllm serve tencent/Hy4-flash-FP8 \
+    --trust-remote-code \
+    --kv-cache-dtype fp8 \
+    --max-model-len "$CTX" \
+    --reasoning-parser hy_v4 \
+    --speculative-config '{"model":"tencent/Hy4-flash-DFly2-0.85B","num_speculative_tokens":4}' \
+    --gpu-memory-utilization 0.90 --port "$PORT"
+elif [ "$MODE" = "llamacpp_hy4_flash_engram_offload" ]; then
+  echo "=== [llama.cpp AngelSlim GGUF] Keeping 12B active layers + 1/6 SWA KV on GPU while pinning 64B Engram tables to Host RAM ==="
+  exec llama-server -m "$HY4_GGUF" \
+    -ngl 99 -fa on \
+    -ot "engram\..*=CPU" \
+    --cache-type-k q8_0 --cache-type-v q8_0 \
+    -c "$CTX" --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "vllm_lingsante31_air_vl" ]; then
+  echo "=== [Air-Gapped Medical AI] Serving $LINGSANTE (124B-A5.5B MIT Multimodal MoE, ctx=$CTX) ==="
+  export HF_HUB_OFFLINE=1
+  exec vllm serve "$LINGSANTE" \
+    --trust-remote-code \
+    --kv-cache-dtype fp8 \
+    --max-model-len "$CTX" \
+    --limit-mm-per-prompt '{"image": 6, "video": 1}' \
+    --gpu-memory-utilization 0.88 --port "$PORT"
+else
+  echo "Unknown RUN_MODE=$MODE (expected: vllm_hy4_flash_dfly2_fp8 | llamacpp_hy4_flash_engram_offload | vllm_lingsante31_air_vl)" >&2
+  exit 1
+fi
+
+```
+
 ## Local LLM Hardware Usable Limits & Model Presets Reference
 
 - **Apple Silicon Mac (16GB Unified)** (Apple Silicon Mac（16GB 统一内存）): Total Memory 16 GB | Safe Usable Ceiling: **11.5 GB** | Bandwidth: 120 GB/s — macOS reserves ~4.5GB for OS & WindowServer; exceeding ~11.5GB triggers SSD swap and severe slowdown.
@@ -7033,6 +7331,10 @@ fi
 - **Qualcomm Dragonfly AI200 Card (768GB LPDDR5X · Hexagon NPU · Rack-Scale)** (高通 Dragonfly AI200 单卡（768GB LPDDR5X · Hexagon NPU · 机柜级推理）): Total Memory 768 GB | Safe Usable Ceiling: **720 GB** | Bandwidth: 1200 GB/s — SC26 Cirrascale evaluation card with 768GB LPDDR5X (56 cards = ~43TB / ~414 TB/s rack-level spec, 140–160kW DLC); per-card bandwidth modeled conservatively for single-card sizing.
 - **Phison NPU Computational Storage SSD (64GB Onboard · 130 GB/s · Near-Data PoC)** (群联内置 NPU 计算存储 SSD（64GB 板载内存 · 130 GB/s · 近数据概念版）): Total Memory 64 GB | Safe Usable Ceiling: **56 GB** | Bandwidth: 130 GB/s — SC26 PoC enterprise SSD integrating an NPU (36,800 DMIPS scalar quote) + 64GB onboard memory (130 GB/s) running llama.cpp/vLLM/PyTorch near data to cut host PCIe transfers 10x–100x.
 - **ASUS ProArt GR1X / MSI EdgeMesa N AI+ (RTX Spark N1X · 128GB UMA · 300 GB/s)** (华硕 ProArt GR1X / 微星 EdgeMesa N AI+（RTX Spark N1X · 128GB 统一内存 · 300 GB/s）): Total Memory 128 GB | Safe Usable Ceiling: **108 GB** | Bandwidth: 300 GB/s — Retail 1.15L–1.3L Windows-on-Arm mini PCs (140W sustained, 6,144 Blackwell CUDA cores, 1 PFLOP FP4, 10GbE + Wi-Fi 7); ~108GB usable under Windows 11 Pro for Inkling 2 Mini & WeMM-Video-35B.
+- **Penguin MemoryAI Photonic Appliance (Marvell Photonic Fabric · 576GB HBM3E + 16TB DDR5 · 7.2 TB/s)** (Penguin MemoryAI 硅光内存盒（Marvell Photonic Fabric · 576GB HBM3E + 16TB DDR5 · 7.2 TB/s）): Total Memory 576 GB | Safe Usable Ceiling: **540 GB** | Bandwidth: 7200 GB/s — SC26 silicon photonics memory appliance (PF-NIC PCIe 6.0 / CXL 3.1) pooling 576GB HBM3E fast cache tier (modeled here) + 16TB DDR5 capacity tier across racks at 57.6 Tbps (7.2 TB/s) optical bandwidth.
+- **SK hynix MARS CXL KV Pool (8× 256GB CMM-DDR5 · 640 GB/s + Hybrid CXL SSD)** (SK hynix MARS 机柜级 CXL 内存池（8× 256GB CMM-DDR5 · 640 GB/s + 混合 CXL 闪存）): Total Memory 2048 GB | Safe Usable Ceiling: **1920 GB** | Bandwidth: 640 GB/s — SC26 Memory-centric AI Rack System pooling 2nd-gen 256GB CMM-DDR5 modules (80 GB/s each) + CXL Hybrid DRAM/SSD to cut multi-turn agent TTFT by >80% (~80s -> ~15s).
+- **MSI XpertStation WS300 / GIGABYTE W775-V10 (GB300 · 748GB Coherent + ConnectX-8 800GbE)** (微星 XpertStation WS300 / 技嘉 W775-V10（GB300 · 748GB 相干内存 + ConnectX-8 800GbE）): Total Memory 748 GB | Safe Usable Ceiling: **710 GB** | Bandwidth: 2650 GB/s — SC26 OEM deskside GB300 liquid-cooled towers (44–46 dBA, 1600W PSU): 252GB HBM3e (7.1 TB/s) + 496GB LPDDR5X ECC (396 GB/s) over 900 GB/s NVLink-C2C, ConnectX-8 2x400GbE & 2x PCIe Gen6 M.2 scratch bays.
+- **AIC F2026 2U 26-Bay PCIe Gen5 JBOF + 96GB GPU Node (4× DPU NVMe-oF KV Tier)** (AIC F2026 2U 26 盘位 PCIe Gen5 全闪 JBOF + 96GB GPU 节点（4× DPU NVMe-oF KV 池）): Total Memory 352 GB | Safe Usable Ceiling: **324 GB** | Bandwidth: 1150 GB/s — SC26 2U 26-bay dual-port PCIe Gen5 NVMe JBOF (up to 4 DPUs, powering MangoBoost KESAR-E) paired with a 96GB GPU + 256GB CXL/DDR5 node for multi-TB persistent NVMe-oF KV streaming.
 
 - **Qwen2.5-1.5B-Instruct** (1.54B params, 28 layers, 2 KV heads): Ultra-low-power Raspberry Pi 5 voice loop & sub-100ms IDE FIM tab autocomplete (树莓派 5 极速离线语音对答、低配设备毫秒级 IDE 行间代码补全)
 - **Qwen2.5-3B-Instruct** (3.09B params, 36 layers, 2 KV heads): Edge devices, Raspberry Pi 5 (8GB), ultra-fast RSS/tag classification (边缘设备、树莓派 5 (8GB)、超低延迟 RSS 分类与轻量提取)
@@ -7088,6 +7390,9 @@ fi
 - **NVIDIA Nemotron-3.5-Super-VL-120B-A12B (Mamba-2 + MoE + C-RADIO VL · 1M Ctx)** (120B params, 12 layers, 4 KV heads): OpenMDW-1.1 120B-A12B hybrid Mamba-2 + 512-expert MoE + C-RADIO v4-H vision/video encoder (1M ctx, NVFP4/GGUF): ideal for 96GB–192GB workstations (GMKtec EVO-X5 Pro / RTX PRO 6000) (OpenMDW-1.1 协议 120B-A12B 混合 Mamba-2 + 512 专家 MoE + C-RADIO v4-H 图文视频视觉编码器（1M 上下文，NVFP4/GGUF）：契合 96GB–192GB 工作站（EVO-X5 Pro / RTX PRO 6000）)
 - **Thinking Machines Inkling 2 Mini (26.4B-A3B · 48-Pass Looped MoE · 1M Ctx)** (26.4B params, 48 layers, 8 KV heads): Apache 2.0 multimodal Looped Transformer MoE (26.4B total / ~3.1B unique active weights, 24 physical layers looping middle 12 layers 3x = 48 logical KV passes, DSpark MTP, 1M ctx, NVFP4/MXFP8/GGUF): fits 32GB Mac/GPU & 128GB RTX Spark (Apache 2.0 多模态循环 Transformer MoE（总参 26.4B / 仅 3.1B 独立激活权重，24 层物理权重中段循环 3 次 = 48 逻辑 KV 层，自带 DSpark 投机头与 1M 上下文，原生 NVFP4/MXFP8/GGUF）：适配 32GB Mac/独显与 128GB RTX Spark)
 - **Tencent WeMM-Video-35B-A3B (Bilingual Audio-Visual MoE · 256K Ctx)** (35B params, 40 layers, 2 KV heads): Apache 2.0 Chinese-English omni-modal audio + video + image + text MoE (35B total / 3B active, 256K ctx, BF16 ~68–72 GiB / NVFP4 ~24.1 GiB): ideal for 32GB RTX 5090 (NVFP4) or 128GB RTX Spark (FP8/BF16) (Apache 2.0 中英双语音画全模态理解 MoE（总参 35B / 激活 3B，256K 上下文，BF16 约 68–72 GiB / NVFP4 约 24.1 GiB）：适配 32GB RTX 5090（NVFP4）或 128GB RTX Spark（FP8/BF16）)
+- **Thinking Machines Inkling 2 Small (594B-A17B · 384-Expert Multimodal MoE · 1M Ctx)** (594B params, 48 layers, 8 KV heads): 594B total / 17B active (8/384 experts) 48-layer hybrid local/global attention multimodal MoE (1M ctx, native NVFP4 ~320 GB / Q4_K_M ~352 GB): fits single 748GB MSI WS300 / GIGABYTE W775-V10 GB300 tower or 512GB M5 Ultra (总参 594B / 仅 17B 激活（384 选 8 专家）48 层混合局部/全局注意力图文多模态 MoE（1M 上下文，NVFP4 约 320 GB / Q4_K_M 约 352 GB）：单台 748GB 微星 WS300 / 技嘉 W775-V10 GB300 塔式工作站或 512GB M5 Ultra 即可装入)
+- **Tencent Hunyuan Hy4-Flash (224B-A12B · 64B Engram + LatentMoE + DFly2 · 1M Ctx)** (224B params, 36 layers, 2 KV heads): ~224B total (~64B Engram hash table + LatentMoE + 0.85B DFly2) / 12B active multimodal MoE with 1:3 SWA shrinking 1M-ctx KV cache to 1/6th: fits 192GB EVO-X5 Pro or 96GB–128GB host with -ot "engram\..*=CPU" (总参约 224B（含 64B Engram 静态哈希记忆表 + LatentMoE + 0.85B DFly2 投机头）/ 仅 12B 激活，1:3 SWA 将百万上下文 KV 显存砍至 1/6：适配 192GB EVO-X5 Pro，或用 -ot "engram\..*=CPU" 塞进 96GB–128GB 主机)
+- **Ant Group LingSante-3.1-air-VL (124B-A5.5B · MIT Multimodal Medical MoE · 256K Ctx)** (124B params, 44 layers, 4 KV heads): MIT-licensed 124B total / 5.5B active medical multimodal MoE (X-ray/dermatology/video/GUI agent, 256K ctx, Q4_K_M ~72.6 GB): runs 100% air-gapped on single 96GB RTX PRO 6000 or 128GB M5 Max / RTX Spark (MIT 开源协议 124B 总参 / 仅 5.5B 激活的医疗健康全模态 MoE（胸片/120+ 皮肤病识别/视频/医疗 GUI Agent，256K 上下文，Q4_K_M 约 72.6 GB）：单张 96GB RTX PRO 6000 或 128GB M5 Max / RTX Spark 即可 100% 离线运行)
 
 ## Interactive Troubleshooter Root Causes & Verified Solutions
 

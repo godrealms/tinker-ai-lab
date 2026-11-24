@@ -3,7 +3,7 @@
 > **Official Website**: [https://tinker-ai.com/](https://tinker-ai.com/) | **中文官网**: [https://tinker-ai.com/zh/](https://tinker-ai.com/zh/)
 > **GitHub Pages Directory**: [https://godrealms.github.io/tinker-ai-lab/](https://godrealms.github.io/tinker-ai-lab/)
 
-This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **62 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
+This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **64 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
 
 ---
 
@@ -11,9 +11,9 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 | Tool | English URL | 中文版入口 | Description |
 | :--- | :--- | :--- | :--- |
-| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **54 model presets** and **89 hardware profiles** |
+| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **57 model presets** and **93 hardware profiles** |
 | **Interactive AI Troubleshooter** | [Open Troubleshooter](https://tinker-ai.com/tools/troubleshooter/) | [打开排障决策树](https://tinker-ai.com/zh/tools/troubleshooter/) | **13** step-by-step diagnostic decision trees for local LLM networking, VRAM OOM, SSE stream drops, RoCEv2 rings, and NPU/GPU traps |
-| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **62 verified configs** directly in your browser before downloading |
+| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **64 verified configs** directly in your browser before downloading |
 
 ---
 
@@ -25,7 +25,7 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 ---
 
-## 3. All 62 Public Guides & Companion Scripts
+## 3. All 64 Public Guides & Companion Scripts
 
 | # | English Guide | 中文实测指南 | Companion Script (`scripts/`) | Online Customizer |
 | :-: | :--- | :--- | :--- | :--- |
@@ -91,6 +91,8 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 | **60** | [192GB Desktop AI Workstation, Native XDNA 2 NPU & Mamba-2 Hybrid MoE: GMKtec EVO-X5 Pro (Ryzen AI Max+ PRO 495 · 160GB VRAM) + Unsloth Desktop Q4NX NPU Running NVIDIA Nemotron 3.5 Super VL (120B-A12B) & Lightning 30B](https://tinker-ai.com/guides/gmktec-evo-x5-pro-192gb-unsloth-desktop-xdna2-npu-and-nemotron-35-super-vl-120b/) | [192GB 桌面工作站、原生 XDNA 2 NPU 与 Mamba-2 混合 MoE 实战：GMKtec EVO-X5 Pro（160GB 显存 · 双万兆）+ Unsloth Desktop Q4NX 运行 NVIDIA Nemotron 3.5 Super VL (120B-A12B) 与 Lightning 30B](https://tinker-ai.com/zh/guides/gmktec-evo-x5-pro-192gb-unsloth-desktop-xdna2-npu-and-nemotron-35-super-vl-120b/) | [`run-evox5-unsloth-npu-nemotron35.sh`](scripts/run-evox5-unsloth-npu-nemotron35.sh) | [Customize](https://tinker-ai.com/artifacts/evo-x5-192gb-unsloth-npu-nemotron35-launcher/) |
 | **61** | [SC26 Non-HBM Memory Wall Breakers: Intel GPU D270 (160GB/480GB Xe3P LPDDR5X) & Qualcomm Dragonfly AI200 (768GB LPDDR) vs Phison NPU Computational Storage SSD (64GB · 130 GB/s)](https://tinker-ai.com/guides/sc26-lpddr5x-inference-intel-gpu-d270-qualcomm-dragonfly-ai200-vs-phison-npu-ssd/) | [SC26 绕开 HBM 内存墙三大新硬件拆解：Intel GPU D270（160GB/480GB Xe3P LPDDR5X）、高通 Dragonfly AI200（768GB LPDDR）对决群联内置 NPU 计算存储 SSD（64GB · 130 GB/s）](https://tinker-ai.com/zh/guides/sc26-lpddr5x-inference-intel-gpu-d270-qualcomm-dragonfly-ai200-vs-phison-npu-ssd/) | [`audit-lpddr5x-accelerator-and-nvme-rag.sh`](scripts/audit-lpddr5x-accelerator-and-nvme-rag.sh) | [Customize](https://tinker-ai.com/artifacts/sc26-d270-dragonfly-phison-ssd-evaluator/) |
 | **62** | [NVIDIA RTX Spark Retail Mini PCs (ASUS ProArt GR1X & MSI EdgeMesa N AI+) + Looped MoE & Omni-Video: Running Thinking Machines Inkling 2 Mini (26.4B-A3B · 1M Ctx · NVFP4) & Tencent WeMM-Video-35B-A3B](https://tinker-ai.com/guides/rtx-spark-oem-proart-gr1x-edgemesa-n-and-inkling2-mini-looped-moe-wemm-video/) | [NVIDIA RTX Spark 零售迷你主机（华硕 ProArt GR1X / 微星 EdgeMesa N AI+）与 11 月新架构开源模型实战：Thinking Machines Inkling 2 Mini（26.4B 循环 MoE · 1M 上下文 · NVFP4）与腾讯混元 WeMM-Video-35B-A3B](https://tinker-ai.com/zh/guides/rtx-spark-oem-proart-gr1x-edgemesa-n-and-inkling2-mini-looped-moe-wemm-video/) | [`run-inkling2-looped-and-wemm-video.sh`](scripts/run-inkling2-looped-and-wemm-video.sh) | [Customize](https://tinker-ai.com/artifacts/rtx-spark-oem-inkling2-wemm-video-launcher/) |
+| **63** | [SC26 Optical, CXL & NVMe-oF KV Cache Pooling vs Deskside GB300 Towers: Penguin MemoryAI Photonic (576GB HBM3E + 16TB DDR5), SK hynix MARS CMM-DDR5 & AIC F2026 26-Bay Gen5 JBOF vs MSI WS300 / GIGABYTE W775-V10 Running Inkling 2 Small (594B-A17B)](https://tinker-ai.com/guides/sc26-optical-cxl-kv-pooling-penguin-photonic-sk-hynix-mars-aic-f2026-jbof-and-inkling2-small-594b/) | [SC26 光互联、CXL 与 NVMe-oF 远程 KV 缓存池对决 GB300 桌边塔式超算：Penguin MemoryAI 硅光内存盒（576GB HBM3E + 16TB DDR5）、SK hynix MARS CMM-DDR5 与 AIC F2026（26 盘位 Gen5 JBOF）对比微星 WS300 / 技嘉 W775-V10 运行 Inkling 2 Small (594B-A17B)](https://tinker-ai.com/zh/guides/sc26-optical-cxl-kv-pooling-penguin-photonic-sk-hynix-mars-aic-f2026-jbof-and-inkling2-small-594b/) | [`run-gb300-ws300-inkling2-small-and-kv-pool.sh`](scripts/run-gb300-ws300-inkling2-small-and-kv-pool.sh) | [Customize](https://tinker-ai.com/artifacts/sc26-optical-cxl-kv-pool-and-gb300-ws300-inkling2-small-launcher/) |
+| **64** | [November 2026 Ultra-Sparse Multimodal MoEs: Tencent Hunyuan Hy4-Flash (224B-A12B · 64B Engram · LatentMoE · 1/6 KV Cache · DFly2) & Ant Group LingSante-3.1-air-VL (124B-A5.5B) / Flash (560B-A25B) Local Deployment](https://tinker-ai.com/guides/tencent-hy4-flash-224b-a12b-engram-latentmoe-dfly2-and-ant-lingsante-31-medical-vl-local-ai/) | [2026 年 11 月超稀疏多模态 MoE 双雄实战：腾讯混元 Hy4-Flash（224B-A12B · 64B Engram 记忆表 · LatentMoE · 1/6 KV 缓存 · DFly2 投机解码）与蚂蚁医疗开源大模型 LingSante-3.1-air-VL（124B-A5.5B）/ Flash（560B-A25B）本地部署全解](https://tinker-ai.com/zh/guides/tencent-hy4-flash-224b-a12b-engram-latentmoe-dfly2-and-ant-lingsante-31-medical-vl-local-ai/) | [`run-hy4-flash-and-lingsante31-medical.sh`](scripts/run-hy4-flash-and-lingsante31-medical.sh) | [Customize](https://tinker-ai.com/artifacts/hy4-flash-engram-dfly2-and-lingsante31-medical-vl-launcher/) |
 
 ---
 
