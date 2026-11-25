@@ -3,7 +3,7 @@
 > **Official Website**: [https://tinker-ai.com/](https://tinker-ai.com/) | **中文官网**: [https://tinker-ai.com/zh/](https://tinker-ai.com/zh/)
 > **GitHub Pages Directory**: [https://godrealms.github.io/tinker-ai-lab/](https://godrealms.github.io/tinker-ai-lab/)
 
-This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **64 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
+This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **66 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
 
 ---
 
@@ -11,9 +11,9 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 | Tool | English URL | 中文版入口 | Description |
 | :--- | :--- | :--- | :--- |
-| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **57 model presets** and **93 hardware profiles** |
+| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **60 model presets** and **97 hardware profiles** |
 | **Interactive AI Troubleshooter** | [Open Troubleshooter](https://tinker-ai.com/tools/troubleshooter/) | [打开排障决策树](https://tinker-ai.com/zh/tools/troubleshooter/) | **13** step-by-step diagnostic decision trees for local LLM networking, VRAM OOM, SSE stream drops, RoCEv2 rings, and NPU/GPU traps |
-| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **64 verified configs** directly in your browser before downloading |
+| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **66 verified configs** directly in your browser before downloading |
 
 ---
 
@@ -25,7 +25,7 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 ---
 
-## 3. All 64 Public Guides & Companion Scripts
+## 3. All 66 Public Guides & Companion Scripts
 
 | # | English Guide | 中文实测指南 | Companion Script (`scripts/`) | Online Customizer |
 | :-: | :--- | :--- | :--- | :--- |
@@ -93,6 +93,8 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 | **62** | [NVIDIA RTX Spark Retail Mini PCs (ASUS ProArt GR1X & MSI EdgeMesa N AI+) + Looped MoE & Omni-Video: Running Thinking Machines Inkling 2 Mini (26.4B-A3B · 1M Ctx · NVFP4) & Tencent WeMM-Video-35B-A3B](https://tinker-ai.com/guides/rtx-spark-oem-proart-gr1x-edgemesa-n-and-inkling2-mini-looped-moe-wemm-video/) | [NVIDIA RTX Spark 零售迷你主机（华硕 ProArt GR1X / 微星 EdgeMesa N AI+）与 11 月新架构开源模型实战：Thinking Machines Inkling 2 Mini（26.4B 循环 MoE · 1M 上下文 · NVFP4）与腾讯混元 WeMM-Video-35B-A3B](https://tinker-ai.com/zh/guides/rtx-spark-oem-proart-gr1x-edgemesa-n-and-inkling2-mini-looped-moe-wemm-video/) | [`run-inkling2-looped-and-wemm-video.sh`](scripts/run-inkling2-looped-and-wemm-video.sh) | [Customize](https://tinker-ai.com/artifacts/rtx-spark-oem-inkling2-wemm-video-launcher/) |
 | **63** | [SC26 Optical, CXL & NVMe-oF KV Cache Pooling vs Deskside GB300 Towers: Penguin MemoryAI Photonic (576GB HBM3E + 16TB DDR5), SK hynix MARS CMM-DDR5 & AIC F2026 26-Bay Gen5 JBOF vs MSI WS300 / GIGABYTE W775-V10 Running Inkling 2 Small (594B-A17B)](https://tinker-ai.com/guides/sc26-optical-cxl-kv-pooling-penguin-photonic-sk-hynix-mars-aic-f2026-jbof-and-inkling2-small-594b/) | [SC26 光互联、CXL 与 NVMe-oF 远程 KV 缓存池对决 GB300 桌边塔式超算：Penguin MemoryAI 硅光内存盒（576GB HBM3E + 16TB DDR5）、SK hynix MARS CMM-DDR5 与 AIC F2026（26 盘位 Gen5 JBOF）对比微星 WS300 / 技嘉 W775-V10 运行 Inkling 2 Small (594B-A17B)](https://tinker-ai.com/zh/guides/sc26-optical-cxl-kv-pooling-penguin-photonic-sk-hynix-mars-aic-f2026-jbof-and-inkling2-small-594b/) | [`run-gb300-ws300-inkling2-small-and-kv-pool.sh`](scripts/run-gb300-ws300-inkling2-small-and-kv-pool.sh) | [Customize](https://tinker-ai.com/artifacts/sc26-optical-cxl-kv-pool-and-gb300-ws300-inkling2-small-launcher/) |
 | **64** | [November 2026 Ultra-Sparse Multimodal MoEs: Tencent Hunyuan Hy4-Flash (224B-A12B · 64B Engram · LatentMoE · 1/6 KV Cache · DFly2) & Ant Group LingSante-3.1-air-VL (124B-A5.5B) / Flash (560B-A25B) Local Deployment](https://tinker-ai.com/guides/tencent-hy4-flash-224b-a12b-engram-latentmoe-dfly2-and-ant-lingsante-31-medical-vl-local-ai/) | [2026 年 11 月超稀疏多模态 MoE 双雄实战：腾讯混元 Hy4-Flash（224B-A12B · 64B Engram 记忆表 · LatentMoE · 1/6 KV 缓存 · DFly2 投机解码）与蚂蚁医疗开源大模型 LingSante-3.1-air-VL（124B-A5.5B）/ Flash（560B-A25B）本地部署全解](https://tinker-ai.com/zh/guides/tencent-hy4-flash-224b-a12b-engram-latentmoe-dfly2-and-ant-lingsante-31-medical-vl-local-ai/) | [`run-hy4-flash-and-lingsante31-medical.sh`](scripts/run-hy4-flash-and-lingsante31-medical.sh) | [Customize](https://tinker-ai.com/artifacts/hy4-flash-engram-dfly2-and-lingsante31-medical-vl-launcher/) |
+| **65** | [SC26 Digital In-Memory Compute & High-Utilization LPUs: d-Matrix Corsair (2GB 150 TB/s SRAM + 256GB LPDDR5X), HyperAccel Bertha 500 LPU (546 GB/s · 90% BW Util) & Positron Atlas (256GB HBM · >93% Util)](https://tinker-ai.com/guides/sc26-dimc-sram-and-lpu-accelerators-d-matrix-corsair-256gb-hyperaccel-bertha-500-vs-positron-atlas/) | [SC26 数字存内计算与高利用率 LPU 推理卡对决：d-Matrix Corsair（2GB 150 TB/s SRAM + 256GB LPDDR5X）、HyperAccel Bertha 500（546 GB/s · 90% 带宽利用率 · 250W）与 Positron Atlas（256GB HBM · >93% 利用率）](https://tinker-ai.com/zh/guides/sc26-dimc-sram-and-lpu-accelerators-d-matrix-corsair-256gb-hyperaccel-bertha-500-vs-positron-atlas/) | [`audit-dimc-lpu-and-launch-disagg-decode.sh`](scripts/audit-dimc-lpu-and-launch-disagg-decode.sh) | [Customize](https://tinker-ai.com/artifacts/sc26-dmatrix-corsair-hyperaccel-bertha-positron-evaluator/) |
+| **66** | [November 2026 Looped & Hybrid KDA/MLA Open-Weight VLMs: Ant InclusionAI Ling-3.2-air (124B-A5.5B MIT), SenseTime SenseNova-Loop-9B (32→56 Layers mHC · 512K) & Thinking Machines TML-d24-varloop on GEEKOM A9 Mega (128GB) & 32GB GPUs](https://tinker-ai.com/guides/ling-32-air-124b-hybrid-kda-mla-sensenova-loop-9b-mhc-and-tml-varloop-geekom-a9-mega-local-ai/) | [2026 年 11 月动态循环层与混合 KDA/MLA 开源多模态实战：蚂蚁 Ling-3.2-air（124B-A5.5B MIT）、商汤 SenseNova-Loop-9B（32→56 层 mHC · 512K）与 Thinking Machines TML-d24-varloop 在 GEEKOM A9 Mega（128GB）及 32GB 独显上的部署全解](https://tinker-ai.com/zh/guides/ling-32-air-124b-hybrid-kda-mla-sensenova-loop-9b-mhc-and-tml-varloop-geekom-a9-mega-local-ai/) | [`run-ling32-air-sensenova-loop-and-varloop.sh`](scripts/run-ling32-air-sensenova-loop-and-varloop.sh) | [Customize](https://tinker-ai.com/artifacts/ling32-air-sensenova-loop-tml-varloop-launcher/) |
 
 ---
 
