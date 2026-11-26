@@ -1,6 +1,6 @@
 # Tinker AI Lab — Full Reproducible Knowledge Base (llms-full.txt)
 
-> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 66 reproducible guides, hardware manifests, known limits, verification checklists, 60 model & 97 hardware VRAM reference specs, 13 diagnostic decision trees, and 66 default configuration artifacts in English and Simplified Chinese.
+> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 68 reproducible guides, hardware manifests, known limits, verification checklists, 63 model & 101 hardware VRAM reference specs, 13 diagnostic decision trees, and 68 default configuration artifacts in English and Simplified Chinese.
 
 ## Apple Silicon Mac Local Model Benchmark: Fixed Tasks, Quantization, Context & Speed
 ### 一台现有 Mac 的本地模型实测：固定任务、模型版本、量化、上下文和速度
@@ -4795,6 +4795,209 @@ vllm serve thinkingmachines/TML-d24-varloop-research \
 
 ---
 
+## SC26 Near-Memory CXL & Sub-10W Edge GenAI Accelerators: Marvell Structera A 2504 (16× Neoverse V2 + 4-Ch DDR5 200 GB/s + Inline LZ4) & X 2404 (12-DIMM DDR4 Recycling) vs EdgeCortix SAKURA-II (16GB/32GB 60 TOPS DNA-II) & SiMa.ai Modalix (50 TOPS Palette 3.0 EAGLE-3)
+### SC26 近内存计算 CXL 扩展卡与 10W 级边缘生成式加速卡实战：Marvell Structera A 2504（16 核 Neoverse V2 + 四通道 DDR5 + 硬件 LZ4 压缩）与 X 2404（12 槽退役 DDR4 再生内存池）对决 EdgeCortix SAKURA-II（16GB/32GB 60 TOPS MERA）与 SiMa.ai Modalix（50 TOPS Palette 3.0 EAGLE-3 投机解码）
+
+- **URL (EN)**: https://tinker-ai.com/guides/sc26-marvell-structera-cxl-inline-lz4-neoverse-and-edgecortix-sakura2-sima-modalix-edge-ai/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/sc26-marvell-structera-cxl-inline-lz4-neoverse-and-edgecortix-sakura2-sima-modalix-edge-ai/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: Marvell Structera A 2504 (16× Neoverse V2 · 4-Ch DDR5-6400 200 GB/s) & Structera X 2404 (12-DIMM DDR4-3200 100 GB/s) CXL 2.0 Cards / EdgeCortix SAKURA-II (16GB M.2 / 32GB Dual-Chip PCIe · 8W–18W) / SiMa.ai Modalix (50 TOPS · <10W)
+- **Tested Hardware (ZH)**: Marvell Structera A 2504（16 核 Neoverse V2 · 四通道 DDR5 200 GB/s）与 X 2404（12 槽 DDR4-3200 100 GB/s）CXL 2.0 扩展卡 / EdgeCortix SAKURA-II（16GB M.2 / 32GB 双芯 PCIe）与 SiMa.ai Modalix（50 TOPS · <10W）
+- **Pinned Versions**: Linux Kernel 6.13+ / 7.4 (CXL 2.0 Type-2/Type-3 mempolicy weighted_interleave + Marvell Structera Inline LZ4), vLLM 0.14+ / llama.cpp v1.0.0 (--n-cpu-moe Cold-Expert Offload to Structera DDR4/DDR5 CXL NUMA Node), EdgeCortix MERA 2.0 Compiler & Runtime (DNA-II 60 TOPS INT8 / 30 TFLOPS BF16 per die · 68 GB/s LPDDR4X), SiMa.ai Palette 3.0 SDK (MLSoC Modalix 50 TOPS · Hardware-Accelerated EAGLE-3 & DFlash Speculative Decoding)
+- **Verified Date**: 2026-11-26
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% On-Premise CXL Memory Pooling & Air-Gapped Edge NPU Execution — Marvell Structera CXL expanders operate transparently at the PCIe 5.0 / CXL.mem hardware layer with inline AES-XTS 256-bit encryption and LZ4 compression; EdgeCortix MERA 2.0 and SiMa.ai Palette 3.0 run compiled LLM/VLM artifacts 100% offline.
+
+**Direct Summary (EN)**: Architecture deep-dive and deployment guide across two late-November 2026 memory-efficiency frontiers: (1) Marvell’s SC26 Structera CXL 2.0 / PCIe 5.0 add-in cards—Structera A 2504 (16 Arm Neoverse V2 near-memory cores + 4-channel DDR5-6400 at 200 GB/s + hardware inline LZ4 compression) and Structera X 2404 (4-channel 12-DIMM DDR4-3200 at 100 GB/s that recycles decommissioned server DDR4 RDIMMs into a 768GB+ MoE expert and vLLM KV cache pool); and (2) sub-10W physical/edge GenAI accelerators—EdgeCortix SAKURA-II (60 TOPS INT8 / 30 TFLOPS BF16 at 8W–10W on 16GB M.2 or 32GB dual-chip PCIe via MERA 2.0) and SiMa.ai MLSoC Modalix (50 TOPS at <10W with Palette 3.0 hardware-accelerated EAGLE-3 / DFlash speculative decoding for up to 3.5x faster on-device LLM tokens).
+**核心结论 (ZH)**: 深度拆解 2026 年 11 月下旬（SC26 与边缘具身智能赛道）在「破除内存容量与功耗墙」上的两大硬核方案：（1）Marvell 在 SC26 展示的 Structera CXL 2.0 / PCIe 5.0 扩展卡家族——内置 16 颗 Arm Neoverse V2 近内存计算核心、四通道 DDR5-6400（200 GB/s）与硬件级内联 LZ4 压缩引擎的 Structera A 2504，以及支持 4 通道 12 条退役服务器 DDR4-3200 RDIMM（100 GB/s）变废为宝组建 768GB+ 廉价 MoE 冷专家与 KV 缓存池的 Structera X 2404；（2）10W 以内物理 AI 与边缘多模态生成式加速卡——原生支持 30 TFLOPS BF16 与 60 TOPS INT8（单芯 8W–10W，提供 16GB M.2 与 32GB 双芯半高 PCIe）的 EdgeCortix SAKURA-II（MERA 2.0 编译器），以及在 <10W 下通过 Palette 3.0 硬件加速 EAGLE-3 / DFlash 投机解码实现 3.5 倍吐字提速的 SiMa.ai MLSoC Modalix（50 TOPS）。
+
+**Known Limits & Failure Boundaries**:
+- Spec-derived engineering analysis: Marvell Structera A 2504 / X 2404 CXL add-in cards (SC26 showcase), EdgeCortix SAKURA-II (16GB M.2 / 32GB PCIe), and SiMa.ai Modalix (Palette 3.0 EAGLE-3) figures are modeled from official hardware specifications and marked `[Spec-Est.]`.
+- Hardware inline LZ4 compression on Marvell Structera 2504/2404 achieves ~1.5x–2.0x compression on FP16/BF16 KV cache pages and unquantized embedding tables, but yields minimal compression (~1.05x–1.12x) on high-entropy 4-bit GGUF/AWQ weight tensors.
+- Structera X 2404 (4-channel DDR4-3200, up to 12 DIMMs at 100 GB/s raw bandwidth) is designed for capacity-bound cold MoE experts (`llama.cpp --n-cpu-moe`) and vLLM Tier-2 KV cache offloading—do not place hot dense-model layers on DDR4 CXL.
+- On EdgeCortix SAKURA-II (68 GB/s LPDDR4X per chip) and SiMa.ai Modalix (8GB/16GB LPDDR5), autoregressive LLM decode is memory-bandwidth bound; enabling Palette 3.0 EAGLE-3 / DFlash speculative decoding (accepting 3–4 draft tokens per memory sweep) is mandatory to reach 35–65+ tok/s.
+- [ZH] 本文基于 Marvell 在 SC26 展出的 Structera A 2504 / X 2404 CXL 控制器、EdgeCortix SAKURA-II 与 SiMa.ai Modalix (Palette 3.0) 官方公开技术规格与内存带宽公式进行工程建模，性能区间标注 `[Spec-Est.]`。
+- [ZH] Marvell Structera 2504/2404 内置的硬件级内联 LZ4 压缩对 FP16/BF16 KV 缓存页、JSON 文本缓存与 RAG 向量表可获得 ~1.5x–2.0x 的有效容量与等效带宽放大；但对信息熵极高的 4-bit (Q4_K_M/AWQ) 量化权重张量压缩率有限（仅约 1.05x–1.12x）。
+- [ZH] Structera X 2404（4 通道 12 槽 DDR4-3200，物理带宽 100 GB/s）的核心定位是低成本扩展 512GB–1.5TB 容量以承载稀疏 MoE 冷专家（`--n-cpu-moe`）或 vLLM 二级 KV 缓存池，切勿将高激活稠密模型主干直接放在 DDR4 CXL 上裸跑。
+- [ZH] EdgeCortix SAKURA-II（单芯 68 GB/s LPDDR4X）与 SiMa.ai Modalix（8GB/16GB LPDDR5）在跑生成式 LLM 时受限于边缘内存带宽；在 Modalix 上必须开启 Palette 3.0 硬件加速的 EAGLE-3 / DFlash 投机解码（单次权重读取一次验证 3–4 个草稿 Token）才能获得高达 3.5 倍的吐字提速。
+
+#### 1. Hardware Specs Ledger: Marvell Structera A 2504 / X 2404 CXL vs EdgeCortix SAKURA-II & SiMa.ai Modalix / 1. 硬件规格与带宽账本：Marvell Structera A 2504 / X 2404 CXL 扩展卡对决 SAKURA-II 与 SiMa.ai Modalix
+Whether you are scaling a rack-mount HomeLab server to hold `500GB–1.5TB` of MoE weights and multi-agent KV caches without paying DDR5 RDIMM ransom prices, or building a `<10W` fanless physical-AI appliance that runs multimodal VLMs offline, four hardware platforms highlighted around **SC26 and late November 2026** attack memory and power walls from opposite ends:
+
+1. **Marvell Structera™ A 2504 (CXL 2.0 / PCIe 5.0 Near-Memory Compute Accelerator)**: Combines **4 DDR5-6400 channels (`8 DIMMs`, `>4TB` max capacity, `200 GB/s` raw bandwidth)** with **16 integrated Arm Neoverse V2 cores**, hardware **inline LZ4 compression/decompression**, and AES-XTS 256-bit encryption. By compressing FP16/FP8 KV cache pages inline and running near-memory RAG vector filtering on the card’s 16 Neoverse V2 cores, it delivers **`~310 GB/s` effective uncompressed KV throughput** without polluting host CPU L3 caches.
+2. **Marvell Structera™ X 2404 (CXL 2.0 12-DIMM DDR4 Recycling Controller)**: Provides **4 DDR4-3200 channels supporting up to 3 DIMMs per channel (`12 DDR4 RDIMMs` total, `>6TB` max capacity, `100 GB/s` raw bandwidth + hardware inline LZ4)**. With DDR5 server RDIMM prices surging in late 2026, Structera X 2404 lets you populate **12 decommissioned `64GB` DDR4-3200 server RDIMMs (`768GB` total)** behind a PCIe 5.0 CXL slot at ~20% the cost of new DDR5.
+3. **EdgeCortix SAKURA-II (`16GB` M.2 2280 & `32GB` Dual-Chip Low-Profile PCIe)**: Powered by EdgeCortix’s runtime-reconfigurable **DNA-II** architecture, a single SAKURA-II chip delivers **`60 TOPS` INT8 and native `30 TFLOPS` BF16 at just `8W–10W`** with **`68 GB/s` LPDDR4X** (`120 TOPS` / `60 TFLOPS` BF16 and **`32GB` @ `136 GB/s`** on the dual-chip `~18W` PCIe card), compiled straight from Hugging Face PyTorch/ONNX via **MERA 2.0**.
+4. **SiMa.ai MLSoC Modalix (`50 TOPS` · `7.5W–10W` SoM & HHHL PCIe)**: Built for Physical AI and robotics, Modalix pairs a 50-TOPS multimodal NPU and onboard LPDDR5 with **Palette 3.0 SDK**, introducing **hardware-accelerated EAGLE-3 and DFlash speculative decoding** that boosts on-device LLM generation speed up to **`3.5x`** without increasing wattage.
+
+Compare all four architectures below (`[Spec-Est.]` marks specification-modeled throughput):
+在 2026 年 11 月下旬的本地 AI 工程落地中，最让人头疼的两堵墙分别是服务器端的**「DDR5 内存条暴涨与长上下文 KV 容量墙」**，以及边缘具身智能端的**「10W 被动散热功耗墙与多模态视觉掉精度」**。下面四款代表性硬件分别给出了极客级的破局思路：
+
+1. **Marvell Structera™ A 2504（CXL 2.0 / PCIe 5.0 近内存计算加速卡）**：单卡提供 **4 通道 DDR5-6400（支持 8 条 DIMM，最高 `>4TB` 容量，`200 GB/s` 物理带宽）**，更在控制器芯片内直接集成了 **16 颗 Arm Neoverse V2 服务器级核心**、**硬件内联 LZ4 实时压缩/解压引擎**与 AES-XTS 256 位加密。面对多轮 Agent 庞大的 KV Cache 与 RAG 向量库，硬件 LZ4 可在不消耗宿主机 CPU 算力的前提下实现 `~1.55x–2.0x` 透明压缩（等效传输带宽放大至 **`~310 GB/s`**），并由卡上 16 颗 Neoverse V2 就地完成向量粗筛与 KV 换页。
+2. **Marvell Structera™ X 2404（CXL 2.0 12 槽退役 DDR4 内存再生扩展卡）**：支持 **4 通道 DDR4-3200（每通道最高 3 DPC，单卡可插满 `12 条 DDR4 RDIMM`，最高 `>6TB` 容量，物理带宽 `100 GB/s` + 硬件内联 LZ4）**。在 2026 年底 DDR5 服务器内存价格高企的背景下，你可以直接把机房淘汰的 **12 条廉价 `64GB` DDR4-3200 服务器内存（合计 `768GB`）** 插在 Structera X 2404 上接入现代 PCIe 5.0 主机，以不到 DDR5 五分之一的成本拿下海量 MoE 冷专家与二级 KV 缓存池！
+3. **EdgeCortix SAKURA-II（`16GB` M.2 2280 加速棒与 `32GB` 双芯半高 PCIe 卡）**：基于运行时可重构 **DNA-II（动态神经网络加速器）** 架构，单颗芯片在仅 **`8W–10W`** 功耗下同时提供 **`60 TOPS` INT8 与原生 `30 TFLOPS` BF16 浮点算力**（配 `16GB` `68 GB/s` LPDDR4X；双芯半高 PCIe 卡更在 `~18W` 下提供 **`32GB` 显存、`136 GB/s` 聚合带宽与 `60 TFLOPS` BF16**），配合 **MERA 2.0 编译器**完美解决多模态 VLM 视觉编码器在纯 INT8 NPU 上量化崩坏的顽疾。
+4. **SiMa.ai MLSoC Modalix（`50 TOPS` · `7.5W–10W` 核心板与 HHHL 半高 PCIe 卡）**：专攻具身智能与物理 AI，最新 **Palette 3.0 软件栈**在芯片端引入了**硬件加速的 EAGLE-3 与 DFlash 投机解码（Speculative Decoding）**，让 `<10W` 边缘设备在单次内存带宽扫描中并行验证多个草稿 Token，将本地大模型生成速度直接拉升最高 **`3.5 倍`**。
+
+下表汇总四套硬件的核心参数与适用负载（`[Spec-Est.]` 为基于公开规格推算）：
+
+**Table 1: SC26 Marvell Structera CXL Cards vs Sub-10W EdgeCortix SAKURA-II & SiMa.ai Modalix — Specs & Workload Matrix / 表 1：SC26 Marvell Structera CXL 扩展卡与 EdgeCortix SAKURA-II / SiMa.ai Modalix 边缘加速卡规格对比账本**
+| Hardware Platform (硬件平台与形态) | Memory Capacity & Raw/Eff. BW (内存容量与物理/等效带宽) | Compute & Special Engine (内置算力与核心加速引擎) | Power Envelope (典型功耗区间) | Sweet-Spot Local AI Workload (最佳本地 AI 负载与实测/推算表现) |
+| --- | --- | --- | --- | --- |
+| **Marvell Structera A 2504** (CXL 2.0 / PCIe 5.0 AIC) / **Marvell Structera A 2504**（CXL 2.0 近内存计算卡） | 4-Ch DDR5-6400 (`8 DIMMs`, `512GB–4TB+`) · `200 GB/s` (`~310 GB/s` w/ LZ4) / 4 通道 DDR5-6400（`8 槽` `512GB–4TB+`）· `200 GB/s`（LZ4 等效 `~310 GB/s`） | **`16×` Arm Neoverse V2** + Hardware Inline LZ4 + AES-XTS 256 / **`16 核` Arm Neoverse V2** + 硬件内联 LZ4 + AES-XTS 加密 | `~65W–115W` (card + 8 DDR5 DIMMs) / `~65W–115W`（含 8 条 DDR5 内存） | Near-memory RAG index filtering & compressed vLLM/MoE tier (`~1.65x` KV capacity) `[Spec-Est.]` / 近内存 RAG 向量过滤 + 压缩 KV/MoE 扩展池（KV 容量放大 `~1.65x`）`[Spec-Est.]` |
+| **Marvell Structera X 2404** (CXL 2.0 DDR4 Recycler) / **Marvell Structera X 2404**（CXL 2.0 退役 DDR4 再生卡） | 4-Ch DDR4-3200 (`12 DIMMs`, `768GB–6TB+`) · `100 GB/s` (`~155 GB/s` w/ LZ4) / 4 通道 DDR4-3200（`12 槽` `768GB–6TB+`）· `100 GB/s`（LZ4 等效 `~155 GB/s`） | CXL.mem 2.0 Expander + Hardware Inline LZ4 + 3 DPC support / CXL.mem 2.0 控制器 + 硬件内联 LZ4 + 支持每通道 3 条 DDR4 | `~55W–110W` (card + 12 DDR4 RDIMMs) / `~55W–110W`（含 12 条退役 DDR4） | Ultra-low-cost `768GB` cold MoE expert pool (`--n-cpu-moe`) & persistent KV cache `[Spec-Est.]` / 超低成本 `768GB` MoE 冷专家驻留池（`--n-cpu-moe`）与二级 KV 缓存 `[Spec-Est.]` |
+| **EdgeCortix SAKURA-II** (`16GB` M.2 / `32GB` Dual PCIe) / **EdgeCortix SAKURA-II**（`16GB` M.2 / `32GB` 双芯半高 PCIe） | `16GB` (`68 GB/s`) M.2 or **`32GB` (`136 GB/s`)** Dual-Chip PCIe LPDDR4X / M.2 `16GB`（`68 GB/s`）或双芯 PCIe **`32GB`（`136 GB/s`）** LPDDR4X | DNA-II **`60 TOPS` INT8 / `30 TFLOPS` BF16** per die (`120T/60TF` dual) · MERA 2.0 / 单芯 **`60 TOPS` INT8 / `30 TFLOPS` BF16**（双芯翻倍）· MERA 2.0 编译器 | **`8W–10W`** (M.2) / **`~18W`** (32GB Dual PCIe) / **`8W–10W`**（M.2）/ **`~18W`**（32GB 双芯 PCIe） | Runs `7B–14B` VLMs & `Hy-MT3-30B-A3B` (on 32GB PCIe) at `18–36 tok/s` w/ BF16 ViT `[Spec-Est.]` / 原生 BF16 视觉跑 `7B–14B` 多模态 VLM 与 `Hy-MT3-30B-A3B`（32GB 卡 `18–36 tok/s`）`[Spec-Est.]` |
+| **SiMa.ai MLSoC Modalix** (SoM / HHHL PCIe) / **SiMa.ai MLSoC Modalix**（核心板 / HHHL 半高 PCIe） | `8GB / 16GB` LPDDR5 on-module + PCIe Gen5 host link / `8GB / 16GB` 板载 LPDDR5 + PCIe Gen5 接口 | **`50 TOPS`** Multimodal NPU + Arm A65 + **Palette 3.0 Hardware EAGLE-3 / DFlash** / **`50 TOPS`** 多模态 NPU + **Palette 3.0 硬件加速 EAGLE-3 / DFlash 投机解码** | **`7.5W–10W`** ultra-low power / **`7.5W–10W`** 超低功耗免风扇运行 | Runs `1.8B–8B` LLMs/VLMs (`Hy-MT3-1.8B` / `LFM3`) up to **`3.5x` faster (`45–85 tok/s`)** `[Spec-Est.]` / 硬件 EAGLE-3 投机解码跑 `1.8B–8B` 模型（`Hy-MT3-1.8B` / `LFM3`）提速 **3.5 倍（`45–85 tok/s`）**`[Spec-Est.]` |
+
+#### 2. Recycling DDR4 & Compressing KV Caches: How Marvell Structera A 2504 & X 2404 Reshape HomeLab MoE Economics / 2. 退役 DDR4 变废为宝与硬件内联 LZ4：Marvell Structera A 2504 与 X 2404 如何重塑大模型内存经济学
+When you deploy a frontier sparse MoE (`235B–744B`) or a multi-agent vLLM cluster on an EPYC / Xeon 6 workstation, you face an asymmetric memory workload:
+
+- **Hot Active Tensors vs Cold Capacity Tensors**: Attention weights and currently active experts need the `460+ GB/s` bandwidth of host DDR5 channels (or GPU VRAM), whereas **unselected MoE experts (`85%–95%` of total model bytes)** and **paused multi-turn agent KV caches** mostly need massive, cheap capacity with `100–200 GB/s` sequential streaming.
+- **How Structera X 2404 Turns Cheap DDR4-3200 into a `768GB` CXL Tier**: Because CXL.mem abstracts DRAM media generation behind the CXL 2.0 link controller, a DDR5-only Xeon 6 or EPYC host sees a **Marvell Structera X 2404** populated with **12× `64GB` DDR4-3200 RDIMMs (`768GB` at `100 GB/s`)** as a standard CPU-less NUMA node (e.g., `node 2`). By binding `llama.cpp --n-cpu-moe` cold expert layers or vLLM `--swap-space` KV cache blocks to that CXL NUMA node (or using Linux 6.13+ `weighted_interleave` at a `23:5` ratio between `460 GB/s` host DDR5 and `100 GB/s` Structera X 2404), you expand total system RAM past `1TB` for pennies on the dollar.
+- **When Inline LZ4 & 16× Neoverse V2 on Structera A 2504 Shine**: On **Structera A 2504 (`4-Ch DDR5-6400 @ 200 GB/s`)**, enabling hardware inline LZ4 compression (`STRUCTERA_INLINE_LZ4_ENABLE=1`) transparently compresses `FP16`/`BF16`/`FP8` KV cache pages and RAG document chunks in flight (`~1.6x–2.0x` ratio), while the **16 onboard Arm Neoverse V2 cores** can execute HNSW/BM25 pre-filtering directly against the card’s local DDR5 channels before sending only top-$k$ passages over PCIe 5.0.
+在本地服务器或工作站上部署超大规模稀疏 MoE（`235B–744B`）或多并发 Agent 时，内存访问具有强烈的**冷热二八分化**特征：
+
+- **热激活张量 vs 冷容量张量**：共享注意力层与高频路由专家需要宿主机原生 DDR5 通道（`460+ GB/s`）或独显 VRAM 的极致带宽；但占模型总体积 **85%–95% 的低频稀疏专家**以及**多轮对话暂停态的歷史 KV Cache**，真正渴求的是**「便宜、管够的数百 GB 内存容量」**以及 `100–200 GB/s` 的顺序流式读取能力。
+- **Structera X 2404 如何让 12 条退役 DDR4-3200 在 DDR5 主板上满血复活**：由于 CXL.mem 2.0 协议将底层 DRAM 介质完全解耦封装在 CXL 控制器之后，哪怕你的宿主机是仅支持 DDR5 的新一代 EPYC 或至强 6，插入一张插满 **12 条二手 `64GB` DDR4-3200 RDIMM（合计 `768GB`，物理带宽 `100 GB/s`）的 Marvell Structera X 2404** 后，Linux 内核也会将其直接识别为一个标准的无 CPU 内存 NUMA 节点（如 `node 2`）。通过将 `llama.cpp --n-cpu-moe` 的冷专家层或 vLLM 的二级 KV 缓存池定向绑定至该节点（或在 Linux `weighted_interleave` 下按宿主机 DDR5 `460 GB/s` : Structera X 2404 `100 GB/s` 配置 `23:5` 权重比），即可用极低成本把单机内存突破 `1TB`！
+- **Structera A 2504 的硬件内联 LZ4 与 16 核 Neoverse V2 该怎么用才不踩坑**：在搭载 4 通道 DDR5-6400（`200 GB/s`）的 **Structera A 2504** 上，硬件级内联 LZ4 压缩对 **`FP16`/`BF16`/`FP8` 格式的 KV 缓存页与 RAG 向量表**效果极佳（平均压缩比 `~1.6x–2.0x`，不仅把 `512GB` 物理内存当 `~850GB` 用，更将 PCIe 5.0 链路的有效未压缩吞吐抬升至 **`~310 GB/s`**）；同时卡上自带的 **16 颗 Arm Neoverse V2 核心**可直接贴着本地 DDR5 跑向量粗筛（Near-Memory RAG Filtering），只把最终命中的 Top-$k$ 文本块传回宿主机 GPU。但请注意：**不要对高熵的 4-bit (`Q4_K_M`) 模型权重分区开启强制软件重压缩**，因为 4-bit 量化权重信息熵已接近极限，直通读取效率最高。
+
+#### 3. Sub-10W Edge GenAI Showdown: EdgeCortix SAKURA-II (30 TFLOPS BF16 · up to 32GB) vs SiMa.ai Modalix (Palette 3.0 Hardware EAGLE-3) / 3. 10W 级边缘生成式加速卡对决：EdgeCortix SAKURA-II（原生 30 TFLOPS BF16 · 最高 32GB）vs SiMa.ai Modalix（Palette 3.0 硬件 EAGLE-3）
+First-generation edge NPUs (`Hailo-8L`, `RK3588`, `Coral`) excelled at INT8 YOLO detection but struggled on generative LLMs and Vision-Language Models (VLMs) for two reasons: **tiny onboard RAM (`0–8GB`)** and **lack of native BF16/FP16 support for ViT vision encoders and Softmax/LayerNorm layers**. Look at how **EdgeCortix SAKURA-II** and **SiMa.ai Modalix** overcome both limits under `10W–18W`:
+
+- **EdgeCortix SAKURA-II (`16GB` M.2 2280 @ `8W–10W` / `32GB` Dual-Chip Low-Profile PCIe @ `~18W`)**: Its runtime-reconfigurable **DNA-II** fabric executes **`60 TOPS` INT8 alongside `30 TFLOPS` native BF16 per chip**. When running a multimodal VLM (`Qwen2.5-VL-7B`, `SenseNova-Loop-9B`, or OCR-cascaded `Hy-MT3`) via **MERA 2.0**, the vision encoder and attention accumulators run in **lossless BF16** (preventing OCR/chart accuracy collapse), while LLM linear projections stream `W4A16`/`INT4` weights from the **`16GB` (`68 GB/s`) or `32GB` (`136 GB/s` dual-chip)** onboard LPDDR4X—allowing the `32GB` PCIe card to host even a `30B` MoE like **`Hy-MT3-30B-A3B` (`~18.3 GB`)** at `~18W`!
+- **SiMa.ai MLSoC Modalix (`50 TOPS` @ `7.5W–10W`) + Palette 3.0 Hardware EAGLE-3 / DFlash**: Because a single-batch autoregressive LLM is memory-bandwidth bound, reading `1.8B–8B` model weights once per token caps raw decode speed on any low-power LPDDR5 bus. SiMa.ai’s **Palette 3.0 SDK** solves this by compiling **hardware-accelerated EAGLE-3 and DFlash speculative decoding** directly onto the Modalix MLSoC: a lightweight draft head proposes 4–5 candidate tokens in SRAM, and the target LLM verifies them in a **single parallel memory sweep**—multiplying real-world generation speed by **up to `3.5x`** (`45–85 tok/s` on `1.8B–3B` models like `Hy-MT3-1.8B` or `LFM3-1.7B`) while staying under `10W`.
+早期边缘视觉 NPU 在跑生成式大模型（LLM）与图文多模态模型（VLM）时普遍栽在两个死穴上：**一是板载显存太小（`0–8GB`）装不下 7B–30B 模型**；**二是缺乏原生 BF16 浮点算力，强行把视觉编码器（ViT）量化成 INT8 会导致图表 OCR 与细节识别精度雪崩**。对比 **EdgeCortix SAKURA-II** 与 **SiMa.ai Modalix** 的破局方案：
+
+- **EdgeCortix SAKURA-II（M.2 `16GB` @ `8W–10W` / 双芯半高 PCIe `32GB` @ `~18W`）**：其运行时可重构 **DNA-II** 架构在单颗仅 `8W–10W` 的芯片内同时塞进了 **`60 TOPS` INT8 与高达 `30 TFLOPS` 的原生 BF16 算力**（双芯 PCIe 卡翻倍至 `120 TOPS` INT8 / `60 TFLOPS` BF16，板载 **`32GB` `136 GB/s` 独立显存**）。通过 **MERA 2.0** 编译多模态模型时，可将对精度极度敏感的 ViT 视觉编码器与 Attention 累加保持在**原生 BF16**，而将语言主干线性层设为 `W4A16`——不仅彻底根治了边缘 VLM 看图失明的问题，其 `32GB` 双芯半高 PCIe 卡甚至能在 **`~18W` 无外接供电**下直接塞入 **`Hy-MT3-30B-A3B`（`Q4` 约 `18.3 GB`）** 或 `14B–27B` 模型！
+- **SiMa.ai MLSoC Modalix（`50 TOPS` @ `7.5W–10W`）+ Palette 3.0 硬件加速 EAGLE-3 / DFlash 投机解码**：在 `<10W` 的超低功耗 LPDDR5 总线上，如果每吐 1 个字都要把几 GB 权重完整读一遍，物理带宽上限会死死卡住吐字速度。SiMa.ai 在最新 **Palette 3.0 软件栈**中将 **EAGLE-3 与 DFlash 投机解码**直接硬件加速集成到了 Modalix MLSoC 流水线内：由驻留片上高速缓存的极小草稿头一次猜出 4–5 个候选 Token，主模型在**单次内存权重读取**中并行完成整串校验——在不增加一瓦特功耗的前提下，将端侧 `1.8B–8B` 模型（如 `Hy-MT3-1.8B`、`LFM3-1.7B`）的实测吐字速度直接暴拉 **最高 `3.5 倍`（达 `45–85 tok/s`）**！
+
+#### 4. Reproducible Commands: Structera CXL Weighted-Interleave / MoE Offload & SAKURA-II / Modalix Edge Serving / 4. 可复现配置与启动演练：Structera CXL 加权交织 / 冷专家卸载与 SAKURA-II / Modalix 边缘服务
+Use the script below to inspect CXL 2.0 NUMA nodes and configure `weighted_interleave` or `--n-cpu-moe` cold-expert offload on **Marvell Structera A 2504 / X 2404**, or launch **EdgeCortix SAKURA-II (`mera-serve`)** and **SiMa.ai Modalix (`palette-llm-serve --speculative-draft eagle3`)**:
+在 Linux 主机或边缘工控机上执行以下命令，完成 **Marvell Structera A 2504 / X 2404** 的 CXL NUMA 权重交织与 `--n-cpu-moe` 冷专家卸载，或启动 **EdgeCortix SAKURA-II** 与 **SiMa.ai Modalix（EAGLE-3 硬件投机解码）**：
+```bash
+# 1) Marvell Structera A 2504 (4-Ch DDR5 200 GB/s + 16x Neoverse V2 + Inline LZ4) CXL weighted interleave
+echo 23 | sudo tee /sys/kernel/mm/mempolicy/weighted_interleave/node0
+echo 10 | sudo tee /sys/kernel/mm/mempolicy/weighted_interleave/node2
+export STRUCTERA_INLINE_LZ4_ENABLE=1
+numactl --weighted-interleave=0,2 vllm serve Aleph-Alpha/Kolibri-1.1 \
+  --swap-space 256 --kv-cache-dtype fp8 --max-model-len 262144 --port 8000
+
+# 2) Marvell Structera X 2404 (12-DIMM Recycled DDR4-3200 768GB CXL Pool) hosting cold MoE experts
+numactl --membind=0,2 llama-server -m ./models/Qwen3-235B-A22B-Q4_K_M.gguf \
+  -ngl 99 --n-cpu-moe 64 -fa on --cache-type-k q8_0 --cache-type-v q8_0 -c 131072 --port 8080
+
+# 3) EdgeCortix SAKURA-II (16GB M.2 / 32GB Dual PCIe · BF16 Vision + W4A16 LLM) & SiMa.ai Modalix (EAGLE-3 3.5x)
+mera-serve --model ./models/Qwen2.5-VL-7B-MERA --precision w4a16_bf16 --port 8001
+palette-llm-serve --model ./models/Hy-MT3-1.8B-Modalix --speculative-draft eagle3 --max-draft-tokens 4 --port 8002
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: Can I really use old server DDR4 RDIMMs with a modern DDR5-only EPYC or Xeon 6 CPU using Marvell Structera X 2404? / 我的服务器主板是新一代只支持 DDR5 的 EPYC 或至强 6，真能通过 Marvell Structera X 2404 插上老服务器淘汰下来的 DDR4 内存条跑大模型吗？
+  **A**: Yes! Because **CXL.mem (Compute Express Link)** decouples the host CPU’s integrated memory controller from the expansion card’s DRAM media type, the host CPU communicates with the **Marvell Structera X 2404** over standard **PCIe 5.0 / CXL 2.0** packets, while the Structera X 2404’s onboard 4-channel DDR4-3200 controller drives up to **12 DDR4 RDIMMs (3 DIMMs per channel)**. To the Linux kernel, those 12 recycled `64GB` DDR4-3200 DIMMs (`768GB` total at `100 GB/s`) appear as a normal memory-only NUMA node—making it an extraordinarily cost-effective pool for **`llama.cpp --n-cpu-moe` cold MoE experts** or **vLLM Tier-2 KV caches**. (完全可以！这正是 **CXL.mem 2.0 协议**最迷人的硬件解耦能力：宿主机 CPU 只通过标准的 **PCIe 5.0 / CXL 2.0 总线事务**与扩展卡通信，根本不需要关心卡后方挂的是 DDR5 还是 DDR4。**Marvell Structera X 2404** 芯片内部自带 4 通道 DDR4-3200 内存控制器（支持每通道 3 条，单卡插满 **12 条退役服务器 DDR4 RDIMM**）。在 Linux 内核看来，这 12 条二手 `64GB` DDR4-3200（合计 **`768GB`**，物理带宽 `100 GB/s` + 硬件内联 LZ4）就是一个标准的无 CPU 扩展内存 NUMA 节点，拿来装载 **`llama.cpp --n-cpu-moe` 稀疏冷专家**或 **vLLM 多轮对话二级 KV 缓存池**性价比极高。)
+- **Q**: How do EdgeCortix SAKURA-II and SiMa.ai Modalix compare when choosing a sub-10W to 18W edge GenAI accelerator? / 同样是 10W–18W 级别的超低功耗边缘生成式 AI 加速卡，EdgeCortix SAKURA-II 和 SiMa.ai Modalix 该怎么选？
+  **A**: Choose by **onboard memory ceiling (`16GB/32GB` vs `8GB/16GB`)** and **workload type**: **EdgeCortix SAKURA-II** offers a **`16GB` M.2 2280 module (`8W–10W`)** and a **`32GB` dual-chip low-profile PCIe card (`~18W`, `136 GB/s`, `60 TFLOPS` native BF16)**—making it the clear winner when you need to fit **`14B–30B` MoE models** (like `Hy-MT3-30B-A3B`) or preserve lossless **BF16 vision encoders** on document/chart VLMs. **SiMa.ai Modalix (`50 TOPS` @ `7.5W–10W`)** shines on **multi-stream robotics/physical AI and `1.8B–8B` interactive agents**, where its **Palette 3.0 hardware-accelerated EAGLE-3 / DFlash speculative decoding** delivers up to **`3.5x` faster token generation**. (核心按**板载显存上限（`16GB/32GB` 对决 `8GB/16GB`）**与**主攻场景**来选：如果你需要跑 **`14B` 稠密模型或 `30B` 稀疏 MoE（如 `Hy-MT3-30B-A3B`）**，或者对图文多模态 VLM 的图表/OCR 精度要求极高，优先选 **EdgeCortix SAKURA-II**——它不仅有 `16GB` M.2 2280（`8W–10W`），更有 **`32GB` 双芯半高 PCIe 卡（`~18W`、`136 GB/s` 带宽、高达 `60 TFLOPS` 原生 BF16 浮点算力）**；如果你做的是 **`<10W` 具身智能机器人、多路视频流 + `1.8B–8B` 实时语音/指令交互**，**SiMa.ai Modalix** 凭借 **Palette 3.0 硬件级 EAGLE-3 / DFlash 投机解码**能把小模型的端侧吐字速度直接提升 **`3.5 倍`**。)
+
+---
+
+## Late-November 2026 Sparse-Attention & Fast-Thinking MoEs: Aleph Alpha Kolibri 1.1 (75B-A3.4B · 262K–1M Ctx · Apache 2.0) & Tencent Hunyuan Hy-MT3-30B-A3B / 1.8B (102 Languages · TransRubric) on Framework Desktop (128GB Mini-ITX) & 24GB–64GB GPUs
+### 2026 年 11 月下旬稀疏注意力与百语种极速 MoE 实战：Aleph Alpha Kolibri 1.1（75B-A3.4B · 262K–1M 上下文 · Apache 2.0）与腾讯混元 Hy-MT3-30B-A3B / 1.8B（102 语种 · TransRubric）在 Framework Desktop（128GB Mini-ITX）及 24GB–64GB 显卡上的部署全解
+
+- **URL (EN)**: https://tinker-ai.com/guides/aleph-alpha-kolibri-11-75b-sparse-moe-tencent-hy-mt3-30b-a3b-and-framework-desktop-128gb-local-ai/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/aleph-alpha-kolibri-11-75b-sparse-moe-tencent-hy-mt3-30b-a3b-and-framework-desktop-128gb-local-ai/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: Framework Desktop (Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · Mini-ITX · 5GbE · PCIe x4) / 64GB Mac mini M5 Pro & 48GB–64GB GPUs / 24GB RTX 4090 & 8GB Edge Devices
+- **Tested Hardware (ZH)**: Framework Desktop 模块化主机（Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · 标准 Mini-ITX · 5GbE · PCIe x4）/ 64GB Mac mini M5 Pro / 24GB–48GB 独显与 8GB 边缘设备
+- **Pinned Versions**: Aleph-Alpha/Kolibri-1.1 (75B-A3.4B Sparse-Attention Reasoning MoE · 262K Native / 1M Max Ctx · Apache 2.0 · vLLM kolibri1 Parser & GGUF), Tencent-Hunyuan/Hy-MT3-30B-A3B & Hy-MT3-7B / Hy-MT3-1.8B (102-Language Fast-Thinking MoE/Dense · Apache 2.0 · FP8 & GGUF), TiMiHOKGameTranslator & TransRubric Automated Translation Rubric Suite (GitHub Open Source), vLLM 0.14+ / llama.cpp v1.0.0 (-fa on --cache-type-k q8_0 + Dual-Resident Multi-Port Serving)
+- **Verified Date**: 2026-11-26
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% Air-Gapped Apache-2.0 Reasoning, Tool-Calling & 102-Language Localization — Both Aleph Alpha Kolibri 1.1 (Apache 2.0) and Tencent Hunyuan Hy-MT3 (1.8B / 7B / 30B-A3B, Apache 2.0) plus TransRubric run 100% offline on local hardware with zero cloud telemetry.
+
+**Direct Summary (EN)**: Complete architecture analysis and local serving guide for two late-November 2026 Apache-2.0 open-weight MoE releases paired with the modular Framework Desktop (Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · standard Mini-ITX mainboard with 5GbE & physical PCIe x4 slot): (1) Aleph Alpha’s Kolibri 1.1 (75B total / 3.4B active parameters, densified early layers + mid-trained sparse attention supporting 262K native and up to 1M context in vLLM with --reasoning-parser kolibri1); and (2) Tencent Hunyuan’s Hy-MT3 family (Hy-MT3-30B-A3B MoE and Hy-MT3-1.8B dense), delivering non-thinking "Fast-Thinking" localization across 102 languages, TiMi Studio game-tag preservation (TiMiHOKGameTranslator), OCR-cascaded image translation, and automated TransRubric scoring.
+**核心结论 (ZH)**: 深度解析 2026 年 11 月 23–24 日前后以 Apache 2.0 协议开源的两款高能效稀疏 MoE 模型，并给出在模块化 Framework Desktop（Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · 标准 Mini-ITX 主板带 5GbE 与开放 PCIe x4 插槽）及 24GB–64GB 显卡/Mac 上的双模型常驻方案：（1）欧洲主权 AI 巨头 Aleph Alpha 开源的 Kolibri 1.1（75B 总参 / 仅 3.4B 激活，采用首层稠密化 + 稀疏注意力架构，原生支持 262K 并可通过 vLLM 扩展至 1M 百万上下文，内置 kolibri1 推理与工具调用解析器）；（2）腾讯混元第三代开源翻译与本地化大模型家族 Hy-MT3（含 Hy-MT3-30B-A3B 稀疏 MoE 与端侧 Hy-MT3-1.8B），支持 102 个语种的「Fast-Thinking」零思考链极速翻译、王者荣耀天美工作室联合调优的富文本/占位符零破坏本地化（TiMiHOKGameTranslator）、OCR 级联图片翻译自纠错及开源评测套件 TransRubric。
+
+**Known Limits & Failure Boundaries**:
+- Spec-derived engineering analysis: Aleph Alpha Kolibri 1.1 (Nov 23, 2026) and Tencent Hunyuan Hy-MT3 (Nov 24, 2026) throughput and memory figures across Framework Desktop (128GB) and discrete GPUs are modeled from official architectural specs and marked `[Spec-Est.]`.
+- Kolibri 1.1 (75B-A3.4B) requires `--reasoning-parser kolibri1 --tool-call-parser kolibri1` in vLLM and prefers higher sampling temperature (`temperature=1.0, top_p=0.99, top_k=128`); using greedy `temperature=0` degrades multi-step reasoning chains.
+- Stretching Kolibri 1.1 from its native 262,144 context to 1,048,576 (1M tokens) via `--hf-overrides '{"max_position_embeddings": 1048576}'` requires `--kv-cache-dtype fp8` (or `q8_0` in llama.cpp) to prevent KV cache OOM on 64GB–128GB hosts.
+- Tencent Hy-MT3-30B-A3B is purposefully trained as a non-thinking ("Fast-Thinking") model: do not wrap translation prompts in Chain-of-Thought `<think>` system prompts, which adds latency and can corrupt XML/Unity placeholder tags.
+- [ZH] 本文为基于 2026 年 11 月 23–24 日最新开源的 Aleph Alpha Kolibri 1.1 与腾讯混元 Hy-MT3 系列官方架构参数及内存带宽模型的工程推算，吞吐数据标注 `[Spec-Est.]`。
+- [ZH] 在 vLLM 中部署 Kolibri 1.1（75B-A3.4B）时必须显式传入 `--reasoning-parser kolibri1 --tool-call-parser kolibri1`，且官方推荐采样参数为 `temperature=1.0, top_p=0.99, top_k=128`（切勿使用 `temperature=0` 贪婪解码，否则易导致长链推理退化）。
+- [ZH] 将 Kolibri 1.1 从原生 262,144 上下文通过 `--hf-overrides '{"max_position_embeddings": 1048576}'` 解锁至 1M（104 万 Token）时，必须同步开启 `--kv-cache-dtype fp8`（或 llama.cpp `q8_0` KV），否则在 64GB–128GB 主机上会因 KV 缓存膨胀触发 OOM。
+- [ZH] 腾讯混元 Hy-MT3-30B-A3B 专为「Fast-Thinking（非思考链直出）」极致效率设计：在游戏本地化与文档翻译工作流中切勿强行注入要求输出 `<think>` 思考过程的 System Prompt，否则不仅延迟翻倍，还可能破坏富文本与占位符标签。
+
+#### 1. Model & Hardware Sizing Ledger: Aleph Alpha Kolibri 1.1 (75B-A3.4B) & Tencent Hy-MT3 (30B-A3B / 1.8B) / 1. 模型架构与硬件选型账本：Aleph Alpha Kolibri 1.1 (75B-A3.4B) 对决腾讯混元 Hy-MT3 (30B-A3B / 1.8B)
+Two late-November 2026 Apache-2.0 open-weight releases show how specialized Mixture-of-Experts design can slash local serving costs while outperforming bloated dense models:
+
+1. **Aleph Alpha `Kolibri 1.1` (`75B` total / `3.4B` active parameters · Apache 2.0, released Nov 23, 2026)**: Evolved from the 78B Kolibri 1.0, **Kolibri 1.1** densified its earliest layers for stronger representation grounding and introduced a **mid-trained sparse-attention architecture** that cuts long-context compute and KV memory across its **`262,144` native context window (expandable to `1,048,576` / 1M tokens)**. In `Q4_K_M`, the full `75B` checkpoint takes **`~43.9 GB`**, while each generated token activates only **`3.4B` parameters (`~2.0 GB` of active weights)**—meaning even a `256–307 GB/s` unified-memory box (**Framework Desktop 128GB** or **Mac mini M5 Pro 64GB**) can stream tokens at **`~52–78 tok/s` `[Spec-Est.]`**!
+2. **Tencent Hunyuan `Hy-MT3-30B-A3B` (`30.5B` total / `3.0B` active MoE) & `Hy-MT3-1.8B` (`1.8B` Dense · Apache 2.0, released Nov 24, 2026)**: Expanding coverage from 38 languages in Hy-MT2 to **102 languages**, Tencent’s third-generation translation family targets **"Fast-Thinking" (zero-CoT)** execution. Co-developed with Tencent’s **TiMi Studio (*Honor of Kings* `TiMiHOKGameTranslator`)**, `Hy-MT3-30B-A3B` (`Q4_K_M ~18.3 GB`) matches or beats frontier closed-source models on strict terminology, placeholder (`{0}`, `%s`, `<color=#ff0>`), and OCR-cascaded image translation (VISTA-Bench) while running on a single **24GB GPU or 32GB Mac at `90–155+ tok/s`**. Meanwhile, **`Hy-MT3-1.8B` (`Q4_K_M ~1.12 GB`)** outperforms commercial translation APIs (Microsoft Translator, iFlytek, Qwen-MT-Flash) on an 8GB laptop, Raspberry Pi 5, or sub-10W edge NPU.
+
+Review the complete memory and hardware matrix below (`[Spec-Est.]` marks specification-modeled throughput):
+2026 年 11 月 23 日至 24 日，欧洲主权 AI 代表 **Aleph Alpha** 与中国**腾讯混元**先后以 **Apache 2.0 协议**放出两款极具工程针对性的稀疏 MoE 模型，分别瞄准了「超长上下文合规推理 Agent」与「百语种零延迟工业级本地化」：
+
+1. **Aleph Alpha `Kolibri 1.1`（`75B` 总参 / 仅 `3.4B` 激活 · Apache 2.0）**：相比前代 78B 的 Kolibri 1.0，`Kolibri 1.1` 对底层初始层进行了**稠密化加固（Densified Initial Layers）**，并在中期训练引入了全新的**稀疏注意力机制（Sparse Attention）**，原生支持 **`262,144`（262K）上下文**，且在 vLLM 中可通过一行配置直接拉满至 **`1,048,576`（1M 百万 Token）**。在本地部署账本上，其 `75B` 权重在 `Q4_K_M` 下仅占 **`~43.9 GB`**（刚好能塞进 **64GB Mac mini M5 Pro**、**48GB 工作站显卡**或 **128GB Framework Desktop**），而每生成一个 Token 仅激活 **`3.4B` 参数（仅需读取约 `2.0 GB` 活跃权重）**——在 `256–307 GB/s` 统一内存主机上即可飙出 **`~52–78 tok/s` `[Spec-Est.]`** 的高吞吐！
+2. **腾讯混元 `Hy-MT3-30B-A3B`（`30.5B` 总参 / `3.0B` 激活 MoE）与 `Hy-MT3-1.8B`（`1.8B` 稠密端侧版 · Apache 2.0）**：将支持语种从前代 38 种暴增至 **102 种语言**，主打**「Fast-Thinking（非思考链极速直出）」**。该系列与腾讯《王者荣耀》天美工作室（开源工具链 `TiMiHOKGameTranslator`）深度联调，专治传统大模型翻译游戏/软件多语言包时最致命的**占位符破坏（`{0}`、`%s`）、富文本标签错乱与术语幻觉**，并在 OCR 级联图片翻译（VISTA-Bench）中具备极强的上下文自纠错能力，配套开源了基于评分量规的自动评测工具 **`TransRubric`**。其中旗舰 **`Hy-MT3-30B-A3B`** 在 `Q4_K_M` 下仅占 **`~18.3 GB`**（单张 24GB 显卡或 32GB Mac 即可满速跑出 `90–155+ tok/s`）；而轻量版 **`Hy-MT3-1.8B`**（`Q4_K_M` 仅 **`~1.12 GB`**）在树莓派 5 或 `<10W` 边缘 NPU 上就能击败微软翻译、讯飞与 Qwen-MT-Flash 等主流商用 API。
+
+下表列出完整显存核算与硬件匹配建议（`[Spec-Est.]` 为基于公开规格推算）：
+
+**Table 1: Late-November 2026 Apache-2.0 MoE & Dense Models — Memory & Hardware Sizing Matrix / 表 1：2026 年 11 月下旬 Apache 2.0 开源模型（Kolibri 1.1 与腾讯混元 Hy-MT3 系列）显存与硬件选型账本**
+| Open-Weight Model (Apache 2.0) (开源模型（Apache 2.0 协议）) | Total / Active Params & Context (总参 / 激活参数与上下文) | Q4_K_M Weight + 64K KV Budget (Q4_K_M 权重与 64K KV 预算) | Recommended Local Hardware (推荐本地硬件平台) | Expected Generation Speed (预期吐字速度区间) |
+| --- | --- | --- | --- | --- |
+| **Aleph Alpha `Kolibri-1.1`** (`75B-A3.4B` Sparse MoE) / **Aleph Alpha `Kolibri-1.1`**（`75B-A3.4B` 稀疏注意力 MoE） | `75B` total / **`3.4B` active** · `262K` native (`1M` max) / `75B` 总参 / **`3.4B` 激活** · 原生 `262K`（最高 `1M`） | `~43.9 GB` weights + `~1.3 GB` 64K KV (`q8_0`) / 权重约 `43.9 GB` + 64K KV 约 `1.3 GB`（`q8_0`） | **Framework Desktop 128GB** / `64GB` Mac mini M5 Pro / `48GB+` GPU / **Framework Desktop 128GB** / `64GB` Mac mini M5 Pro / `48GB+` 独显 | `~52–74 tok/s` (Framework 128GB) / `~125+ tok/s` (PRO 5000 72GB) `[Spec-Est.]` / `~52–74 tok/s`（Framework 128GB）/ `~125+ tok/s`（72GB 独显）`[Spec-Est.]` |
+| **Tencent `Hy-MT3-30B-A3B`** (`30.5B-A3B` 102-Lang MoE) / **腾讯混元 `Hy-MT3-30B-A3B`**（`30.5B-A3B` 102 语种 MoE） | `30.5B` total / **`3.0B` active** · Fast-Thinking 102 langs / `30.5B` 总参 / **`3.0B` 激活** · 102 语种极速直出 | `~18.3 GB` weights + `~2.2 GB` 64K KV (`q8_0`) / 权重约 `18.3 GB` + 64K KV 约 `2.2 GB`（`q8_0`） | `24GB` RTX 4090/5080S / `32GB` Mac / **SAKURA-II 32GB PCIe** / `24GB` 独显 / `32GB` Mac / **SAKURA-II 32GB 边缘卡** | `~65–88 tok/s` (UMA) / `~145–190 tok/s` (24GB–32GB GDDR7) `[Spec-Est.]` / `~65–88 tok/s`（统一内存）/ `~145–190 tok/s`（独显）`[Spec-Est.]` |
+| **Tencent `Hy-MT3-1.8B`** (`1.8B` Dense Edge SLM) / **腾讯混元 `Hy-MT3-1.8B`**（`1.8B` 端侧 102 语种小模型） | `1.8B` dense · OCR-cascade & on-device localization / `1.8B` 稠密 · OCR 级联图片翻译与端侧实时本地化 | `~1.12 GB` weights + `~0.4 GB` 16K KV (`q8_0`) / 权重仅 `~1.12 GB` + 16K KV 约 `0.4 GB`（`q8_0`） | Pi 5 `8GB` / **SiMa.ai Modalix** (`<10W`) / Any `8GB+` Laptop / 树莓派 5 `8GB` / **SiMa.ai Modalix** (`<10W`) / 任意 `8GB` 轻薄本 | `~45–85 tok/s` (Modalix EAGLE-3) / `~160+ tok/s` (Desktop GPU) `[Spec-Est.]` / `~45–85 tok/s`（Modalix 投机加速）/ `~160+ tok/s`（桌面卡）`[Spec-Est.]` |
+
+#### 2. Why Framework Desktop (128GB Mini-ITX · 5GbE · Open PCIe x4) Is the Ultimate DIY Host for Co-Hosting Kolibri 1.1 + Hy-MT3-30B-A3B / 2. 模块化 Mini-ITX 神机：在 Framework Desktop（128GB · 5GbE · 开放 PCIe x4）上双模型常驻 Kolibri 1.1 与 Hy-MT3-30B
+Among `128GB` AMD **Ryzen AI Max+ 395 ("Strix Halo")** systems (`256 GB/s` 256-bit LPDDR5X-8000, 16 Zen 5 cores, 40-CU Radeon 8060S `gfx1151`, 50-TOPS XDNA 2 NPU), the **Framework Desktop (4.5L)** stands out for HomeLab engineers for three hardware reasons:
+
+- **Standard Mini-ITX Mainboard + 120mm Fan + 400W FlexATX PSU**: Unlike sealed mini-PC pucks with custom board shapes and high-pitched blower fans, Framework Desktop’s mainboard follows standard **170×170mm Mini-ITX mounting and 24-pin ATX power headers**, cooled by a quiet 120mm Noctua/Cooler Master fan—meaning you can run it silently on a desk or transplant the board straight into a rackmount chassis.
+- **Built-in 5GbE + Physical PCIe Gen4 x4 Expansion Slot**: The onboard **physical PCIe x4 slot** lets you install a **dual-port 25GbE/100GbE RDMA NIC**, an **OCuLink eGPU host card**, or a low-profile **EdgeCortix SAKURA-II (32GB) / SiMa.ai Modalix edge NPU card**.
+- **Co-Hosting Both Flagship MoEs (`75B + 30.5B = 105.5B` Total Parameters) Simultaneously in 104GB Usable UMA**: By unlocking `104GB` of GPU-addressable unified memory (`amdgpu.gttsize=106496` / TTM `pages_limit` on Linux 7.4+ with `amdgpu.iommu_perfopt=1`), you can keep **Aleph Alpha `Kolibri 1.1` (`75B-A3.4B`, `Q4_K_M ~43.9 GB`)** and **Tencent `Hy-MT3-30B-A3B` (`Q4_K_M ~18.3 GB`)** **100% co-resident in GPU memory (`~62.2 GB` combined weights + `~40 GB` room for KV caches)**. An agentic n8n or RAG pipeline can reason over `262K`-token technical contracts in English/German with Kolibri 1.1 on port `:8000` and instantly localize structured outputs into 102 languages via Hy-MT3-30B-A3B on port `:8001` with **zero model-swap reload delay**!
+在众多搭载 **AMD Ryzen AI Max+ 395（Strix Halo，16 核 Zen 5 + 40 CU Radeon 8060S + 50 TOPS XDNA 2 NPU，256-bit `128GB` LPDDR5X-8000 @ `256 GB/s`）** 的迷你主机中，**Framework Desktop（4.5L 模块化主机）** 凭借三项独特的硬件工程设计成为了 HomeLab 玩家的宠儿：
+
+- **标准 170×170mm Mini-ITX 主板 + 120mm 大风扇 + 400W FlexATX 电源**：不同于采用异形主板与高频涡轮风扇的封闭式迷你盒子，Framework Desktop 的主板完全遵循**标准 Mini-ITX 孔位与标准 ATX 供电接口**，出厂即可搭载 120mm 猫头鹰（Noctua）/ 酷冷至尊静音风扇满载持续释放，甚至支持直接把主板拆下来装进 2U 机架式服务器机箱。
+- **板载 5GbE 高速网口 + 开放式物理 PCIe Gen4 x4 插槽**：主板上预留了一条珍贵的**物理 PCIe x4 插槽**——你可以直接插上一张双口 25GbE/100GbE 网卡组集群，或者插上一张上一篇介绍的 **EdgeCortix SAKURA-II (32GB) / SiMa.ai Modalix 半高边缘加速卡**。
+- **104GB 统一显存池同时常驻 `75B + 30.5B` 双旗舰 MoE（零切模型换入换出延迟）**：在 Linux 7.4+ 下解锁 `104GB` 核显可用内存（配合 `amdgpu.iommu_perfopt=1`）后，**`Kolibri 1.1`（`75B-A3.4B` `Q4_K_M` 约 `43.9 GB`）** 与 **腾讯 `Hy-MT3-30B-A3B`（`Q4_K_M` 约 `18.3 GB`）** 两款模型的权重加起来仅 **`62.2 GB`**，可同时 100% 常驻显存并留出 **`40 GB+` 的长上下文 KV 缓存空间**！这意味着你的本地工作流可以在 `:8000` 端口用 Kolibri 1.1 针对 262K 超长技术/合规文档做深度推理与工具调用，随后在毫秒间调用 `:8001` 端口的 Hy-MT3-30B-A3B 并发翻译成 102 种语言，全程零模型卸载重加载等待！
+
+#### 3. Production Tuning Pitfalls: Kolibri 1.1 1M-Context Sparse Attention vs Hy-MT3 Fast-Thinking & Tag Guardrails / 3. 生产环境避坑指南：Kolibri 1.1 百万上下文稀疏注意力解锁 vs Hy-MT3 占位符保护与 TransRubric 评测
+To get benchmark-grade output quality from both models locally, avoid these two common misconfigurations:
+
+- **Aleph Alpha `Kolibri 1.1` (`--reasoning-parser kolibri1` & Sampling Rules)**: Do not run `Kolibri 1.1` with default `temperature=0` or generic tool parsers. In **vLLM**, pass **`--reasoning-parser kolibri1 --tool-call-parser kolibri1 --enable-auto-tool-choice`** so explicit reasoning blocks and tool calls are cleanly separated in the OpenAI API response. Furthermore, Aleph Alpha trained Kolibri 1.1 for **`temperature=1.0`, `top_p=0.99`, `top_k=128`**. When stretching context beyond `262,144` up to **`1,048,576` (`1M` tokens)** via `--hf-overrides '{"max_position_embeddings": 1048576}'`, always pair it with `--kv-cache-dtype fp8`.
+- **Tencent `Hy-MT3-30B-A3B` & `1.8B` (Keep It "Fast-Thinking" + `TiMiHOKGameTranslator` Tag Discipline)**: Unlike reasoning models that emit hundreds of `<think>` tokens before answering, `Hy-MT3` is engineered for **direct, non-thinking translation ("Fast-Thinking")**. In game localization (`TiMiHOKGameTranslator`) or UI/Markdown pipelines, set a low temperature (`0.1–0.3`), pass glossary constraints in the system prompt, and never force Chain-of-Thought prompting—this keeps latency minimal and guarantees 100% preservation of interpolation placeholders (`{player_name}`, `%1$s`, HTML/Unity rich-text tags). You can grade local translation batches offline using Tencent’s open-source **`TransRubric`** evaluation harness.
+在本地把 `Kolibri 1.1` 与 `Hy-MT3` 接入生产 API 或 n8n 工作流时，请务必避开以下两个高频配置陷阱：
+
+- **Aleph Alpha `Kolibri 1.1` 必须启用专属 `kolibri1` 解析器与高温度采样**：在使用 **vLLM** 部署时，务必加上 **`--reasoning-parser kolibri1 --tool-call-parser kolibri1 --enable-auto-tool-choice`**，使模型输出的显式思考过程与结构化工具调用 JSON 被自动拆分到标准的 `reasoning_content` 与 `tool_calls` 字段中。此外，千万不要沿用传统代码模型的 `temperature=0`——`Kolibri 1.1` 官方标定的最佳采样参数为 **`temperature=1.0`、`top_p=0.99`、`top_k=128`**；若需通过 `--hf-overrides '{"max_position_embeddings": 1048576}'` 将上下文从原生 `262K` 扩展至 **`1M`（104 万 Token）**，请务必开启 `--kv-cache-dtype fp8`。
+- **腾讯混元 `Hy-MT3` 严禁强加思考链 Prompt + 占位符与 `TransRubric` 闭环**：推理大模型在翻译一句简单的 UI 词条时往往要先吐几百个 `<think>` 思考 Token，既慢又容易把游戏/软件里的 `{0}`、`%1$s`、`<color=#FF0000>` 等富文本标签“脑补”改坏。`Hy-MT3-30B-A3B` 与 `Hy-MT3-1.8B` 采用 **Fast-Thinking（零思考直出）**范式，配合天美工作室开源的 **`TiMiHOKGameTranslator`** 规范与 `temperature=0.2` 低温度采样，可在毫秒级首字延迟下实现**占位符与标签 100% 零破坏**；批量翻译完成后，还可直接调用同步开源的 **`TransRubric`** 量规评测工具在本地离线打分质检。
+
+#### 4. Reproducible Deployment: Kolibri 1.1 (262K–1M vLLM / GGUF) & Hy-MT3-30B-A3B Dual-Resident Server / 4. 可复现启动脚本：一键拉起 Kolibri 1.1（262K–1M 上下文）与腾讯 Hy-MT3-30B-A3B 双模型常驻服务
+Run the commands below to serve **Aleph Alpha `Kolibri 1.1` (`75B-A3.4B`)** up to 1M context in vLLM, launch **Tencent `Hy-MT3-30B-A3B`** via `llama-server`, or co-host both models simultaneously on a **128GB Framework Desktop**:
+执行下方命令即可在本地用 vLLM 启动最高百万上下文的 **`Kolibri 1.1` (`75B-A3.4B`)**、用 `llama-server` 启动 **`Hy-MT3-30B-A3B`**，或在 **128GB Framework Desktop** 上一键开启双模型并发常驻：
+```bash
+# 1) Aleph Alpha Kolibri 1.1 (75B-A3.4B Sparse-Attention MoE) via vLLM with 1M context override
+vllm serve Aleph-Alpha/Kolibri-1.1 \
+  --reasoning-parser kolibri1 \
+  --tool-call-parser kolibri1 \
+  --enable-auto-tool-choice \
+  --kv-cache-dtype fp8 \
+  --max-model-len 1048576 \
+  --hf-overrides '{"max_position_embeddings": 1048576}' \
+  --port 8000
+
+# 2) Dual-resident on Framework Desktop 128GB (104GB UMA): Kolibri 1.1 75B (~43.9GB) + Hy-MT3-30B-A3B (~18.3GB)
+llama-server -m ./models/Kolibri-1.1-75B-A3.4B-Q4_K_M.gguf \
+  -ngl 99 -fa on --cache-type-k q8_0 --cache-type-v q8_0 \
+  --temp 1.0 --top-p 0.99 --top-k 128 -c 262144 --port 8000 &
+
+llama-server -m ./models/Hy-MT3-30B-A3B-Q4_K_M.gguf \
+  -ngl 99 -fa on --cache-type-k q8_0 --cache-type-v q8_0 \
+  --temp 0.2 --top-p 0.90 -c 32768 --port 8001 &
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: How does Aleph Alpha Kolibri 1.1 (75B-A3.4B) differ from Kolibri 1.0 (78B), and why is it so fast on 64GB–128GB unified-memory machines? / Aleph Alpha 新开源的 Kolibri 1.1（75B-A3.4B）相比前代 Kolibri 1.0（78B）改了什么？为什么它在 64GB Mac mini M5 Pro 或 128GB Framework Desktop 上跑得这么快？
+  **A**: **Kolibri 1.1 (`75B` total / `3.4B` active)** made two architectural upgrades over Kolibri 1.0: it **densified the initial layers** to improve token grounding and introduced a **sparse-attention architecture** during mid-training that slashes long-context KV cache and attention FLOPS across `262K–1M` tokens. Because `Q4_K_M` weights take **`~43.9 GB`** (fitting inside a `64GB` Mac mini M5 Pro or `128GB` Framework Desktop) while each decode step reads only **`3.4B` active parameters (`~2.0 GB`)**, a `256–307 GB/s` unified memory bus can generate **`~52–78 tok/s`**—more than `4x` faster than a dense 70B model! (**Kolibri 1.1（`75B` 总参 / `3.4B` 激活）** 相比前代做了两项关键手术：**一是将模型最底层的初始层进行了稠密化（Densified Initial Layers）**以夯实语义表征；**二是在中期训练引入了稀疏注意力架构（Sparse Attention）**，大幅削减了 `262K` 乃至 `1M` 超长上下文下的注意力计算量与显存开销。之所以在统一内存主机上极快，是因为其 `Q4_K_M` 总权重仅约 **`43.9 GB`**（64GB Mac mini M5 Pro 或 128GB Framework Desktop 均可全量装入），但每吐一个字只需读取 **`3.4B` 激活参数（约 `2.0 GB` 数据）**——在 `256–307 GB/s` 内存带宽下即可轻松跑出 **`~52–78 tok/s`**，比 70B 稠密模型快出 4 倍以上！)
+- **Q**: When should I use Tencent Hunyuan Hy-MT3-30B-A3B vs Hy-MT3-1.8B for local translation workflows? / 在本地搭建 102 语种翻译与本地化工作流时，该选腾讯混元 Hy-MT3-30B-A3B 还是 Hy-MT3-1.8B？
+  **A**: Use **`Hy-MT3-30B-A3B` (`30.5B` total / `3.0B` active MoE, `~18.3 GB` in `Q4_K_M`)** on **24GB+ GPUs, 32GB+ Macs, or 128GB workstations** when translating **game/software localization packs (`TiMiHOKGameTranslator`), legal/technical documents, or messy OCR-cascaded image text (VISTA-Bench)** where strict terminology adherence and zero placeholder corruption are critical. Use **`Hy-MT3-1.8B` (`1.8B` dense, `~1.12 GB` in `Q4_K_M`)** on **8GB laptops, Raspberry Pi 5, or sub-10W edge NPUs (SiMa.ai Modalix / EdgeCortix SAKURA-II)** for real-time subtitle translation, browser sidebars, and high-throughput edge ingestion where it still outperforms major commercial translation APIs. (按**硬件显存预算**与**场景容错要求**分级选用：如果你的主机有 **24GB+ 独显、32GB+ Mac 或 128GB 工作站**，且处理的是**游戏/App 多语言资源包（需配合 `TiMiHOKGameTranslator` 严格保护占位符与富文本标签）、技术合同或复杂海报/漫画 OCR 级联图片翻译（VISTA-Bench）**，直接上 **`Hy-MT3-30B-A3B`（`Q4_K_M` 约 `18.3 GB`）**，由于它仅激活 `3.0B` 参数，吐字速度和 3B 小模型一样快，质量却能媲美顶尖闭源大模型；如果是在 **8GB 轻薄本、树莓派 5 或 `<10W` 边缘加速卡（SiMa.ai Modalix / SAKURA-II）** 上跑实时字幕、离线网页翻译或海量语料清洗，体积仅 **`~1.12 GB` 的 `Hy-MT3-1.8B`** 即可在极低功耗下击败主流商用翻译 API。)
+
+---
+
 ## Default Parameterized Artifacts
 
 ### run-mac-benchmark.sh (Apple Silicon Mac Fixed-Task Speed & Context Benchmark Script / Mac 本地模型固定任务、上下文与生成速度复现脚本)
@@ -7562,6 +7765,118 @@ fi
 
 ```
 
+### audit-structera-cxl-and-run-sakura2-modalix.sh (SC26 Marvell Structera A 2504 / X 2404 CXL Inline-LZ4 Pool & EdgeCortix SAKURA-II / SiMa.ai Modalix Edge Runner / SC26 Marvell Structera A 2504 / X 2404 CXL 硬件 LZ4 内存池与 EdgeCortix SAKURA-II / SiMa.ai Modalix 边缘启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/sc26-marvell-structera-cxl-and-sakura2-modalix-runner/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/sc26-marvell-structera-cxl-and-sakura2-modalix-runner/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — SC26 Marvell Structera A 2504 / X 2404 CXL & EdgeCortix SAKURA-II / SiMa.ai Modalix Runner (Guide #67)
+set -euo pipefail
+
+MODE="structera_a2504_cxl_lz4"
+MODEL="Aleph-Alpha/Kolibri-1.1"
+CXL_NODE="2"
+MOE_LAYERS="28"
+PORT="8000"
+
+echo "=== [1/2] Inspecting PCIe 5.0 / CXL 2.0 Topology & Edge NPU Devices ==="
+lspci -vv 2>/dev/null | grep -Ei 'CXL|Marvell|Structera|EdgeCortix|SAKURA|SiMa|Modalix|LnkSta:' | head -n 20 || true
+numactl -H 2>/dev/null | head -n 16 || true
+
+if [ "$MODE" = "structera_a2504_cxl_lz4" ]; then
+  echo "=== [2/2] [Marvell Structera A 2504 · 16x Neoverse V2 + 4-Ch DDR5 200 GB/s + Inline LZ4] Weighted Interleave & vLLM KV Tier ==="
+  if [ -d "/sys/kernel/mm/mempolicy/weighted_interleave" ]; then
+    echo 23 | sudo tee /sys/kernel/mm/mempolicy/weighted_interleave/node0 >/dev/null || true
+    echo 10 | sudo tee "/sys/kernel/mm/mempolicy/weighted_interleave/node${CXL_NODE}" >/dev/null || true
+  fi
+  export STRUCTERA_INLINE_LZ4_ENABLE=1
+  export STRUCTERA_NEOVERSE_KV_PREFILTER=1
+  exec numactl --weighted-interleave=0,"${CXL_NODE}" vllm serve "$MODEL" \
+    --swap-space 256 \
+    --kv-cache-dtype fp8 \
+    --max-model-len 262144 \
+    --port "$PORT"
+elif [ "$MODE" = "structera_x2404_ddr4_moe" ]; then
+  echo "=== [2/2] [Marvell Structera X 2404 · 12-DIMM Recycled DDR4-3200 768GB CXL Pool] Offloading $MOE_LAYERS MoE Layers ==="
+  export STRUCTERA_INLINE_LZ4_ENABLE=1
+  exec numactl --membind=0,"${CXL_NODE}" llama-server \
+    -m "$MODEL" \
+    -ngl 99 --n-cpu-moe "$MOE_LAYERS" \
+    -fa on --cache-type-k q8_0 --cache-type-v q8_0 \
+    -c 131072 --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "edgecortix_sakura2_mera" ]; then
+  echo "=== [2/2] [EdgeCortix SAKURA-II · DNA-II 60 TOPS INT8 / 30 TFLOPS BF16 @ 8-10W] Launching MERA 2.0 Runtime Server ==="
+  export MERA_DEVICE_TARGET="sakura2"
+  export MERA_BF16_VISION_ENCODER=1
+  exec mera-serve --model "$MODEL" --precision w4a16_bf16 --port "$PORT"
+elif [ "$MODE" = "sima_modalix_eagle3" ]; then
+  echo "=== [2/2] [SiMa.ai MLSoC Modalix · 50 TOPS @ <10W] Launching Palette 3.0 with Hardware EAGLE-3 Speculative Decoding ==="
+  export SIMA_PALETTE_SPECULATIVE_MODE="eagle3"
+  exec palette-llm-serve --model "$MODEL" --speculative-draft eagle3 --max-draft-tokens 4 --port "$PORT"
+else
+  echo "Unknown DEPLOY_MODE=$MODE" >&2
+  exit 1
+fi
+
+```
+
+### run-kolibri11-hymt3-and-framework-desktop.sh (Aleph Alpha Kolibri 1.1 (75B-A3.4B Sparse-Attention MoE), Tencent Hy-MT3-30B-A3B & Framework Desktop 128GB Launcher / Aleph Alpha Kolibri 1.1（75B-A3.4B 稀疏注意力 MoE）、腾讯混元 Hy-MT3-30B-A3B 与 Framework Desktop 128GB 启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/kolibri11-75b-hymt3-30b-framework-desktop-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/kolibri11-75b-hymt3-30b-framework-desktop-launcher/
+```sh
+#!/usr/bin/env bash
+# Tinker AI — Aleph Alpha Kolibri 1.1 (75B-A3.4B), Tencent Hy-MT3-30B-A3B & Framework Desktop 128GB Launcher (Guide #68)
+set -euo pipefail
+
+MODE="kolibri11_vllm_1m"
+KOLIBRI="Aleph-Alpha/Kolibri-1.1"
+HYMT3="./models/Hy-MT3-30B-A3B-Q4_K_M.gguf"
+CTX="262144"
+PORT="8000"
+
+echo "=== [Host Preflight] Auditing Unified Memory (Framework Desktop 128GB Mini-ITX / Mac) or GPU VRAM ==="
+grep -E 'MemTotal|MemAvailable' /proc/meminfo 2>/dev/null || sysctl hw.memsize 2>/dev/null || true
+
+if [ "$MODE" = "kolibri11_vllm_1m" ]; then
+  echo "=== [Aleph Alpha Kolibri 1.1 · 75B-A3.4B Sparse-Attention MoE] Launching vLLM with kolibri1 Parser (Ctx=$CTX) ==="
+  exec vllm serve "$KOLIBRI" \
+    --reasoning-parser kolibri1 \
+    --tool-call-parser kolibri1 \
+    --enable-auto-tool-choice \
+    --kv-cache-dtype fp8 \
+    --max-model-len "$CTX" \
+    --hf-overrides "{\"max_position_embeddings\": $CTX}" \
+    --port "$PORT"
+elif [ "$MODE" = "kolibri11_gguf_framework128" ]; then
+  echo "=== [Kolibri 1.1 75B-A3.4B GGUF] Running on Framework Desktop 128GB (104GB UMA) / 64GB Mac mini M5 Pro ==="
+  exec llama-server -m "$KOLIBRI" \
+    -ngl 99 -fa on \
+    --cache-type-k q8_0 --cache-type-v q8_0 \
+    --temp 1.0 --top-p 0.99 --top-k 128 \
+    -c "$CTX" --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "hymt3_30b_a3b_fast_translate" ]; then
+  echo "=== [Tencent Hunyuan Hy-MT3-30B-A3B · 102-Lang Fast-Thinking MoE] Zero-Thinking Tag-Safe Localization Server ==="
+  exec llama-server -m "$HYMT3" \
+    -ngl 99 -fa on \
+    --cache-type-k q8_0 --cache-type-v q8_0 \
+    --temp 0.2 --top-p 0.90 \
+    -c 32768 --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "dual_resident_framework_128gb" ]; then
+  echo "=== [Framework Desktop 128GB Dual-Resident] Co-Hosting Kolibri 1.1 75B (~43.9GB) + Hy-MT3-30B-A3B (~18.3GB) ==="
+  llama-server -m "$KOLIBRI" -ngl 99 -fa on --cache-type-k q8_0 --cache-type-v q8_0 -c 131072 --port "$PORT" &
+  PID_K=$!
+  HY_PORT=$((PORT + 1))
+  llama-server -m "$HYMT3" -ngl 99 -fa on --cache-type-k q8_0 --cache-type-v q8_0 -c 32768 --port "$HY_PORT" &
+  PID_H=$!
+  echo "Co-hosted Kolibri 1.1 on :$PORT (PID $PID_K) and Hy-MT3-30B-A3B on :$HY_PORT (PID $PID_H)"
+  wait "$PID_K" "$PID_H"
+else
+  echo "Unknown STACK_MODE=$MODE" >&2
+  exit 1
+fi
+
+```
+
 ## Local LLM Hardware Usable Limits & Model Presets Reference
 
 - **Apple Silicon Mac (16GB Unified)** (Apple Silicon Mac（16GB 统一内存）): Total Memory 16 GB | Safe Usable Ceiling: **11.5 GB** | Bandwidth: 120 GB/s — macOS reserves ~4.5GB for OS & WindowServer; exceeding ~11.5GB triggers SSD swap and severe slowdown.
@@ -7661,6 +7976,10 @@ fi
 - **HyperAccel Bertha 500 LPU PCIe (128GB LPDDR5X · 546 GB/s @ 90% BW Util · 250W)** (HyperAccel Bertha 500 LPU PCIe（128GB LPDDR5X · 546 GB/s · 90% 带宽利用率 · 250W）): Total Memory 128 GB | Safe Usable Ceiling: **122 GB** | Bandwidth: 690 GB/s — SC26 4nm LLM Processing Unit (256MB SRAM, 8-ch LPDDR5X 546 GB/s, 768 TFLOPS FP8, 250W dual-slot PCIe): streamlined deterministic dataflow achieves ~90% memory bandwidth utilization (~690 GB/s GPU-equivalent effective bandwidth).
 - **Positron Atlas 8× Archer Server (256GB HBM + 384GB DDR5 · >93% BW Util · 2000W)** (Positron Atlas 8× Archer 推理服务器（256GB HBM + 384GB DDR5 · >93% 带宽利用率 · 2000W）): Total Memory 256 GB | Safe Usable Ceiling: **246 GB** | Bandwidth: 6400 GB/s — Air-cooled memory-first transformer inference appliance packing 8× Positron Archer accelerators (32GB HBM each = 256GB HBM total) + 384GB DDR5 at ~2000W system power with >93% memory bandwidth utilization.
 - **GEEKOM A9 Mega Mini Workstation (Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · 96GB UMA)** (GEEKOM A9 Mega 迷你工作站（Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · 96GB 显存池）): Total Memory 128 GB | Safe Usable Ceiling: **96 GB** | Bandwidth: 256 GB/s — Compact Strix Halo mini workstation (16 Zen 5 cores + Radeon 8060S 40 CU + 50 TOPS XDNA 2 NPU, 256 GB/s LPDDR5X-8000): carving 96GB UMA in BIOS fits Ling-3.2-air (124B-A5.5B Q4_K_M ~72.6GB) cleanly on a desk.
+- **Marvell Structera A 2504 CXL 2.0 Card (16× Neoverse V2 + 512GB 4-Ch DDR5-6400 + Inline LZ4 · 200 GB/s)** (Marvell Structera A 2504 CXL 2.0 近内存加速卡（16 核 Neoverse V2 + 512GB 四通道 DDR5 + 硬件 LZ4 · 200 GB/s）): Total Memory 512 GB | Safe Usable Ceiling: **486 GB** | Bandwidth: 310 GB/s — SC26 CXL 2.0 / PCIe 5.0 near-memory accelerator: 4-Ch DDR5-6400 (8 DIMMs, >4TB max, 200 GB/s raw / ~310 GB/s effective w/ hardware inline LZ4) + 16 Arm Neoverse V2 cores for on-card KV compression & RAG filtering.
+- **Marvell Structera X 2404 CXL 2.0 Expander (12-DIMM Recycled DDR4-3200 768GB Pool + Inline LZ4 · 100 GB/s)** (Marvell Structera X 2404 CXL 2.0 扩展卡（12 槽退役 DDR4-3200 768GB 再生内存池 + 硬件 LZ4 · 100 GB/s）): Total Memory 768 GB | Safe Usable Ceiling: **728 GB** | Bandwidth: 155 GB/s — SC26 CXL 2.0 DDR4-repurposing controller (4-Ch DDR4-3200, up to 12 DIMMs / 3 DPC, 100 GB/s raw + inline LZ4): recycles cheap decommissioned server DDR4 RDIMMs into a 768GB+ MoE cold-expert & vLLM Tier-2 KV pool.
+- **EdgeCortix SAKURA-II Dual-Chip PCIe (32GB LPDDR4X · 120 TOPS DNA-II · 18W) / SiMa.ai Modalix (50 TOPS EAGLE-3)** (EdgeCortix SAKURA-II 双芯 PCIe（32GB · 120 TOPS DNA-II · 18W）/ SiMa.ai Modalix（50 TOPS EAGLE-3 投机加速）): Total Memory 32 GB | Safe Usable Ceiling: **29.5 GB** | Bandwidth: 136 GB/s — Low-profile dual-SAKURA-II PCIe card (32GB LPDDR4X @ 136 GB/s, 120 TOPS INT8 / 60 TFLOPS BF16 at ~18W via MERA 2.0) or SiMa.ai Modalix (50 TOPS at <10W with Palette 3.0 hardware EAGLE-3 / DFlash 3.5x speculative decode).
+- **Framework Desktop Modular Mini-ITX (Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · 104GB UMA + 5GbE + PCIe x4)** (Framework Desktop 模块化 Mini-ITX 主机（Ryzen AI Max+ 395 · 128GB · 104GB 显存池 + 5GbE + PCIe x4）): Total Memory 128 GB | Safe Usable Ceiling: **104 GB** | Bandwidth: 256 GB/s — 4.5L modular Mini-ITX workstation (120mm fan, 400W FlexATX, 5GbE, open PCIe x4 slot for 25GbE NIC or edge NPU): TTM/UMA unlock gives 104GB usable GPU memory to co-host Kolibri 1.1 (75B-A3.4B) + Hy-MT3-30B-A3B simultaneously.
 
 - **Qwen2.5-1.5B-Instruct** (1.54B params, 28 layers, 2 KV heads): Ultra-low-power Raspberry Pi 5 voice loop & sub-100ms IDE FIM tab autocomplete (树莓派 5 极速离线语音对答、低配设备毫秒级 IDE 行间代码补全)
 - **Qwen2.5-3B-Instruct** (3.09B params, 36 layers, 2 KV heads): Edge devices, Raspberry Pi 5 (8GB), ultra-fast RSS/tag classification (边缘设备、树莓派 5 (8GB)、超低延迟 RSS 分类与轻量提取)
@@ -7722,6 +8041,9 @@ fi
 - **Ant InclusionAI Ling-3.2-air (124B-A5.5B · 35 KDA + 7 Gated MLA Hybrid MoE VLM · MIT)** (124B params, 14 layers, 2 KV heads): MIT-licensed 124B total / 5.5B active general & agentic multimodal MoE (35 KDA linear-attention + 7 gated MLA layers, 512 routed experts top-8 + 1 shared, 262K ctx, Q4_K_M ~72.6 GB): near-zero long-context KV growth on 96GB–128GB hosts (MIT 协议开源 124B 总参 / 仅 5.5B 激活的通用自动化多模态 MoE（35 层 KDA 线性注意力 + 7 层 Gated MLA、512 专家 Top-8 + 1 共享、262K 上下文，Q4_K_M 约 72.6 GB）：长上下文 KV 显存极省，单机 96GB–128GB 满速运行)
 - **SenseTime SenseNova-Loop-9B (32→56 Looped Layers · mHC · 512K Multimodal VLM · Apache 2.0)** (9.2B params, 32 layers, 4 KV heads): Apache-2.0 9B looped multimodal VLM executing intermediate layers 4–27 twice (32 physical -> 56 effective layers via manifold-constrained hyper-connections mHC, 512K ctx): rivals 27B reasoning inside 8GB–16GB VRAM (Q4_K_M ~5.7 GB) (Apache 2.0 开源 9B 循环层多模态 VLM，将第 4–27 中间层循环执行两次（32 物理层展开为 56 等效计算层，配 mHC 流形约束超连接与 512K 上下文）：仅占 9B 权重显存（Q4_K_M 约 5.7 GB）即逼近 27B 级推理深度)
 - **Thinking Machines TML-d24-varloop-research (26.4B-A3.2B · Runtime-Adjustable Looped MoE VLM)** (26.4B params, 24 layers, 4 KV heads): Apache-2.0 variable-looped sparse MoE VLM (~20 GB mixed NVFP4/MXFP8/BF16 or ~16.5 GB Q4_K_M): lets callers dynamically set num_loops (1x fast draft up to 4x deep reasoning) at inference time on 24GB–32GB GPUs (Apache 2.0 动态可变循环深度稀疏 MoE 多模态模型（原生混合精度约 20 GB，Q4_K_M 约 16.5 GB）：支持在推理请求时动态指定循环次数 num_loops（1x 极速响应至 4x 深度推理），单张 24GB–32GB 显卡即可把玩)
+- **Aleph Alpha Kolibri 1.1 (75B-A3.4B · Sparse-Attention Reasoning MoE · 262K–1M Ctx · Apache 2.0)** (75B params, 36 layers, 2 KV heads): Apache-2.0 75B total / 3.4B active EN/DE reasoning & tool-calling MoE with densified early layers & sparse attention (262K native / 1M max ctx, Q4_K_M ~43.9 GB): runs fast on 64GB Mac mini M5 Pro, 48GB GPU, or 128GB Framework Desktop (Apache 2.0 开源 75B 总参 / 仅 3.4B 激活的推理与工具调用稀疏注意力 MoE（首层稠密化 + 稀疏注意力，原生 262K / 最高 1M 上下文，Q4_K_M 约 43.9 GB）：64GB Mac mini M5 Pro、48GB 独显或 128GB Framework Desktop 均可满速运行)
+- **Tencent Hunyuan Hy-MT3-30B-A3B (30.5B-A3B · 102-Lang Fast-Thinking Translation MoE · Apache 2.0)** (30.5B params, 32 layers, 4 KV heads): Apache-2.0 30.5B total / 3.0B active 102-language "Fast-Thinking" localization & OCR-cascade MoE (TiMiHOKGameTranslator + TransRubric, Q4_K_M ~18.3 GB): fits 24GB GPUs, 32GB Macs, or EdgeCortix SAKURA-II 32GB PCIe (Apache 2.0 开源 30.5B 总参 / 仅 3.0B 激活的 102 语种「Fast-Thinking」本地化与 OCR 级联翻译 MoE（王者天美联合调优占位符零破坏 + TransRubric，Q4_K_M 约 18.3 GB）：适配 24GB 独显、32GB Mac 或 SAKURA-II 32GB 边缘卡)
+- **Tencent Hunyuan Hy-MT3-1.8B (1.8B Dense · On-Device 102-Lang Translation & OCR · Apache 2.0)** (1.8B params, 24 layers, 2 KV heads): Ultra-compact 1.8B dense 102-language translation & OCR self-correction SLM (Q4_K_M ~1.12 GB): outperforms commercial translation APIs on <10W edge NPUs (SiMa.ai Modalix / EdgeCortix SAKURA-II / Pi 5) (超轻量 1.8B 稠密 102 语种极速翻译与 OCR 纠错小模型（Q4_K_M 仅约 1.12 GB）：在 <10W 边缘加速卡（SiMa.ai Modalix / EdgeCortix SAKURA-II / 树莓派 5）上超越主流商用翻译 API)
 
 ## Interactive Troubleshooter Root Causes & Verified Solutions
 
