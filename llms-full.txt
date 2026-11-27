@@ -1,6 +1,6 @@
 # Tinker AI Lab — Full Reproducible Knowledge Base (llms-full.txt)
 
-> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 68 reproducible guides, hardware manifests, known limits, verification checklists, 63 model & 101 hardware VRAM reference specs, 13 diagnostic decision trees, and 68 default configuration artifacts in English and Simplified Chinese.
+> Complete technical corpus of Tinker AI Lab (https://tinker-ai.com), including all 70 reproducible guides, hardware manifests, known limits, verification checklists, 65 model & 105 hardware VRAM reference specs, 13 diagnostic decision trees, and 70 default configuration artifacts in English and Simplified Chinese.
 
 ## Apple Silicon Mac Local Model Benchmark: Fixed Tasks, Quantization, Context & Speed
 ### 一台现有 Mac 的本地模型实测：固定任务、模型版本、量化、上下文和速度
@@ -4998,6 +4998,158 @@ llama-server -m ./models/Hy-MT3-30B-A3B-Q4_K_M.gguf \
 
 ---
 
+## Deskside Blackwell Supercomputers vs NVMe Tiered Inference: ASUS ET900N G3 (GB300 748GB) & Acer Veriton GN100 (GB10 128GB) vs vLLM MoRI UMBP (1.8TB NVMe KV) & Strata 3-Tier MoE
+### 桌边 Blackwell 超算对决 NVMe 三层卸载实战：华硕 ET900N G3（GB300 748GB）与宏碁 Veriton GN100（GB10 128GB）对比 vLLM MoRI UMBP（1.8TB NVMe KV）与 Strata 流式 MoE
+
+- **URL (EN)**: https://tinker-ai.com/guides/asus-et900n-g3-gb300-acer-veriton-gn100-vs-vllm-mori-umbp-nvme-kv-and-strata-moe/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/asus-et900n-g3-gb300-acer-veriton-gn100-vs-vllm-mori-umbp-nvme-kv-and-strata-moe/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: ASUS ExpertCenter Pro ET900N G3 (GB300 748GB · Dual ConnectX-8 400GbE), Acer Veriton GN100 (GB10 128GB · ConnectX-7), & Consumer 16GB GPU + 64GB DDR5 + PCIe 4/5 NVMe Node
+- **Tested Hardware (ZH)**: 华硕 ExpertCenter Pro ET900N G3（GB300 748GB · 双 ConnectX-8 400GbE）、宏碁 Veriton GN100（GB10 128GB · ConnectX-7）与消费级 16GB 独显 + 64GB DDR5 + PCIe 4/5 NVMe 节点
+- **Pinned Versions**: vLLM 0.32.0 + MoRI UMBP Connector, Strata MoE Engine (VRAM + DDR5 + NVMe), CUDA 13.0 / NVFP4 TensorRT-LLM, ConnectX-8 400GbE / ConnectX-7 200GbE RoCEv2
+- **Verified Date**: 2026-11-27
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% Air-Gapped Local Execution (After Weights Download) — Both GB10/GB300 deskside units and vLLM MoRI UMBP / Strata NVMe nodes run fully offline with zero cloud API calls once weights are mirrored locally.
+
+**Direct Summary (EN)**: Compares two late-2026 retail/enterprise NVIDIA Blackwell desktop systems—ASUS ExpertCenter Pro ET900N G3 (748GB coherent GB300, dual ConnectX-8 400GbE) and Acer Veriton GN100 (128GB GB10, ConnectX-7, $3,999)—against software-defined NVMe memory hierarchies: AMD + vLLM MoRI UMBP (matching DRAM KV throughput within 1% on 1.8TB NVMe) and Strata (streaming 125B+ MoE models on a 16GB GPU + 64GB RAM).
+**核心结论 (ZH)**: 深度拆解 2026 年 11 月底两款桌面级 Blackwell 整机——华硕 ExpertCenter Pro ET900N G3（GB300 748GB 相干内存 · 双 400GbE）与宏碁 Veriton GN100（GB10 128GB · ConnectX-7 · 约 $3,999），并横向对比两项颠覆性 NVMe 卸载方案：AMD 联合 vLLM 推出的 MoRI UMBP（1.8TB NVMe KV 池性能逼近纯 DRAM 1% 以内）与 Strata 三层异构流式 MoE 引擎（单张 16GB 独显 + 64GB 内存跑通 125B+ 稀疏模型）。
+
+**Known Limits & Failure Boundaries**:
+- Numbers are derived from published SC26 / November 2026 vendor specs and vLLM / Strata engineering benchmarks (spec-estimate), not yet measured on our in-house bench.
+- vLLM MoRI UMBP hides NVMe read latency inside asynchronous prefill overlap; pure single-turn decode with zero prefix reuse still requires DRAM/VRAM bandwidth.
+- Strata 3-tier MoE streaming depends heavily on sparse activation ratios (e.g. 6B–14B active out of 120B+ total); dense models see severe PCIe/NVMe bottlenecks.
+- [ZH] 本文吞吐与容量数据基于 SC26 与 2026 年 11 月厂商公开规格及 vLLM / Strata 官方基准推算（spec-estimate），尚未在工坊本地机台复测。
+- [ZH] vLLM MoRI UMBP 通过异步预填充重叠掩盖 NVMe 读取延迟，主要利好多轮 Agent 长上下文 KV 复用；无前缀命中的单轮纯解码仍受限于显存带宽。
+- [ZH] Strata 三层异构流式卸载高度依赖 MoE 的低激活比（如 120B+ 总参仅激活 6B–14B）；稠密模型若强行跨 PCIe/NVMe 流式加载将严重掉速。
+
+#### 1. Hardware Showdown: ASUS ET900N G3 (GB300 748GB) vs Acer Veriton GN100 (GB10 128GB) vs Tiered NVMe Nodes / 一、硬件与架构横评：华硕 ET900N G3（GB300）vs 宏碁 Veriton GN100（GB10）vs 消费级 NVMe 三层卸载节点
+Late November 2026 bifurcates local AI infrastructure into two distinct philosophies: **brute-force coherent silicon** (packing 128GB–748GB of unified memory into deskside Blackwell boxes like the **ASUS ExpertCenter Pro ET900N G3** and **Acer Veriton GN100**) versus **software-defined NVMe memory hierarchies** (**vLLM MoRI UMBP** and **Strata**) that turn commodity PCIe Gen4/Gen5 SSDs into active KV cache or cold-expert tiers.
+2026 年 11 月底的本地 AI 硬件演进呈现清晰的「双轨分化」：一轨是以**华硕 ExpertCenter Pro ET900N G3（748GB 相干内存）**与**宏碁 Veriton GN100（128GB 统一内存）**为代表的桌边 Blackwell 相干内存超算，靠硬件暴力消除内存墙；另一轨则是以 **vLLM MoRI UMBP** 与 **Strata** 为代表的软件定义三层存储架构，把廉价的高速 PCIe Gen4/Gen5 NVMe SSD 直接拉入推理热路径，让普通工作站甚至 16GB 独显也能驾驭百亿至万亿级 MoE 与百万级 Agent 缓存。
+
+**Late-Nov 2026 Deskside Blackwell Systems vs NVMe-Tiered Inference Nodes (Spec-Derived) / 2026 年 11 月底桌边 Blackwell 整机与 NVMe 三层卸载方案规格对比（规格推算）**
+| Platform / Stack (平台 / 方案) | Compute & Memory Tiering (算力与内存层级) | Interconnect / Storage (高速互联与存储) | Street Price & Sweet Spot (参考价位与最佳场景) |
+| --- | --- | --- | --- |
+| ASUS ExpertCenter Pro ET900N G3 / 华硕 ExpertCenter Pro ET900N G3 | GB300 (72-core Grace V2 + Blackwell Ultra) · 748GB coherent (252GB HBM3e + 496GB LPDDR5X) · 20 PFLOPS FP4 / GB300（72 核 Grace V2 + Blackwell Ultra）· 748GB 相干内存（252GB HBM3e + 496GB LPDDR5X）· 20 PFLOPS FP4 | Dual ConnectX-8 400GbE QSFP112 · 4× M.2 PCIe 5.0 NVMe · Liquid-cooled 27kg tower / 双 ConnectX-8 400GbE QSFP112 · 4 槽 M.2 PCIe 5.0 NVMe · 一体水冷 27kg 塔式 | ~$99,999 · Full-speed 280B–1T MoE (ERNIE 5.5 Flash / Kimi K3.1) & local fine-tuning / 约 $99,999 · 满速运行 280B–1T 级 MoE（ERNIE 5.5 Flash / Kimi K3.1）与本地微调 |
+| Acer Veriton GN100 / 宏碁 Veriton GN100 | GB10 (20-core Grace + Blackwell GPU) · 64GB / 128GB unified LPDDR5X · 1 PFLOPS FP4 / GB10（20 核 Grace + Blackwell GPU）· 64GB / 128GB 统一内存 · 1 PFLOPS FP4 | ConnectX-7 200GbE (2-node cluster up to 405B) · 4TB SED NVMe · 10GbE + Wi-Fi 7 (<1.5kg) / ConnectX-7 200GbE（双机互联最高 405B）· 4TB 自加密 NVMe · 万兆 + Wi-Fi 7（<1.5kg） | ~$3,999 · Deskside 70B–120B FP4 single node; 256GB dual-node ERNIE 5.5 / Llama 405B / 约 $3,999 · 单机 70B–120B FP4；双机 256GB 跑通 ERNIE 5.5 Flash / 405B |
+| vLLM 0.32 + MoRI UMBP (NVMe KV) / vLLM 0.32 + MoRI UMBP（NVMe KV 池） | GPU VRAM + Small DRAM Staging Buffer (32GB) + 1.8TB+ NVMe KV Cache Pool / GPU 显存 + 轻量 DRAM 写缓冲（32GB）+ 1.8TB+ NVMe KV 缓存池 | PCIe Gen4/Gen5 NVMe direct block pool · Async prefill overlap hides SSD read latency / PCIe Gen4/Gen5 NVMe 块池 · 异步预填充重叠掩盖 SSD 读延迟 | $200–$600 SSD upgrade · Multi-turn Agentic KV reuse within ~1% of pure DRAM speed / $200–$600 SSD 成本 · 多轮 Agent 长上下文 KV 复用性能逼近纯 DRAM（差距 <1%） |
+| Strata 3-Tier MoE Engine / Strata 三层异构 MoE 引擎 | 12–16GB GPU VRAM (Hot Experts + Attn + KV) + 64GB DDR5 (Warm) + NVMe SSD (Cold / N-Gram) / 12–16GB 独显（热专家 + 注意力 + KV）+ 64GB DDR5（温专家）+ NVMe（冷专家 / N-Gram） | Async expert prefetch + speculative decoding ("guess-then-check") · OpenAI/Anthropic API / 异步专家预取 + 投机解码掩盖 PCIe/NVMe 延迟 · 兼容 OpenAI / Anthropic 接口 | Existing $800–$1,500 PC · Run 125B+ sparse MoE (Qwen3.8-Flash-Next) for local coding agents / 利用现有 $800–$1,500 主机 · 在 16GB 显卡上跑通 125B+ 稀疏 MoE 驱动本地编程 Agent |
+
+#### 2. Why vLLM MoRI UMBP Matches DRAM Within 1% on 1.8TB NVMe KV Pools / 二、为什么 vLLM MoRI UMBP 能用 1.8TB NVMe SSD 跑出逼近纯 DRAM（差距 <1%）的 Agent 吞吐？
+Long-horizon coding and multi-agent loops generate hundreds of gigabytes of reusable KV cache across turns. Buying 2TB of server DDR5 RDIMMs solely to hold idle KV blocks costs tens of thousands of dollars. **MoRI UMBP (Unified Memory/Buffer Pool)**, co-developed by AMD and the vLLM community in November 2026, replaces giant DRAM KV tiers with a **small DRAM write/staging ring (e.g., 32GB)** backed by a **multi-terabyte NVMe block pool**. When an agent resumes a session, MoRI UMBP pipelines asynchronous NVMe block reads behind active GPU prefill kernels—keeping GPU compute saturated and matching pure-DRAM latency within **~1%** on Kimi-K3 agentic traces.
+在多轮编程 Agent 与长程工具调用场景中，跨轮次复用的 KV Cache 动辄膨胀到数百 GB 甚至 TB 级；若全靠服务器 DDR5 内存兜底，仅内存条成本就要数万美元。AMD 与 vLLM 社区在 2026 年 11 月推出的 **MoRI UMBP（Unified Memory/Buffer Pool）** 巧妙打破了这一僵局：它仅在主机内存中保留一块**轻量 DRAM 写入暂存环（如 32GB）**，而将高达 **1.8TB+ 的冷热 KV 块池直接落盘至标准 NVMe SSD**。当 Agent 恢复历史会话时，MoRI UMBP 将 NVMe 异步块读取巧妙藏在 GPU 当前轮次的 Prefill 计算等待窗口内，在 Kimi-K3 长上下文 Agent 回放基准中取得了与纯 DRAM 方案差距 **不到 1%** 的惊人成绩。
+```bash
+mkdir -p /mnt/nvme-kv/mori-umbp
+export MORI_UMBP_STORAGE_DIR=/mnt/nvme-kv/mori-umbp
+export MORI_UMBP_DRAM_STAGING_GB=32
+export MORI_UMBP_ASYNC_PREFETCH=1
+
+vllm serve Qwen/Qwen3.8-Flash-Next-NVFP4 \
+  --kv-transfer-config '{"kv_connector":"MoRIUMBPConnector","kv_role":"kv_both"}' \
+  --enable-prefix-caching \
+  --kv-cache-dtype fp8 \
+  --max-model-len 131072 \
+  --host 127.0.0.1 --port 8000
+```
+
+#### 3. Strata 3-Tier MoE Streaming: Running 125B+ Sparse Models on a Single 16GB GPU / 三、Strata 三层异构流式 MoE：单张 16GB 独显 + 64GB 内存跑通 125B+ 稀疏大模型
+Whereas `llama.cpp --n-cpu-moe` splits whole layers or static experts between GPU and CPU, **Strata** (`stratallm.org`) treats a sparse MoE model as a dynamic three-tier cache: (1) **VRAM Hot Cache** permanently pins attention projections, router gates, KV cache, and the highest-hit hot experts; (2) **System RAM** holds warm experts for fast PCIe transfer or hybrid compute; (3) **NVMe SSD** streams cold experts and giant N-gram tables asynchronously via speculative draft lookahead ("guess-then-check"). Exposing both OpenAI and Anthropic-compatible endpoints on `127.0.0.1`, Strata lets consumer 12GB–16GB GPUs power local coding agents with 125B+ sparse MoE models.
+相比传统 `llama.cpp --n-cpu-moe` 的静态切层策略，开源推理引擎 **Strata**（`stratallm.org`）将稀疏 MoE 彻底重构为动态三层缓存架构：（1）**显存热区（VRAM）**常驻所有注意力层、路由器权重、KV 缓存以及命中率最高的「热专家」；（2）**系统内存温区（DDR5）**承接中频「温专家」并配合混合计算；（3）**NVMe 冷区（SSD）**专门流式读取低频冷专家与超大 N-Gram 查表，并通过投机解码（「先猜后验」）提前发起异步预取。Strata 原生暴露 OpenAI 与 Anthropic 双兼容本地接口，让普通 12GB–16GB 独显玩家也能用 125B+ 稀疏大模型驱动本地编程 Agent。
+```bash
+strata serve Qwen/Qwen3.8-Flash-Next-NVFP4 \
+  --vram-hot-experts auto \
+  --ram-budget-gb 48 \
+  --ssd-cache-dir /mnt/nvme-kv/strata-cache \
+  --async-prefetch \
+  --speculative-draft auto \
+  --host 127.0.0.1 --port 8000
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: When should I buy an Acer Veriton GN100 ($3,999 GB10) vs upgrading my existing 16GB GPU PC with Strata + NVMe? / 预算有限时，该花约 $3,999 入手宏碁 Veriton GN100（GB10 128GB），还是直接用现有 16GB 独显主机跑 Strata + NVMe 卸载？
+  **A**: If you already own a **16GB GPU + 64GB DDR5 + Gen4/Gen5 NVMe** desktop and primarily run **single-user coding agents** on sparse MoE models (like Qwen3.8-Flash-Next), **Strata** gives you immediate 125B+ capability for $0 hardware spend. Buy an **Acer Veriton GN100 (128GB GB10)** when you need **dense 70B+ models, 1 PFLOPS native FP4 prefill speed, quiet <1.5kg desktop form factor, or 2-node ConnectX-7 256GB clustering** without PCIe/NVMe streaming latency. (如果你手头已有 **16GB 独显 + 64GB DDR5 + 高速 NVMe** 台式机，且核心诉求是**单人本地编程 Agent** 跑稀疏 MoE 模型（如 Qwen3.8-Flash-Next），零硬件投入直接上 **Strata** 性价比最高；而当你需要流畅运行 **70B+ 稠密模型、依赖 1 PFLOPS 原生 FP4 极速预填充、追求 1.5kg 静音桌面体积，或计划双机 ConnectX-7 组 256GB 集群**时，宏碁 **Veriton GN100（GB10 128GB）** 的原生统一内存与 CUDA 生态更具确定性优势。)
+- **Q**: How does ASUS ExpertCenter Pro ET900N G3 compare to MSI XpertStation WS300 / GIGABYTE W775-V10? / 华硕 ExpertCenter Pro ET900N G3 与此前介绍的微星 WS300、技嘉 W775-V10 有何异同？
+  **A**: All three are retail/enterprise OEM towers built around the **NVIDIA GB300 Grace Blackwell Ultra Desktop Superchip (748GB coherent memory: 252GB HBM3e + 496GB LPDDR5X, 20 PFLOPS FP4)**. The **ASUS ET900N G3** stands out with its **custom single-piece cold-plate liquid cooling (27kg chassis with integrated metal carry handles)**, **dual ConnectX-8 400GbE QSFP112 SuperNICs**, and **4× M.2 PCIe 5.0 NVMe slots**, plus compatibility with the new **Windows Server 2028 Preview** alongside DGX OS. (三者均基于同一核心——**NVIDIA GB300 Grace Blackwell Ultra 桌面超算芯片（748GB 相干内存：252GB HBM3e + 496GB LPDDR5X，20 PFLOPS FP4）**。华硕 **ET900N G3** 的差异化在于其**定制一体式冷板水冷散热（27kg 机箱配金属提手）**、**双口 ConnectX-8 400GbE QSFP112 超级网卡**与 **4 槽 M.2 PCIe 5.0 NVMe 扩展**，并支持在 DGX OS 与最新 **Windows Server 2028 预览版**间按企业环境选配。)
+
+---
+
+## Late-Nov 2026 Linear-Attention & HCA MoE Showdown: KRAFTON Raon-1 Mini (28.8B-A4.3B · 18 RDA + 7 MLA · 6 Reasoning Levels) & Baidu ERNIE 5.5 Flash (280B-A14B · 1M Ctx) on Corsair AI Workstation 300 & RTX 5090
+### 2026 年 11 月底线性注意力与超稀疏 MoE 双雄实战：KRAFTON Raon-1 Mini（28.8B-A4.3B · 18 层 RDA + 六档推理）与百度 ERNIE 5.5 Flash（280B-A14B · 1M 上下文）在 Corsair AI Workstation 300 与 RTX 5090 上的部署全解
+
+- **URL (EN)**: https://tinker-ai.com/guides/krafton-raon1-mini-29b-rda-baidu-ernie55-flash-280b-and-corsair-ai-workstation-300/
+- **URL (ZH)**: https://tinker-ai.com/zh/guides/krafton-raon1-mini-29b-rda-baidu-ernie55-flash-280b-and-corsair-ai-workstation-300/
+- **Pillar**: Local AI / HomeLab / 本地 AI / HomeLab
+- **Tested Hardware (EN)**: Corsair AI Workstation 300 (Ryzen AI Max+ 395 · 128GB LPDDR5X · 96GB UMA), NVIDIA RTX 5090 (32GB) / RTX 5080 SUPER (24GB), & Mac Studio M3/M5 Ultra (256GB–512GB)
+- **Tested Hardware (ZH)**: 美商海盗船 Corsair AI Workstation 300（Ryzen AI Max+ 395 · 128GB 统一内存 · 96GB 显存）、NVIDIA RTX 5090 (32GB) / RTX 5080 SUPER (24GB) 与 Mac Studio M3/M5 Ultra (256GB–512GB)
+- **Pinned Versions**: vLLM 0.32.0 + vllm-ernie plugin, llama.cpp v1.0.0+ (Vulkan / ROCm / CUDA 12.8+), KRAFTON Raon-1-mini (NVFP4 / MXFP8 / GGUF), Baidu ERNIE-5.5-Flash (FP8 / FP4 · --reasoning-parser ernie5)
+- **Verified Date**: 2026-11-27
+- **Evidence Level**: Spec-derived estimate (not lab-measured yet)
+- **Offline Boundary**: 100% Local Offline Execution (Apache 2.0 / Open Weights) — Both KRAFTON Raon-1 Mini (Apache 2.0) and Baidu ERNIE 5.5 Flash run locally via vLLM or llama.cpp with zero external API telemetry once weights are cached.
+
+**Direct Summary (EN)**: Complete deployment & VRAM sizing guide for two late-November 2026 open-weight MoE releases—KRAFTON Raon-1 Mini (Apache 2.0, 28.8B-A4.3B, 18 RDA linear + 7 Gated MLA layers = ~8 KiB/tok BF16 KV, 256K ctx, 6 selectable reasoning levels) and Baidu ERNIE 5.5 Flash (280B-A14B, Hybrid HCA + MLA-DSA, 1M ctx, day-0 vllm-ernie)—paired with the compact 4.4L Corsair AI Workstation 300 (128GB Strix Halo) and single 24GB–32GB GPUs.
+**核心结论 (ZH)**: 全面拆解 2026 年 11 月 25–26 日发布的两大开源 MoE 新秀：KRAFTON Raon-1 Mini（Apache 2.0，28.8B 总参 / 4.3B 激活，18 层 RDA 线性注意力 + 7 层 Gated MLA，BF16 KV 仅 ~8 KiB/token，原生 256K 上下文 + 六档可调思考深度）与百度 ERNIE 5.5 Flash（280B-A14B，Hybrid HCA + MLA-DSA，1M 上下文，vllm-ernie 零日支持），实测推算其在 Corsair AI Workstation 300（4.4L · 128GB）与 RTX 5090 32GB 上的最优配置。
+
+**Known Limits & Failure Boundaries**:
+- Throughput figures are spec-derived estimates based on published architecture parameters (active bytes per token, KV bytes per token) and vendor release notes (spec-estimate).
+- Baidu ERNIE 5.5 Flash (280B total) requires ~175 GB in Q4_K_M or ~290 GB in FP8—it will NOT fit a single 128GB Strix Halo box without aggressive IQ3/NVFP4 quantization or multi-node splitting.
+- Raon-1 Mini reasoning levels (`xhigh` / `max`) dramatically increase generated thinking tokens; always set explicit `max_tokens` budgets for automated pipelines.
+- [ZH] 本文速度区间基于两款模型公开架构参数（每 token 激活权重字节与 KV 字节）及官方发布数据推算（spec-estimate），尚未在工坊实机跑分。
+- [ZH] 百度 ERNIE 5.5 Flash 总参达 280B（Q4_K_M 约 175 GB、FP8 约 290 GB），无法无损装入单台 128GB Strix Halo 主机，需使用 256GB–512GB Mac Studio、双机 Veriton GN100 或 GB300 塔式超算。
+- [ZH] Raon-1 Mini 开启 `xhigh` / `max` 深度推理档位时会输出极长思考链，在自动化工作流中务必显式设置 `max_tokens` 上限防止单次请求超时。
+
+#### 1. Architecture Breakdown: Raon-1 Mini (18 RDA + 7 MLA) vs ERNIE 5.5 Flash (Hybrid HCA + MLA-DSA) / 一、架构深度拆解：Raon-1 Mini（18 层 RDA 线性注意力）vs ERNIE 5.5 Flash（Hybrid HCA + MLA-DSA）
+Both late-November 2026 releases attack the same local-inference bottleneck—**quadratic KV cache explosion at 256K–1M context**—using complementary hybrid-attention designs. **KRAFTON Raon-1 Mini** (released Nov 25, 2026 under Apache 2.0) keeps only **7 Gated MLA layers** out of 25 total layers, replacing the other **18 layers with Raon Delta Attention (RDA)** (decoupled erase/write gates maintaining a constant-size recurrent state) and **Raon-mHC** training connections. The payoff is extraordinary: a **full 256K context KV cache consumes only ~2.0 GB in BF16 (~8 KiB/token)**, letting NVFP4/MXFP8 weights + 256K context fit comfortably on a single **24GB–32GB RTX 5090**. Meanwhile, **Baidu ERNIE 5.5 Flash (280B-A14B)** combines **Heavily Compressed Attention (HCA) + MLA-DSA**, Multi-Router Latent MoE, and built-in **ECHO / DSpark** speculative decoding for 1M-token enterprise workflows.
+2026 年 11 月底发布的两款开源 MoE 不约而同瞄准了本地长上下文部署的最大死穴——**256K 至 1M 上下文下的 KV Cache 显存爆炸**。**KRAFTON Raon-1 Mini**（11 月 25 日以 Apache 2.0 开源）在全部 25 层中仅保留 **7 层 Gated MLA 全局注意力**，其余 **18 层全部替换为自研 Raon Delta Attention（RDA）线性注意力**（通过解耦擦除门与写入门维持固定大小的循环状态）并引入 **Raon-mHC** 加速训练。结果极其惊艳：其 **BF16 精度下每 token KV 仅占约 8 KiB，拉满原生 256K 上下文总 KV 仅约 2.0 GB**，配合 NVFP4/MXFP8 权重可轻松塞进单张 **24GB–32GB RTX 5090**。而**百度 ERNIE 5.5 Flash（280B-A14B）**则通过 **Hybrid HCA（极度压缩注意力）+ MLA-DSA**、Multi-Router Latent MoE 与原生 **ECHO / DSpark** 投机解码，面向 256GB–748GB 工作站提供 1M 超长上下文的旗舰级吞吐。
+
+**KRAFTON Raon-1 Mini vs Baidu ERNIE 5.5 Flash: Memory, KV Footprint & Hardware Pairing / KRAFTON Raon-1 Mini 与百度 ERNIE 5.5 Flash 显存、KV 占用与硬件选型矩阵**
+| Model & License (模型与协议) | Params (Total / Active) (参数量（总参 / 激活）) | Attention & KV Cost (注意力机制与 KV 开销) | Q4_K_M / NVFP4 Size & Ideal Hardware (权重体积与最佳硬件) |
+| --- | --- | --- | --- |
+| KRAFTON Raon-1 Mini (Apache 2.0) / KRAFTON Raon-1 Mini（Apache 2.0） | 28.8B total / 4.3B active (128 routed top-6 + 1 shared) / 28.8B 总参 / 4.3B 激活（128 专家选 6 + 1 共享） | 18 RDA linear + 7 Gated MLA · ~8 KiB/tok BF16 (~2.0 GB @ 256K) / 18 层 RDA 线性 + 7 层 Gated MLA · BF16 约 8 KiB/tok（256K 仅约 2.0 GB） | ~18.0 GB (Q4_K_M) / ~15.5 GB (NVFP4) · RTX 5090 32GB, RTX 5080 SUPER 24GB, Corsair AI Workstation 300 / 约 18.0 GB（Q4_K_M）/ 15.5 GB（NVFP4）· RTX 5090 32GB、RTX 5080 SUPER 24GB、Corsair 300 128GB |
+| Baidu ERNIE 5.5 Flash (Open Weights) / 百度 ERNIE 5.5 Flash（开源权重） | 280B total / 14B active (Multi-Router Latent MoE) / 280B 总参 / 14B 激活（Multi-Router Latent MoE） | Hybrid HCA + MLA-DSA · 1M native context · ECHO / DSpark speculative / Hybrid HCA + MLA-DSA · 原生 1M 上下文 · 内置 ECHO / DSpark 投机解码 | ~174.9 GB (Q4_K_M) / ~290 GB (FP8) · Mac Studio 256GB–512GB, Dual Veriton GN100, ASUS ET900N G3 / 约 174.9 GB（Q4_K_M）/ 290 GB（FP8）· Mac Studio 256GB–512GB、双机 GN100、华硕 ET900N G3 |
+
+#### 2. Tuning Raon-1 Mini’s 6 Reasoning Levels on RTX 5090 & Corsair AI Workstation 300 / 二、在 RTX 5090 与 Corsair AI Workstation 300 上调优 Raon-1 Mini 六档推理强度
+Raon-1 Mini exposes **six native reasoning effort levels** (`none`, `low`, `medium`, `high`, `xhigh`, `max`). In local developer workflows, route fast IDE autocomplete and JSON extraction to `none` or `low` for instant sub-second responses, while reserving `high` / `xhigh` for AIME/GPQA-class math, architecture debugging, and multi-file refactoring. On the **Corsair AI Workstation 300** (4.4L Strix Halo desktop, 128GB LPDDR5X with 96GB+ UMA and a front-panel hardware fan-curve dial), Raon-1 Mini (~18 GB) leaves over **75 GB of VRAM headroom**—enough to co-host a local vision/embedding model and vector database simultaneously with zero swap.
+Raon-1 Mini 原生内置 **`none`、`low`、`medium`、`high`、`xhigh`、`max` 六档思考强度**。在本地工程实战中，建议将 IDE 行间补全、日志抽取与结构化 JSON 路由至 `none` / `low` 档以获得毫秒级首字响应，仅在复杂算法调试、跨文件重构或数学/科研推理时按请求动态切至 `high` / `xhigh`。在 **Corsair AI Workstation 300**（4.4L 紧凑 Strix Halo 主机，128GB 统一内存可划出 96GB+ 显存，机身前置物理三档风扇静音/性能拨盘）上，Raon-1 Mini 仅占约 **18 GB**，剩余 **75 GB+** 显存足以同时常驻多模态视觉模型、重排模型与本地向量库，全程零 Swap。
+```bash
+# 1. Launch Raon-1 Mini NVFP4 with full 256K context on a single 24GB–32GB GPU
+vllm serve krafton-ai/Raon-1-mini-NVFP4 \
+  --max-model-len 262144 \
+  --gpu-memory-utilization 0.90 \
+  --enable-auto-tool-choice \
+  --host 127.0.0.1 --port 8000
+
+# 2. Fast JSON extraction (reasoning_effort=none) vs deep STEM reasoning (reasoning_effort=xhigh)
+curl -sS http://127.0.0.1:8000/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "krafton-ai/Raon-1-mini-NVFP4",
+    "messages": [{"role": "user", "content": "Prove whether the sequence converges and output clean LaTeX."}],
+    "reasoning_effort": "xhigh",
+    "max_tokens": 4096
+  }'
+```
+
+#### 3. Day-0 Baidu ERNIE 5.5 Flash (280B-A14B) Deployment via vllm-ernie / 三、基于 vllm-ernie 插件零日部署百度 ERNIE 5.5 Flash（280B-A14B）
+Baidu ERNIE 5.5 Flash ships with day-0 vLLM 0.32.0 integration through the dedicated `vllm-ernie` plugin. Always pass `--reasoning-parser ernie5` so structured thinking traces stay separated from final tool-call JSON payloads, and enable `--kv-cache-dtype fp8` when pushing past 256K context toward its 1M limit on high-memory workstations (ASUS ET900N G3 GB300, dual Acer Veriton GN100, or 256GB–512GB Mac Studio).
+百度 ERNIE 5.5 Flash 通过官方 `vllm-ernie` 插件实现了对 vLLM 0.32.0 的零日支持。部署时务必显式传入 `--reasoning-parser ernie5`，以确保思考过程与最终工具调用 JSON 严格隔离；在 ASUS ET900N G3（748GB）、双机 Acer Veriton GN100（256GB）或大内存工作站上冲击 256K–1M 长上下文时，同步开启 `--kv-cache-dtype fp8` 与 `--enable-prefix-caching` 可最大化并发槽位。
+```bash
+pip install "vllm==0.32.0" vllm-ernie
+
+vllm serve baidu/ERNIE-5.5-Flash-FP8 \
+  --reasoning-parser ernie5 \
+  --kv-cache-dtype fp8 \
+  --enable-prefix-caching \
+  --max-model-len 262144 \
+  --host 127.0.0.1 --port 8000
+```
+
+#### Frequently Asked Questions (FAQs)
+- **Q**: Why does KRAFTON Raon-1 Mini (28.8B-A4.3B) use only ~2 GB of KV cache at 256K context? / 为什么 KRAFTON Raon-1 Mini（28.8B-A4.3B）在 256K 满上下文下 KV Cache 只占约 2 GB？
+  **A**: Because **18 of its 25 layers use Raon Delta Attention (RDA)**—a linear attention variant with decoupled erase/write gates that compresses history into a **fixed-size recurrent state** regardless of sequence length. Only the remaining **7 Gated MLA layers** grow a KV cache (~8 KiB/token in BF16), slashing 256K KV memory by >85% compared to a standard 28-layer GQA transformer. (因为其全部 25 层中有 **18 层采用了自研 Raon Delta Attention（RDA）线性注意力**，通过解耦擦除门与写入门将历史上下文压缩进**固定大小的循环状态**，不随序列长度膨胀；仅剩 **7 层 Gated MLA** 保留极轻量 KV 缓存（BF16 仅约 8 KiB/token），相比传统 28 层 GQA 模型在 256K 上下文下节省超过 85% 的 KV 显存。)
+- **Q**: Can I run Baidu ERNIE 5.5 Flash (280B-A14B) on a single 128GB Strix Halo or Acer Veriton GN100? / 单台 128GB Strix Halo（如 Corsair 300）或单台宏碁 Veriton GN100（128GB）能跑百度 ERNIE 5.5 Flash（280B-A14B）吗？
+  **A**: Not cleanly at Q4_K_M or FP8: **280B weights need ~175 GB in Q4_K_M and ~290 GB in FP8**. For full-precision or Q4_K_M local hosting, step up to a **256GB–512GB Mac Studio**, a **2-node ConnectX-7 Veriton GN100 cluster (256GB)**, or an **ASUS ET900N G3 (GB300 748GB)**. On a single 128GB workstation, either run **KRAFTON Raon-1 Mini (28.8B-A4.3B)** at full speed or offload cold ERNIE experts via Strata/NVMe if you accept slower generation. (无法以 Q4_K_M 或 FP8 无损装入：**280B 总参在 Q4_K_M 下约需 175 GB、FP8 约需 290 GB**。若希望本地流畅运行 ERNIE 5.5 Flash，建议使用 **256GB–512GB Mac Studio**、**双机 ConnectX-7 互联的 Veriton GN100（256GB）** 或 **华硕 ET900N G3（748GB GB300）**；单台 128GB 主机更推荐全速运行 **KRAFTON Raon-1 Mini（28.8B-A4.3B）**，或配合 Strata/NVMe 冷专家流式卸载妥协运行。)
+
+---
+
 ## Default Parameterized Artifacts
 
 ### run-mac-benchmark.sh (Apple Silicon Mac Fixed-Task Speed & Context Benchmark Script / Mac 本地模型固定任务、上下文与生成速度复现脚本)
@@ -7877,6 +8029,113 @@ fi
 
 ```
 
+### launch-mori-umbp-and-strata-tiered-moe.sh (ASUS ET900N G3 / Acer Veriton GN100 + vLLM MoRI UMBP NVMe KV Pool & Strata 3-Tier MoE Launcher / ASUS ET900N G3 / Acer Veriton GN100 + vLLM MoRI UMBP NVMe KV 缓存池与 Strata 三层 MoE 启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/et900n-gn100-mori-umbp-strata-moe-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/et900n-gn100-mori-umbp-strata-moe-launcher/
+```shell
+#!/usr/bin/env bash
+# Tinker AI — ASUS ET900N G3 / Veriton GN100 + vLLM MoRI UMBP & Strata 3-Tier MoE Launcher (Guide #69)
+set -euo pipefail
+
+MODE="mori_umbp_vllm"
+NVME_DIR="/mnt/nvme-kv"
+DRAM_GB="32"
+MODEL="Qwen/Qwen3.8-Flash-Next-NVFP4"
+PORT="8000"
+
+echo "=== [1/3] Hardware, NVMe & RDMA Preflight ==="
+nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>/dev/null || true
+lsblk -d -o NAME,MODEL,SIZE,ROTA,TRAN | grep -E "NAME|nvme" || true
+ibv_devinfo -l 2>/dev/null || echo "[INFO] No InfiniBand/RoCE HCA detected (single-node PCIe/NVMe mode)"
+
+if [ "$MODE" = "gb300_gn100_audit" ]; then
+  echo "=== [2/3] Deskside GB300 (ET900N G3) / GB10 (Veriton GN100) Coherent Memory & Page Cache Check ==="
+  free -h
+  awk '/MemTotal|MemAvailable|Cached|SwapTotal/ {print}' /proc/meminfo
+  echo "[TIP] Before loading >100GB weights on GB10/GB300 unified memory, flush Linux page cache:"
+  echo "      sudo sh -c 'sync; echo 3 > /proc/sys/vm/drop_caches'"
+  exit 0
+elif [ "$MODE" = "mori_umbp_vllm" ]; then
+  echo "=== [2/3] Preparing NVMe KV Pool at $NVME_DIR (DRAM staging: ${DRAM_GB}GB) ==="
+  mkdir -p "$NVME_DIR/mori-umbp-kv"
+  export MORI_UMBP_STORAGE_DIR="$NVME_DIR/mori-umbp-kv"
+  export MORI_UMBP_DRAM_STAGING_GB="$DRAM_GB"
+  export MORI_UMBP_ASYNC_PREFETCH=1
+  export VLLM_ATTENTION_BACKEND=FLASH_ATTN
+  echo "=== [3/3] Launching vLLM with MoRI UMBP NVMe KV Offload on :$PORT ==="
+  exec vllm serve "$MODEL" \
+    --kv-transfer-config '{"kv_connector":"MoRIUMBPConnector","kv_role":"kv_both"}' \
+    --enable-prefix-caching \
+    --kv-cache-dtype fp8 \
+    --max-model-len 131072 \
+    --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "strata_3tier_moe" ]; then
+  echo "=== [2/3] Launching Strata 3-Tier (VRAM Hot + DDR5 Warm + NVMe Cold) MoE Server ==="
+  mkdir -p "$NVME_DIR/strata-cache"
+  exec strata serve "$MODEL" \
+    --vram-hot-experts auto \
+    --ram-budget-gb "$DRAM_GB" \
+    --ssd-cache-dir "$NVME_DIR/strata-cache" \
+    --async-prefetch \
+    --speculative-draft auto \
+    --host 127.0.0.1 --port "$PORT"
+else
+  echo "Unknown RUN_MODE=$MODE" >&2
+  exit 1
+fi
+
+```
+
+### run-raon1-mini-ernie55-and-corsair300.sh (KRAFTON Raon-1 Mini (28.8B-A4.3B · 6 Reasoning Levels) & Baidu ERNIE 5.5 Flash (280B-A14B) Launcher / KRAFTON Raon-1 Mini（28.8B-A4.3B 六档推理）与百度 ERNIE 5.5 Flash（280B-A14B）及 Corsair 300 启动脚本)
+- **URL (EN)**: https://tinker-ai.com/artifacts/raon1-mini-ernie55-flash-corsair300-launcher/
+- **URL (ZH)**: https://tinker-ai.com/zh/artifacts/raon1-mini-ernie55-flash-corsair300-launcher/
+```shell
+#!/usr/bin/env bash
+# Tinker AI — KRAFTON Raon-1 Mini (28.8B-A4.3B) & Baidu ERNIE 5.5 Flash (280B-A14B) Launcher (Guide #70)
+set -euo pipefail
+
+MODE="raon1_vllm_256k"
+RAON="krafton-ai/Raon-1-mini-NVFP4"
+EFFORT="medium"
+ERNIE="baidu/ERNIE-5.5-Flash-FP8"
+PORT="8000"
+
+if [ "$MODE" = "raon1_vllm_256k" ]; then
+  echo "=== [KRAFTON Raon-1 Mini · 28.8B-A4.3B · 18 RDA + 7 Gated MLA · 256K] ==="
+  echo "[INFO] Full 256K context KV cache is only ~2.0 GB in BF16 (~8 KiB/tok) thanks to 18 RDA linear layers."
+  echo "[INFO] Pass extra_body={\"reasoning_effort\": \"$EFFORT\"} (none|low|medium|high|xhigh|max) per request."
+  exec vllm serve "$RAON" \
+    --max-model-len 262144 \
+    --gpu-memory-utilization 0.90 \
+    --enable-auto-tool-choice \
+    --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "raon1_corsair300_llama" ]; then
+  echo "=== [Corsair AI Workstation 300 (128GB Strix Halo) · Raon-1 Mini GGUF] ==="
+  echo "[INFO] Ensure BIOS UMA / Linux amdgpu.gttsize allocates >=96GB VRAM before loading."
+  export GGML_VK_VISIBLE_DEVICES=0
+  exec llama-server -m "$RAON" \
+    -ngl 99 -fa on \
+    --cache-type-k q8_0 --cache-type-v q8_0 \
+    -c 262144 --host 127.0.0.1 --port "$PORT"
+elif [ "$MODE" = "ernie55_vllm_plugin" ]; then
+  echo "=== [Baidu ERNIE 5.5 Flash · 280B-A14B · Hybrid HCA + MLA-DSA · vllm-ernie] ==="
+  python3 -c "import vllm_ernie" 2>/dev/null || {
+    echo "[ERROR] vllm-ernie plugin not found. Install with: pip install vllm==0.32.0 vllm-ernie" >&2
+    exit 1
+  }
+  exec vllm serve "$ERNIE" \
+    --reasoning-parser ernie5 \
+    --kv-cache-dtype fp8 \
+    --max-model-len 262144 \
+    --enable-prefix-caching \
+    --host 127.0.0.1 --port "$PORT"
+else
+  echo "Unknown STACK_MODE=$MODE" >&2
+  exit 1
+fi
+
+```
+
 ## Local LLM Hardware Usable Limits & Model Presets Reference
 
 - **Apple Silicon Mac (16GB Unified)** (Apple Silicon Mac（16GB 统一内存）): Total Memory 16 GB | Safe Usable Ceiling: **11.5 GB** | Bandwidth: 120 GB/s — macOS reserves ~4.5GB for OS & WindowServer; exceeding ~11.5GB triggers SSD swap and severe slowdown.
@@ -7980,6 +8239,10 @@ fi
 - **Marvell Structera X 2404 CXL 2.0 Expander (12-DIMM Recycled DDR4-3200 768GB Pool + Inline LZ4 · 100 GB/s)** (Marvell Structera X 2404 CXL 2.0 扩展卡（12 槽退役 DDR4-3200 768GB 再生内存池 + 硬件 LZ4 · 100 GB/s）): Total Memory 768 GB | Safe Usable Ceiling: **728 GB** | Bandwidth: 155 GB/s — SC26 CXL 2.0 DDR4-repurposing controller (4-Ch DDR4-3200, up to 12 DIMMs / 3 DPC, 100 GB/s raw + inline LZ4): recycles cheap decommissioned server DDR4 RDIMMs into a 768GB+ MoE cold-expert & vLLM Tier-2 KV pool.
 - **EdgeCortix SAKURA-II Dual-Chip PCIe (32GB LPDDR4X · 120 TOPS DNA-II · 18W) / SiMa.ai Modalix (50 TOPS EAGLE-3)** (EdgeCortix SAKURA-II 双芯 PCIe（32GB · 120 TOPS DNA-II · 18W）/ SiMa.ai Modalix（50 TOPS EAGLE-3 投机加速）): Total Memory 32 GB | Safe Usable Ceiling: **29.5 GB** | Bandwidth: 136 GB/s — Low-profile dual-SAKURA-II PCIe card (32GB LPDDR4X @ 136 GB/s, 120 TOPS INT8 / 60 TFLOPS BF16 at ~18W via MERA 2.0) or SiMa.ai Modalix (50 TOPS at <10W with Palette 3.0 hardware EAGLE-3 / DFlash 3.5x speculative decode).
 - **Framework Desktop Modular Mini-ITX (Ryzen AI Max+ 395 · 128GB LPDDR5X-8000 · 104GB UMA + 5GbE + PCIe x4)** (Framework Desktop 模块化 Mini-ITX 主机（Ryzen AI Max+ 395 · 128GB · 104GB 显存池 + 5GbE + PCIe x4）): Total Memory 128 GB | Safe Usable Ceiling: **104 GB** | Bandwidth: 256 GB/s — 4.5L modular Mini-ITX workstation (120mm fan, 400W FlexATX, 5GbE, open PCIe x4 slot for 25GbE NIC or edge NPU): TTM/UMA unlock gives 104GB usable GPU memory to co-host Kolibri 1.1 (75B-A3.4B) + Hy-MT3-30B-A3B simultaneously.
+- **ASUS ExpertCenter Pro ET900N G3 (GB300 · 748GB Coherent · 252GB HBM3e + 496GB LPDDR5X · Dual 400GbE)** (华硕 ExpertCenter Pro ET900N G3（GB300 · 748GB 相干内存 · 252GB HBM3e + 496GB LPDDR5X · 双 400GbE）): Total Memory 748 GB | Safe Usable Ceiling: **700 GB** | Bandwidth: 4600 GB/s — Liquid-cooled deskside DGX Station GB300 OEM tower (72-core Grace Neoverse V2 + Blackwell Ultra, 20 PFLOPS FP4, dual ConnectX-8 400GbE, 4x PCIe 5.0 NVMe): runs ERNIE 5.5 Flash 280B FP8 or 1T MoE models entirely in coherent memory.
+- **Acer Veriton GN100 Mini Workstation (GB10 · 128GB Unified LPDDR5X · 1 PFLOPS FP4 · ConnectX-7)** (宏碁 Veriton GN100 迷你工作站（GB10 · 128GB 统一内存 · 1 PFLOPS FP4 · ConnectX-7 双机互联）): Total Memory 128 GB | Safe Usable Ceiling: **112 GB** | Bandwidth: 273 GB/s — 150x150mm (<1.5kg) retail NVIDIA GB10 workstation ($3,999, 20-core Grace + Blackwell GPU, 4TB SED NVMe, 10GbE + ConnectX-7): single unit runs 70B–120B FP4; pair two via ConnectX-7 for 256GB (ERNIE 5.5 Flash 280B / 405B).
+- **Corsair AI Workstation 300 (Ryzen AI Max+ 395 · 128GB LPDDR5X · 96GB UMA · 4.4L Hardware Fan Dial)** (美商海盗船 Corsair AI Workstation 300（Ryzen AI Max+ 395 · 128GB 统一内存 · 96GB 显存 · 4.4L 物理风扇拨盘）): Total Memory 128 GB | Safe Usable Ceiling: **96 GB** | Bandwidth: 256 GB/s — Compact 4.4L Strix Halo desktop (96.5x188.4x247.5mm) with front-panel hardware fan-profile switch: allocates up to 96GB+ VRAM for Raon-1 Mini 29B (256K) + concurrent local coding/vision agents with zero swap.
+- **Strata 3-Tier MoE Node (16GB GPU VRAM + 64GB DDR5 RAM + PCIe 4/5 NVMe SSD Expert Streaming)** (Strata 三层异构 MoE 节点（16GB 独显热专家 + 64GB DDR5 温专家 + PCIe 4/5 NVMe 异步流式冷专家）): Total Memory 80 GB | Safe Usable Ceiling: **72 GB** | Bandwidth: 115 GB/s — Consumer 16GB GPU + 64GB DDR5 + NVMe running Strata 3-tier MoE engine: pins attention, KV cache & hot experts in 16GB VRAM while streaming cold experts/n-gram tables from DDR5 & NVMe via async prefetch + speculative decode.
 
 - **Qwen2.5-1.5B-Instruct** (1.54B params, 28 layers, 2 KV heads): Ultra-low-power Raspberry Pi 5 voice loop & sub-100ms IDE FIM tab autocomplete (树莓派 5 极速离线语音对答、低配设备毫秒级 IDE 行间代码补全)
 - **Qwen2.5-3B-Instruct** (3.09B params, 36 layers, 2 KV heads): Edge devices, Raspberry Pi 5 (8GB), ultra-fast RSS/tag classification (边缘设备、树莓派 5 (8GB)、超低延迟 RSS 分类与轻量提取)
@@ -8044,6 +8307,8 @@ fi
 - **Aleph Alpha Kolibri 1.1 (75B-A3.4B · Sparse-Attention Reasoning MoE · 262K–1M Ctx · Apache 2.0)** (75B params, 36 layers, 2 KV heads): Apache-2.0 75B total / 3.4B active EN/DE reasoning & tool-calling MoE with densified early layers & sparse attention (262K native / 1M max ctx, Q4_K_M ~43.9 GB): runs fast on 64GB Mac mini M5 Pro, 48GB GPU, or 128GB Framework Desktop (Apache 2.0 开源 75B 总参 / 仅 3.4B 激活的推理与工具调用稀疏注意力 MoE（首层稠密化 + 稀疏注意力，原生 262K / 最高 1M 上下文，Q4_K_M 约 43.9 GB）：64GB Mac mini M5 Pro、48GB 独显或 128GB Framework Desktop 均可满速运行)
 - **Tencent Hunyuan Hy-MT3-30B-A3B (30.5B-A3B · 102-Lang Fast-Thinking Translation MoE · Apache 2.0)** (30.5B params, 32 layers, 4 KV heads): Apache-2.0 30.5B total / 3.0B active 102-language "Fast-Thinking" localization & OCR-cascade MoE (TiMiHOKGameTranslator + TransRubric, Q4_K_M ~18.3 GB): fits 24GB GPUs, 32GB Macs, or EdgeCortix SAKURA-II 32GB PCIe (Apache 2.0 开源 30.5B 总参 / 仅 3.0B 激活的 102 语种「Fast-Thinking」本地化与 OCR 级联翻译 MoE（王者天美联合调优占位符零破坏 + TransRubric，Q4_K_M 约 18.3 GB）：适配 24GB 独显、32GB Mac 或 SAKURA-II 32GB 边缘卡)
 - **Tencent Hunyuan Hy-MT3-1.8B (1.8B Dense · On-Device 102-Lang Translation & OCR · Apache 2.0)** (1.8B params, 24 layers, 2 KV heads): Ultra-compact 1.8B dense 102-language translation & OCR self-correction SLM (Q4_K_M ~1.12 GB): outperforms commercial translation APIs on <10W edge NPUs (SiMa.ai Modalix / EdgeCortix SAKURA-II / Pi 5) (超轻量 1.8B 稠密 102 语种极速翻译与 OCR 纠错小模型（Q4_K_M 仅约 1.12 GB）：在 <10W 边缘加速卡（SiMa.ai Modalix / EdgeCortix SAKURA-II / 树莓派 5）上超越主流商用翻译 API)
+- **KRAFTON Raon-1 Mini (28.8B-A4.3B · 18 RDA Linear + 7 Gated MLA · 256K · 6 Reasoning Levels · Apache 2.0)** (28.8B params, 7 layers, 2 KV heads): Apache-2.0 28.8B total / 4.3B active MoE (128 routed top-6 + 1 shared) with 18 Raon Delta Attention (RDA) linear layers + 7 Gated MLA layers (~8 KiB/tok BF16 KV) and 6 reasoning levels (none–max): fits full 256K context on a single 24GB–32GB GPU or 64GB Mac (Apache 2.0 开源 28.8B 总参 / 仅 4.3B 激活的混合线性注意力 MoE（18 层 RDA 线性注意力 + 7 层 Gated MLA，BF16 KV 仅约 8 KiB/token，原生 256K 上下文，内置 none–max 六档思考强度）：单张 24GB–32GB 独显或 64GB Mac 即可满上下文流畅运行)
+- **Baidu ERNIE 5.5 Flash (280B-A14B · Hybrid HCA + MLA-DSA · 1M Ctx · ECHO/DSpark Speculative)** (280B params, 16 layers, 2 KV heads): 280B total / 14B active frontier MoE with Heavily Compressed Attention (HCA) + MLA-DSA, 1M context, Multi-Router Latent MoE & ECHO/DSpark speculative decoding (Q4_K_M ~174.9 GB): runs on 256GB–512GB Mac Studio, ASUS ET900N G3 GB300, or dual Acer Veriton GN100 (280B 总参 / 仅 14B 激活的超稀疏旗舰 MoE（Hybrid HCA 极度压缩注意力 + MLA-DSA + Multi-Router Latent MoE + ECHO/DSpark 投机解码，原生 1M 上下文，Q4_K_M 约 174.9 GB）：适配 256GB–512GB Mac Studio、ASUS ET900N G3 GB300 或双机 Veriton GN100)
 
 ## Interactive Troubleshooter Root Causes & Verified Solutions
 

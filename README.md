@@ -3,7 +3,7 @@
 > **Official Website**: [https://tinker-ai.com/](https://tinker-ai.com/) | **中文官网**: [https://tinker-ai.com/zh/](https://tinker-ai.com/zh/)
 > **GitHub Pages Directory**: [https://godrealms.github.io/tinker-ai-lab/](https://godrealms.github.io/tinker-ai-lab/)
 
-This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **68 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
+This repository hosts the downloadable user-side shell scripts, Docker Compose templates, and n8n workflow JSONs referenced in the **70 public guides** on **[Tinker AI Lab (tinker-ai.com)](https://tinker-ai.com/)**, along with a complete bilingual index of our public online tools and hardware/model benchmarks.
 
 ---
 
@@ -11,9 +11,9 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 | Tool | English URL | 中文版入口 | Description |
 | :--- | :--- | :--- | :--- |
-| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **63 model presets** and **101 hardware profiles** |
+| **Local LLM VRAM & KV Cache Calculator** | [Open Calculator](https://tinker-ai.com/tools/vram-calculator/) | [打开显存计算器](https://tinker-ai.com/zh/tools/vram-calculator/) | Calculate GGUF (`Q4_K_M`, `Q5_K_M`, `Q8_0`) & `FP16` weights + context window KV cache across **65 model presets** and **105 hardware profiles** |
 | **Interactive AI Troubleshooter** | [Open Troubleshooter](https://tinker-ai.com/tools/troubleshooter/) | [打开排障决策树](https://tinker-ai.com/zh/tools/troubleshooter/) | **13** step-by-step diagnostic decision trees for local LLM networking, VRAM OOM, SSE stream drops, RoCEv2 rings, and NPU/GPU traps |
-| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **68 verified configs** directly in your browser before downloading |
+| **Parameterized Config Workbench** | [Open Workbench](https://tinker-ai.com/artifacts/) | [打开配置工作台](https://tinker-ai.com/zh/artifacts/) | Customize ports, models, and paths across **70 verified configs** directly in your browser before downloading |
 
 ---
 
@@ -25,7 +25,7 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 
 ---
 
-## 3. All 68 Public Guides & Companion Scripts
+## 3. All 70 Public Guides & Companion Scripts
 
 | # | English Guide | 中文实测指南 | Companion Script (`scripts/`) | Online Customizer |
 | :-: | :--- | :--- | :--- | :--- |
@@ -97,6 +97,8 @@ This repository hosts the downloadable user-side shell scripts, Docker Compose t
 | **66** | [November 2026 Looped & Hybrid KDA/MLA Open-Weight VLMs: Ant InclusionAI Ling-3.2-air (124B-A5.5B MIT), SenseTime SenseNova-Loop-9B (32→56 Layers mHC · 512K) & Thinking Machines TML-d24-varloop on GEEKOM A9 Mega (128GB) & 32GB GPUs](https://tinker-ai.com/guides/ling-32-air-124b-hybrid-kda-mla-sensenova-loop-9b-mhc-and-tml-varloop-geekom-a9-mega-local-ai/) | [2026 年 11 月动态循环层与混合 KDA/MLA 开源多模态实战：蚂蚁 Ling-3.2-air（124B-A5.5B MIT）、商汤 SenseNova-Loop-9B（32→56 层 mHC · 512K）与 Thinking Machines TML-d24-varloop 在 GEEKOM A9 Mega（128GB）及 32GB 独显上的部署全解](https://tinker-ai.com/zh/guides/ling-32-air-124b-hybrid-kda-mla-sensenova-loop-9b-mhc-and-tml-varloop-geekom-a9-mega-local-ai/) | [`run-ling32-air-sensenova-loop-and-varloop.sh`](scripts/run-ling32-air-sensenova-loop-and-varloop.sh) | [Customize](https://tinker-ai.com/artifacts/ling32-air-sensenova-loop-tml-varloop-launcher/) |
 | **67** | [SC26 Near-Memory CXL & Sub-10W Edge GenAI Accelerators: Marvell Structera A 2504 (16× Neoverse V2 + 4-Ch DDR5 200 GB/s + Inline LZ4) & X 2404 (12-DIMM DDR4 Recycling) vs EdgeCortix SAKURA-II (16GB/32GB 60 TOPS DNA-II) & SiMa.ai Modalix (50 TOPS Palette 3.0 EAGLE-3)](https://tinker-ai.com/guides/sc26-marvell-structera-cxl-inline-lz4-neoverse-and-edgecortix-sakura2-sima-modalix-edge-ai/) | [SC26 近内存计算 CXL 扩展卡与 10W 级边缘生成式加速卡实战：Marvell Structera A 2504（16 核 Neoverse V2 + 四通道 DDR5 + 硬件 LZ4 压缩）与 X 2404（12 槽退役 DDR4 再生内存池）对决 EdgeCortix SAKURA-II（16GB/32GB 60 TOPS MERA）与 SiMa.ai Modalix（50 TOPS Palette 3.0 EAGLE-3 投机解码）](https://tinker-ai.com/zh/guides/sc26-marvell-structera-cxl-inline-lz4-neoverse-and-edgecortix-sakura2-sima-modalix-edge-ai/) | [`audit-structera-cxl-and-run-sakura2-modalix.sh`](scripts/audit-structera-cxl-and-run-sakura2-modalix.sh) | [Customize](https://tinker-ai.com/artifacts/sc26-marvell-structera-cxl-and-sakura2-modalix-runner/) |
 | **68** | [Late-November 2026 Sparse-Attention & Fast-Thinking MoEs: Aleph Alpha Kolibri 1.1 (75B-A3.4B · 262K–1M Ctx · Apache 2.0) & Tencent Hunyuan Hy-MT3-30B-A3B / 1.8B (102 Languages · TransRubric) on Framework Desktop (128GB Mini-ITX) & 24GB–64GB GPUs](https://tinker-ai.com/guides/aleph-alpha-kolibri-11-75b-sparse-moe-tencent-hy-mt3-30b-a3b-and-framework-desktop-128gb-local-ai/) | [2026 年 11 月下旬稀疏注意力与百语种极速 MoE 实战：Aleph Alpha Kolibri 1.1（75B-A3.4B · 262K–1M 上下文 · Apache 2.0）与腾讯混元 Hy-MT3-30B-A3B / 1.8B（102 语种 · TransRubric）在 Framework Desktop（128GB Mini-ITX）及 24GB–64GB 显卡上的部署全解](https://tinker-ai.com/zh/guides/aleph-alpha-kolibri-11-75b-sparse-moe-tencent-hy-mt3-30b-a3b-and-framework-desktop-128gb-local-ai/) | [`run-kolibri11-hymt3-and-framework-desktop.sh`](scripts/run-kolibri11-hymt3-and-framework-desktop.sh) | [Customize](https://tinker-ai.com/artifacts/kolibri11-75b-hymt3-30b-framework-desktop-launcher/) |
+| **69** | [Deskside Blackwell Supercomputers vs NVMe Tiered Inference: ASUS ET900N G3 (GB300 748GB) & Acer Veriton GN100 (GB10 128GB) vs vLLM MoRI UMBP (1.8TB NVMe KV) & Strata 3-Tier MoE](https://tinker-ai.com/guides/asus-et900n-g3-gb300-acer-veriton-gn100-vs-vllm-mori-umbp-nvme-kv-and-strata-moe/) | [桌边 Blackwell 超算对决 NVMe 三层卸载实战：华硕 ET900N G3（GB300 748GB）与宏碁 Veriton GN100（GB10 128GB）对比 vLLM MoRI UMBP（1.8TB NVMe KV）与 Strata 流式 MoE](https://tinker-ai.com/zh/guides/asus-et900n-g3-gb300-acer-veriton-gn100-vs-vllm-mori-umbp-nvme-kv-and-strata-moe/) | [`launch-mori-umbp-and-strata-tiered-moe.sh`](scripts/launch-mori-umbp-and-strata-tiered-moe.sh) | [Customize](https://tinker-ai.com/artifacts/et900n-gn100-mori-umbp-strata-moe-launcher/) |
+| **70** | [Late-Nov 2026 Linear-Attention & HCA MoE Showdown: KRAFTON Raon-1 Mini (28.8B-A4.3B · 18 RDA + 7 MLA · 6 Reasoning Levels) & Baidu ERNIE 5.5 Flash (280B-A14B · 1M Ctx) on Corsair AI Workstation 300 & RTX 5090](https://tinker-ai.com/guides/krafton-raon1-mini-29b-rda-baidu-ernie55-flash-280b-and-corsair-ai-workstation-300/) | [2026 年 11 月底线性注意力与超稀疏 MoE 双雄实战：KRAFTON Raon-1 Mini（28.8B-A4.3B · 18 层 RDA + 六档推理）与百度 ERNIE 5.5 Flash（280B-A14B · 1M 上下文）在 Corsair AI Workstation 300 与 RTX 5090 上的部署全解](https://tinker-ai.com/zh/guides/krafton-raon1-mini-29b-rda-baidu-ernie55-flash-280b-and-corsair-ai-workstation-300/) | [`run-raon1-mini-ernie55-and-corsair300.sh`](scripts/run-raon1-mini-ernie55-and-corsair300.sh) | [Customize](https://tinker-ai.com/artifacts/raon1-mini-ernie55-flash-corsair300-launcher/) |
 
 ---
 
